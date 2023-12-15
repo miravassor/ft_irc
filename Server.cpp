@@ -76,18 +76,19 @@ void Server::run() {
         }
         for (size_t i = 0; i < pollFds.size(); i++) {
             if (pollFds[i].revents & POLLIN) {
+                // if i == 0 -> first connection
                 if (i == 0) {
                     addClient(acceptConnection());
                 } else {
                     std::cout << "Client socket has events!" << std::endl;
 
                     // todo: handle incoming message from the client at index (i - 1) in clients map
-                    char buffer[1024];
-                    memset(buffer, 0, 1024);
-                    int bytesRead = recv(pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
+                    // char buffer[1024];
+                    memset(_buffer, 0, 1024);
+                    int bytesRead = recv(pollFds[i].fd, _buffer, sizeof(_buffer) - 1, 0);
                     if (bytesRead > 0) {
-                        buffer[bytesRead] = 0;
-                        std::cout << buffer;
+                        _buffer[bytesRead] = 0;
+                        parsBuffer(pollFds[i].fd);
                     } else if (bytesRead == 0) {
                         removeClient(pollFds[i].fd);
                         pollFds.erase(pollFds.begin() + i);
@@ -99,9 +100,7 @@ void Server::run() {
                 }
             }
         }
-
     }
-
 }
 
 void Server::listenPort() const {
