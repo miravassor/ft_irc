@@ -5,13 +5,12 @@ void	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 			return;
 
 	std::string command = tokens[0];
-	// if (command == "CAP") {
-	// 	;
-	// 	// if (tokens[1] == "LS") {
-	// 		// std::string	welcomeMsg = "Welcome to our IRC server\r\n";
-	// 		// send(4, welcomeMsg.c_str(), welcomeMsg.length(), 0);
-	// 	// }
-	// }
+	if (command == "CAP") {
+		if (tokens[1] == "LS") {
+			std::string	capls = "Entering registration process\r\n";
+			send(fd, capls.c_str(), capls.length(), 0);
+		}
+	}
 	if (command == "PASS") {
 		if (tokens[1] == password)
 			clients[fd]->setLog();
@@ -36,10 +35,22 @@ void	Server::checkRegistration(int fd) {
 	if (client->isLogged()) {
 		if (!client->getNickname().empty() && !client->getUsername().empty()) {
 			client->setRegistration();
-			std::string welcome = ":YourServer 001 " + client->getNickname() + " :Welcome to the IRC Network, " + client->getNickname() + "\r\n";
-			send(fd, welcome.c_str(), welcome.length(), 0);
+			completeRegistration(fd, client);
 		}
 	}
+}
+
+void	Server::completeRegistration(int fd, Client *client) {
+	std::string welcome = ":" + serverName + " 001 " + client->getNickname() + " :Welcome to the IRC Network, " + client->getNickname() + "\r\n";
+	std::string host = ":" + serverName + " 002 " + client->getNickname() + " :Your host is " + serverName + ", running version 0.1" + "\r\n";
+	std::string created = ":" + serverName + " 003 " + client->getNickname() + " :This server was created " +  ctime(&start) + "\r\n";
+	std::string myinfo  = ":" + serverName + " 004 " + client->getNickname() + " :INFOS [...]" + "\r\n";
+	std::string support  = ":" + serverName + " 005 " + client->getNickname() + " :are supported by this server [...]" + "\r\n";
+	send(fd, welcome.c_str(), welcome.length(), 0);
+	send(fd, host.c_str(), host.length(), 0);
+	send(fd, created.c_str(), created.length(), 0);
+	send(fd, myinfo.c_str(), myinfo.length(), 0);
+	send(fd, support.c_str(), support.length(), 0);
 }
 
 void	Server::parsBuffer(int fd) {
