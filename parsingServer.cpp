@@ -69,7 +69,7 @@ void	Server::parsBuffer(int fd) {
 		std::vector<std::string> tokens;
 		std::string token;
 		while (lineStream >> token) {
-			std::cout << "{" << token << "}" << " ";
+			std::cout << token << " ";
 			tokens.push_back(token);
 		}
 		std::cout << "[TOKEN END]" << std::endl;
