@@ -7,12 +7,16 @@
 #include <cstdlib>
 #include <ctime>
 #include <unistd.h>
-#include "Client.hpp"
 #include <map>
 #include <vector>
 #include <poll.h>
 #include <sstream>
 #include <vector>
+#include <set>
+#include <algorithm>
+
+#include "Client.hpp"
+#include "Channel.hpp"
 
 class Server {
     private:
@@ -23,10 +27,10 @@ class Server {
         std::string serverName;
         std::vector<pollfd> pollFds;
         std::map<int, Client *> clients;
+        std::vector<Channel *> channels;
 
         void addClient(int clientSocket);
-        bool removeClient(int clientSocket);
-        bool removeClient(const std::string &nickname);
+        void removeClient(int clientSocket);
         void listenPort() const;
         int acceptConnection();
 

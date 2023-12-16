@@ -44,25 +44,24 @@ void Server::addClient(int clientSocket) {
     clients.insert(std::make_pair(clientSocket, new Client()));
 }
 
-bool Server::removeClient(int clientSocket) {
+void Server::removeClient(int clientSocket) {
+    // removing from channels
+   for (std::vector<Channel *>::iterator it = channels.begin(); it != channels.end(); ++it) {
+        (*it)->removeMember(clientSocket);
+    }
+    // removing from pollFds
+   for (std::vector<pollfd>::iterator it = pollFds.begin(); it!= pollFds.end(); ++it) {
+        if (it->fd == clientSocket) {
+            pollFds.erase(it);
+            break;
+        }
+    }
+    // deleting and removing from clients
     std::map<int, Client *>::iterator it = clients.find(clientSocket);
     if (it != clients.end()) {
         delete it->second;
         clients.erase(it);
-        return true;
     }
-    return false;
-}
-
-bool Server::removeClient(const std::string &nickname) {
-    for (std::map<int, Client *>::iterator it = clients.begin(); it != clients.end(); ++it) {
-        if (it->second->getNickname() == nickname) {
-            delete it->second;
-            clients.erase(it);
-            return true;
-        }
-    }
-    return false;
 }
 
 
@@ -84,8 +83,6 @@ void Server::run() {
                 } else {
                     std::cout << "Client socket has events!" << std::endl;
 
-                    // todo: handle incoming message from the client at index (i - 1) in clients map
-                    // char buffer[1024];
                     memset(_buffer, 0, 1024);
                     int bytesRead = recv(pollFds[i].fd, _buffer, sizeof(_buffer) - 1, 0);
                     if (bytesRead > 0) {
@@ -93,7 +90,6 @@ void Server::run() {
                         parsBuffer(pollFds[i].fd);
                     } else if (bytesRead == 0) {
                         removeClient(pollFds[i].fd);
-                        pollFds.erase(pollFds.begin() + i);
                         i--;
                     } else {
                         throw std::runtime_error("SOME TMP ERROR");
@@ -134,3 +130,5 @@ int Server::acceptConnection() {
 
     return clientSocket;
 }
+
+
