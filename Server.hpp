@@ -17,7 +17,13 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
-#include "serverReplies.hpp"
+
+enum serverRep {
+	RPL_WECLOME,
+	RPL_YOURHOST,
+	RPL_CREATED,
+	RPL_MYINFO
+};
 
 class Server {
  	public:
