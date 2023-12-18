@@ -20,6 +20,14 @@
 #include "serverReplies.hpp"
 
 class Server {
+ 	public:
+  		typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string>&)> CmdMap;
+  		typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string>&)>::iterator CmdMapIterator;
+
+  		Server(int port, const std::string &password);
+  		~Server();
+  		void run();
+
     private:
         int socketFd;
         time_t start;
@@ -30,6 +38,9 @@ class Server {
         std::vector<pollfd> pollFds;
         std::map<int, Client *> clients;
         std::vector<Channel *> channels;
+  		CmdMap cmd;
+
+		void  initCmd();
 
         void addClient(int clientSocket);
         void removeClient(int clientSocket);
@@ -46,10 +57,11 @@ class Server {
         void    serverReply(int fd, Client *client, serverRep id);
         void    serverSendReply(int fd, std::string id, std::string nickname, std::string reply);
 
-    public:
-        Server(int port, const std::string &password);
-        ~Server();
-        void run();
+		void processPrivmsg(int fd, const std::vector<std::string> &tokens);
+  		void processJoin(int fd, const std::vector<std::string> &tokens);
+  		void processInvite(int fd, const std::vector<std::string> &tokens);
+  		void processKick(int fd, const std::vector<std::string> &tokens);
+  		void processPart(int fd, const std::vector<std::string> &tokens);
 };
 
 #endif

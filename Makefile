@@ -2,7 +2,7 @@ NAME = servirc
 
 COMPILE = g++ -std=c++98 -Wall -Wextra -Werror -g
 
-SRCS = main.cpp Server.cpp parsingServer.cpp Client.cpp Channel.cpp
+SRCS = main.cpp Server.cpp parsingServer.cpp Client.cpp Channel.cpp processCmd.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
