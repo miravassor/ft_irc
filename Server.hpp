@@ -17,6 +17,7 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "serverReplies.hpp"
 
 class Server {
     private:
@@ -25,6 +26,7 @@ class Server {
         sockaddr_in address;
         std::string password;
         std::string serverName;
+        std::string serverVersion;
         std::vector<pollfd> pollFds;
         std::map<int, Client *> clients;
         std::vector<Channel *> channels;
@@ -37,10 +39,12 @@ class Server {
         // Parsing
         char _buffer[1024];
         void    parsBuffer(int fd);
-        void    registrationProcess(int fd, std::vector<std::string>& tokens);
+        bool    registrationProcess(int fd, std::vector<std::string>& tokens);
         void    checkRegistration(int fd);
         void    processCmd(int fd, std::vector<std::string>& tokens);
-        void    completeRegistration(int fd, Client *client);
+        bool    verifyNickname(int fd, const std::string &token);
+        void    serverReply(int fd, Client *client, serverRep id);
+        void    serverSendReply(int fd, std::string id, std::string nickname, std::string reply);
 
     public:
         Server(int port, const std::string &password);

@@ -24,7 +24,8 @@ Server::Server(int port, const std::string &password) {
     }
 
     this->password = password;
-    this->serverName = "42IRC";
+    this->serverName = "42.IRC";
+    this->serverVersion = "0.1";
     this->start = time(0);
 
     std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
@@ -130,5 +131,3 @@ int Server::acceptConnection() {
 
     return clientSocket;
 }
-
-
