@@ -23,10 +23,10 @@ Server::Server(int port, const std::string &password) {
         throw std::runtime_error("ERROR! Cannot bind the socket");
     }
 
+    this->start = time(0);
     this->password = password;
     this->serverName = "42.IRC";
     this->serverVersion = "0.1";
-    this->start = time(0);
 
 	initCmd();
 

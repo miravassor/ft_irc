@@ -19,10 +19,15 @@
 #include "Channel.hpp"
 
 enum serverRep {
+	CAPLS,
 	RPL_WECLOME,
 	RPL_YOURHOST,
 	RPL_CREATED,
-	RPL_MYINFO
+	RPL_MYINFO,
+	ERR_NEEDMOREPARAMS,
+	ERR_PASSWDMISMATCH,
+	ERR_NICKNAMEINUSE,
+	ERR_ERRONEUSNICKNAME,
 };
 
 class Server {
@@ -58,10 +63,14 @@ class Server {
         void    parsBuffer(int fd);
         bool    registrationProcess(int fd, std::vector<std::string>& tokens);
         void    checkRegistration(int fd);
+        bool    handleCommand(int fd, const std::string& command, const std::vector<std::string>& arg);
         void    processCmd(int fd, std::vector<std::string>& tokens);
-        bool    verifyNickname(int fd, const std::string &token);
-        void    serverReply(int fd, Client *client, serverRep id);
-        void    serverSendReply(int fd, std::string id, std::string nickname, std::string reply);
+        std::string getParam(const std::vector<std::string>& tokens);
+        bool    verifyNickname(int fd, const std::string &arg);
+        bool    verifyPassword(int fd, const std::string &arg);
+        bool    verifyUsername(int fd, const std::string &arg);
+        void    serverReply(int fd, const std::string& token, serverRep id);
+        void    serverSendReply(int fd, std::string id, const std::string& token, std::string reply);
 
 		void processPrivmsg(int fd, const std::vector<std::string> &tokens);
   		void processJoin(int fd, const std::vector<std::string> &tokens);
