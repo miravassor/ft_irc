@@ -1,5 +1,37 @@
 #include "Server.hpp"
 
+// Parsing
+
+void	Server::parsBuffer(int fd) {
+	std::string					bufferStr(_buffer);
+	std::stringstream			ss(bufferStr);
+	std::string					line;
+
+	// tokenize the buffer line by line
+	while (std::getline(ss, line))
+	{
+		size_t	cRet = line.find('\r');
+		if (cRet != std::string::npos)
+			line.erase(cRet);
+
+		std::istringstream lineStream(line);
+		std::vector<std::string> tokens;
+		std::string token;
+		while (lineStream >> token) {
+			std::cout << token << " ";
+			tokens.push_back(token);
+		}
+		std::cout << "[TOKEN END]" << std::endl;
+
+		if (clients[fd]->isRegistered() == false) {
+			if (registrationProcess(fd, tokens))
+				return;
+		}
+		else
+			processCmd(fd, tokens);
+	}
+}
+
 bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 	if (tokens.empty())
 			return 0; // or 1?
@@ -38,6 +70,38 @@ bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 	return 0;
 }
 
+void Server::processCmd(int fd, std::vector<std::string>& tokens) {
+    if (tokens.empty())
+        return;
+
+    std::string command = tokens[0];
+    (void)fd;
+
+	CmdMapIterator it = cmd.find(command);
+	if (it != cmd.end()) {
+		(this->*(it->second))(fd, tokens);
+	} else {
+		// handling unknown command
+		std::cout << "Unknown command: " << command << std::endl;
+	}
+}
+
+// Registration utils
+
+void	Server::checkRegistration(int fd) {
+	Client* client = clients[fd];
+
+	if (client->isLogged()) {
+		if (!client->getNickname().empty() && !client->getUsername().empty()) {
+			client->setRegistration();
+			serverReply(fd, client, RPL_WECLOME);
+			serverReply(fd, client, RPL_YOURHOST);
+			serverReply(fd, client, RPL_CREATED);
+			serverReply(fd, client, RPL_MYINFO);
+		}
+	}
+}
+
 bool	Server::verifyNickname(int fd, const std::string &token) {
 	// look for illegal characters
 	if (token.empty())
@@ -63,84 +127,27 @@ bool	Server::verifyNickname(int fd, const std::string &token) {
 	std::map<int, Client *>::iterator it = clients.begin();
 	for (; it != clients.end(); ++it) {
 		if (it->second != clients[fd] && it->second->getNickname() == token)
-			return (1);
+			return 1;
 	}
-	return (0);
+	return 0;
 }
 
-void	Server::checkRegistration(int fd) {
-	Client* client = clients[fd];
-
-	if (client->isLogged()) {
-		if (!client->getNickname().empty() && !client->getUsername().empty()) {
-			client->setRegistration();
-			serverReply(fd, client, RPL_WECLOME);
-			serverReply(fd, client, RPL_YOURHOST);
-			serverReply(fd, client, RPL_CREATED);
-			serverReply(fd, client, RPL_MYINFO);
-		}
-	}
-}
-
-void	Server::parsBuffer(int fd) {
-	std::string					bufferStr(_buffer);
-	std::stringstream			ss(bufferStr);
-	std::string					line;
-
-	// tokenize the buffer line by line
-	while (std::getline(ss, line))
-	{
-		size_t	cRet = line.find('\r');
-		if (cRet != std::string::npos)
-			line.erase(cRet);
-
-		std::istringstream lineStream(line);
-		std::vector<std::string> tokens;
-		std::string token;
-		while (lineStream >> token) {
-			std::cout << token << " ";
-			tokens.push_back(token);
-		}
-		std::cout << "[TOKEN END]" << std::endl;
-
-		if (clients[fd]->isRegistered() == false) {
-			if (registrationProcess(fd, tokens))
-				return;
-		}
-		else
-			processCmd(fd, tokens);
-	}
-}
-
-void Server::processCmd(int fd, std::vector<std::string>& tokens) {
-    if (tokens.empty())
-        return;
-
-    std::string command = tokens[0];
-    (void)fd;
-
-	CmdMapIterator it = cmd.find(command);
-	if (it != cmd.end()) {
-		(this->*(it->second))(fd, tokens);
-	} else {
-		// handling unknown command
-		std::cout << "Unknown command: " << command << std::endl;
-	}
-}
+// Server reply
 
 void    Server::serverReply(int fd, Client *client, serverRep id) {
+	std::string nickname = client->getNickname();
     switch (id) {
         case RPL_WECLOME:
-            serverSendReply(fd, "001", client->getNickname(), "Welcome to the IRC Network, " + client->getNickname());
+            serverSendReply(fd, "001", nickname, "Welcome to the IRC Network, " + nickname);
             break;
         case RPL_YOURHOST:
-            serverSendReply(fd, "002", client->getNickname(), "Your host is " + serverName + ", running version " + serverVersion);
+            serverSendReply(fd, "002", nickname, "Your host is " + serverName + ", running version " + serverVersion);
             break;
         case RPL_CREATED:
-            serverSendReply(fd, "003", client->getNickname(), "This server was created " + static_cast<std::string>(ctime(&start)));
+            serverSendReply(fd, "003", nickname, "This server was created " + static_cast<std::string>(ctime(&start)));
             break;
         case RPL_MYINFO:
-            serverSendReply(fd, "004", client->getNickname(), "INFOS [...]");
+            serverSendReply(fd, "004", nickname, "INFOS [...]");
             break;
         default:
             return;
