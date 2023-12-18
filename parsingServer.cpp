@@ -88,17 +88,12 @@ void Server::processCmd(int fd, std::vector<std::string>& tokens) {
     std::string command = tokens[0];
     (void)fd;
 
-	// draft template sending messages to multiple targets (channels, users, both)
-    if (command == "PRIVMSG") {
-        std::string message = tokens.back();
-        for (std::vector<std::string>::iterator it = tokens.begin() + 1; it != tokens.end() - 1; ++it) {
-            std::string target = *it;
-            if (target.at(0) == '#' || target.at(0) == '&') {
-                // broadcastMessage(fd, target, message);
-            } else {
-                // privateMessage(fd, target, message);
-            }
-        }
-    }
+	CmdMapIterator it = cmd.find(command);
+	if (it != cmd.end()) {
+		(this->*(it->second))(fd, tokens);
+	} else {
+		// handling unknown command
+		std::cout << "Unknown command: " << command << std::endl;
+	}
 }
 

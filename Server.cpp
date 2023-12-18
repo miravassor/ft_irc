@@ -27,11 +27,22 @@ Server::Server(int port, const std::string &password) {
     this->serverName = "42IRC";
     this->start = time(0);
 
+	initCmd();
+
     std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
               << ":"
               << ntohs(address.sin_port)
               << " socketFD=" << socketFd
               << " password=" << this->password << std::endl;
+}
+
+void Server::initCmd() {
+	cmd["PRIVMSG"] = &Server::processPrivmsg;
+	cmd["JOIN"] = &Server::processJoin;
+	cmd["INVITE"] = &Server::processInvite;
+	cmd["KICK"] = &Server::processKick;
+	cmd["PART"] = &Server::processPart;
+	// and other commands
 }
 
 Server::~Server() {
