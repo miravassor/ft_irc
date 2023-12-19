@@ -80,6 +80,9 @@ class Server {
   		void processInvite(int fd, const std::vector<std::string> &tokens);
   		void processKick(int fd, const std::vector<std::string> &tokens);
   		void processPart(int fd, const std::vector<std::string> &tokens);
+
+        void processMode(int fd, const std::vector<std::string> &tokens);
+        void processPing(int fd, const std::vector<std::string> &tokens);
 };
 
 #endif
