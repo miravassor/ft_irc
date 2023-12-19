@@ -36,7 +36,6 @@ bool	Server::parsBuffer(int fd) {
 bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 	if (tokens.empty())
 			return 0; // or 1?
-
 	if (tokens.size() < 2) {
 		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 		return 1;
@@ -204,7 +203,7 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "464", token, "Password incorrect");
 			break;
 		case ERR_NICKNAMEINUSE:
-			serverSendReply(fd, "433", token, "Nickname is already in use");
+			serverSendReply(fd, "433", "", "Nickname is already in use");
 			break;
 		case ERR_ERRONEUSNICKNAME:
 			serverSendReply(fd, "432", token, "Erroneous nickname");

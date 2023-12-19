@@ -101,7 +101,6 @@ void Server::run() {
                     int bytesRead = recv(pollFds[i].fd, _buffer, sizeof(_buffer) - 1, 0);
                     if (bytesRead > 0) {
                         _buffer[bytesRead] = 0;
-                        parsBuffer(pollFds[i].fd);
                         if (parsBuffer(pollFds[i].fd)) {
                             removeClient(pollFds[i].fd);
                             i--;
