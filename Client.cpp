@@ -59,7 +59,7 @@ int Client::getSocket() {
     return socketFd;
 }
 
-const std::string   &Client::getPassword() const {
+const std::string &Client::getPassword() const {
     return password;
 }
 

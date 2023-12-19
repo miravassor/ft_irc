@@ -2,7 +2,6 @@
 #define SERVER_HPP
 
 #include <iostream>
-// #include <fstream>
 #include <sys/socket.h>
 #include <cstring>
 #include <cstdlib>
@@ -30,6 +29,10 @@ enum serverRep {
 	ERR_NICKNAMEINUSE,
 	ERR_ERRONEUSNICKNAME,
     ERR_ALREADYREGISTRED,
+    ERR_USERSDONTMATCH,
+    RPL_UMODEIS,
+    ERR_UMODEUNKNOWNFLAG,
+    PONG
 };
 
 class Server {
@@ -67,20 +70,19 @@ class Server {
         bool    registrationProcess(int fd, std::vector<std::string>& tokens);
         bool    checkRegistration(int fd);
         bool    handleCommand(int fd, const std::string& command, const std::vector<std::string>& arg);
-        void    processCmd(int fd, std::vector<std::string>& tokens);
-        std::string getParam(const std::vector<std::string>& tokens);
         bool    verifyNickname(int fd, const std::string &arg);
         bool    verifyPassword(int fd, const std::string &arg);
         bool    verifyUsername(int fd, const std::string &arg);
+        void    processCmd(int fd, std::vector<std::string>& tokens);
         void    serverReply(int fd, const std::string& token, serverRep id);
         void    serverSendReply(int fd, std::string id, const std::string& token, std::string reply);
+        std::string getParam(const std::vector<std::string>& tokens);
 
 		void processPrivmsg(int fd, const std::vector<std::string> &tokens);
   		void processJoin(int fd, const std::vector<std::string> &tokens);
   		void processInvite(int fd, const std::vector<std::string> &tokens);
   		void processKick(int fd, const std::vector<std::string> &tokens);
   		void processPart(int fd, const std::vector<std::string> &tokens);
-
         void processMode(int fd, const std::vector<std::string> &tokens);
         void processPing(int fd, const std::vector<std::string> &tokens);
 };

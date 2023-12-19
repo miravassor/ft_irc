@@ -41,8 +41,8 @@ bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 		return 1;
 	}
-	std::string	command = tokens[0];
-	std::vector<std::string>	params(tokens.begin() + 1, tokens.end());
+	std::string command = tokens[0];
+	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 	if (command == "CAP") {
 		if (tokens[1] == "LS") {
 			serverReply(fd, "", CAPLS);
@@ -76,11 +76,14 @@ bool	Server::handleCommand(int fd, const std::string& command, const std::vector
 }
 
 void Server::processCmd(int fd, std::vector<std::string>& tokens) {
-    if (tokens.empty())
-        return;
+	if (tokens.empty())
+		return;
+	if (tokens.size() < 2) {
+		serverReply(fd, "", ERR_NEEDMOREPARAMS);
+		return;
+	}
 
-    std::string command = tokens[0];
-
+	std::string command = tokens[0];
 	CmdMapIterator it = cmd.find(command);
 	if (it != cmd.end()) {
 		(this->*(it->second))(fd, tokens);
@@ -93,7 +96,7 @@ void Server::processCmd(int fd, std::vector<std::string>& tokens) {
 // Registration utils
 
 bool	Server::checkRegistration(int fd) {
-	// check if registration is complete
+	// check if logging is complete
 	if (clients[fd]->isLogged() && (!clients[fd]->getNickname().empty() && !clients[fd]->getUsername().empty()) ) {
 		// check if user (nickname) is in database
 		if (users.find(clients[fd]->getNickname()) != users.end()) {
@@ -167,8 +170,10 @@ bool	Server::verifyNickname(int fd, const std::string &arg) {
 }
 
 bool	Server::verifyPassword(int fd, const std::string &arg) {
-	if (arg.empty())
+	if (arg.empty()) {
+		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 		return 1;
+	}
 	clients[fd]->setLog();
 	return 0;
 }
@@ -206,6 +211,18 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			break;
 		case ERR_ALREADYREGISTRED:
 			serverSendReply(fd, "462", token, "Unauthorized command (already registered)");
+			break;
+		case ERR_USERSDONTMATCH:
+			serverSendReply(fd, "502", token, "Cannot change mode for other users");
+			break;
+		case RPL_UMODEIS:
+			serverSendReply(fd, "221", token, token);
+			break;
+		case ERR_UMODEUNKNOWNFLAG:
+			serverSendReply(fd, "501", token, "Unknown MODE flag");
+			break;
+		case PONG:
+			send(fd, "PONG :42.IRC", 13, 0);
 			break;
 		default:
 			return;

@@ -7,6 +7,18 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <unistd.h>
+#include <set>
+
+enum Mode {
+    AWAY, // a: user is flagged as away
+    INVISIBLE, // i: marks a users as invisible
+    WALLOPS, // w: user receives wallops
+    RESTRICTED, // r: restricted user connection
+    OPERATOR, // o: operator flag
+    LOCAL_OPERATOR, // O: local operator flag
+    SERVER_NOTICES, // s: marks a user for receipt of server notices
+    UNKNOWN
+};
 
 class Client {
     private:
@@ -18,6 +30,7 @@ class Client {
         std::string username;
         std::string realName;
         std::string password;
+        std::set<Mode> modes;
     public:
         Client();
         ~Client();
@@ -33,6 +46,10 @@ class Client {
         void setPassword(const std::string &password);
         void setRegistration();
         void setLog();
+        void addMode(Mode mode);
+        void removeMode(Mode mode);
+        bool activeMode(Mode mode) const;
+        Mode getMode(const std::string &mode);
 };
 
 #endif
