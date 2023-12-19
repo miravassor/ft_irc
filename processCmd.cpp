@@ -28,7 +28,7 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens){
 	(void) tokens;
 }
 
-// process MODE command (user)
+// process MODE command (user) !!-> doc has more
 void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 	if (params[0] != clients[fd]->getNickname()) {
@@ -54,6 +54,12 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::processPing(int fd, const std::vector<std::string> &tokens) {
-	(void)tokens;
-	serverReply(fd, "", PONG);
+	if (tokens.size() <= 1) {
+		serverReply(fd, "", ERR_NOORIGIN);
+	}
+	else if (tokens[1] != serverName) {
+		serverReply(fd, "", ERR_NOSUCHSERVER);
+	}
+	else
+		serverReply(fd, "", PONG);
 }

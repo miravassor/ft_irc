@@ -32,7 +32,9 @@ enum serverRep {
     ERR_USERSDONTMATCH,
     RPL_UMODEIS,
     ERR_UMODEUNKNOWNFLAG,
-    PONG
+    PONG,
+    ERR_NOSUCHSERVER,
+    ERR_NOORIGIN
 };
 
 class Server {

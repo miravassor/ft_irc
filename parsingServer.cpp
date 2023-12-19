@@ -224,6 +224,12 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case PONG:
 			send(fd, "PONG :42.IRC", 13, 0);
 			break;
+		case ERR_NOSUCHSERVER:
+			serverSendReply(fd, "402", token, "No such server");
+			break;
+		case ERR_NOORIGIN:
+			serverSendReply(fd, "409", "", "No origin specified");
+			break;
 		default:
 			return;
 	}
