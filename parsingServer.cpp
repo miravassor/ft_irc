@@ -2,7 +2,7 @@
 
 // Parsing
 
-void	Server::parsBuffer(int fd) {
+bool	Server::parsBuffer(int fd) {
 	std::string					bufferStr(_buffer);
 	std::stringstream			ss(bufferStr);
 	std::string					line;
@@ -18,18 +18,19 @@ void	Server::parsBuffer(int fd) {
 		std::vector<std::string> tokens;
 		std::string token;
 		while (lineStream >> token) {
-			std::cout << token << " ";
+			std::cout << token << " "; // debug
 			tokens.push_back(token);
 		}
-		std::cout << "[TOKEN END]" << std::endl;
+		std::cout << "[TOKEN END]" << std::endl; // debug
 
 		if (clients[fd]->isRegistered() == false) {
 			if (registrationProcess(fd, tokens))
-				return;
+				return 1;
 		}
 		else
 			processCmd(fd, tokens);
 	}
+	return 0;
 }
 
 bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
@@ -40,7 +41,7 @@ bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 		return 1;
 	}
-	std::string command = tokens[0];
+	std::string	command = tokens[0];
 	std::vector<std::string>	params(tokens.begin() + 1, tokens.end());
 	if (command == "CAP") {
 		if (tokens[1] == "LS") {
@@ -48,28 +49,30 @@ bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 		}
 	}
 	else if (handleCommand(fd, command, params)) {
-		removeClient(clients[fd]->getSocket());
 		return 1;
 	}
-	checkRegistration(fd);
-	return 0;
+	return checkRegistration(fd);
 }
 
 bool	Server::handleCommand(int fd, const std::string& command, const std::vector<std::string>& arg) {
 	if (command == "PASS") {
-		return verifyPassword(fd, arg[0]);
+		if (verifyPassword(fd, arg[0]))
+			return 1;
+		else
+			clients[fd]->setPassword(arg[0]);
 	} else if (command == "NICK") {
-		if (!verifyNickname(fd, arg[0]))
-			return (clients[fd]->setNickname(arg[0]), 0);
-		return 1;
+		if (verifyNickname(fd, arg[0]))
+			return 1;
+		else
+			clients[fd]->setNickname(arg[0]);
 	} else if (command == "USER") {
 		std::string	realname = getParam(arg);
-		if (!verifyUsername(fd, realname)) {
-			return (clients[fd]->setUsername(realname), 0);
-		}
-		return 1;
+		if (verifyUsername(fd, realname))
+			return 1;
+		else
+			clients[fd]->setUsername(realname);
 	}
-	return 1;
+	return 0;
 }
 
 void Server::processCmd(int fd, std::vector<std::string>& tokens) {
@@ -77,7 +80,6 @@ void Server::processCmd(int fd, std::vector<std::string>& tokens) {
         return;
 
     std::string command = tokens[0];
-    (void)fd;
 
 	CmdMapIterator it = cmd.find(command);
 	if (it != cmd.end()) {
@@ -90,16 +92,37 @@ void Server::processCmd(int fd, std::vector<std::string>& tokens) {
 
 // Registration utils
 
-void	Server::checkRegistration(int fd) {
-	if (clients[fd]->isLogged()) {
-		if (!clients[fd]->getNickname().empty() && !clients[fd]->getUsername().empty()) {
-			clients[fd]->setRegistration();
-			serverReply(fd, clients[fd]->getNickname(), RPL_WECLOME);
-			serverReply(fd, clients[fd]->getNickname(), RPL_YOURHOST);
-			serverReply(fd, clients[fd]->getNickname(), RPL_CREATED);
-			serverReply(fd, clients[fd]->getNickname(), RPL_MYINFO);
+bool	Server::checkRegistration(int fd) {
+	// check if registration is complete
+	if (clients[fd]->isLogged() && (!clients[fd]->getNickname().empty() && !clients[fd]->getUsername().empty()) ) {
+		// check if user (nickname) is in database
+		if (users.find(clients[fd]->getNickname()) != users.end()) {
+			// check if user is already connected
+			std::map<int, Client *>::iterator it = clients.begin();
+			for (; it != clients.end(); ++it) {
+				if (it->second != clients[fd] && it->second->getNickname() == clients[fd]->getNickname()) {
+					serverReply(fd, clients[fd]->getNickname(), ERR_NICKNAMEINUSE);
+					return 1;
+				}
+			}
+			// check if password match previous login
+			if (clients[fd]->getPassword() != users[clients[fd]->getNickname()]) {
+				serverReply(fd, clients[fd]->getNickname(), ERR_PASSWDMISMATCH);
+				return 1;
+			}
 		}
+		else {
+			// if first time user connect: add to database
+			users.insert(std::make_pair(clients[fd]->getNickname(), clients[fd]->getPassword()));
+		}
+		// resgitration complete, send welcome
+		clients[fd]->setRegistration();
+		serverReply(fd, clients[fd]->getNickname(), RPL_WECLOME);
+		serverReply(fd, clients[fd]->getNickname(), RPL_YOURHOST);
+		serverReply(fd, clients[fd]->getNickname(), RPL_CREATED);
+		serverReply(fd, clients[fd]->getNickname(), RPL_MYINFO);
 	}
+	return 0;
 }
 
 // Find the parameters in command (after ':')
@@ -140,23 +163,12 @@ bool	Server::verifyNickname(int fd, const std::string &arg) {
 		if (arg.find(ill[i]) != std::string::npos)
 			return (serverReply(fd, arg, ERR_ERRONEUSNICKNAME), 1);
 	}
-
-	// check if username is already used
-	std::map<int, Client *>::iterator it = clients.begin();
-	for (; it != clients.end(); ++it) {
-		if (it->second != clients[fd] && it->second->getNickname() == arg) {
-			serverReply(fd, arg, ERR_NICKNAMEINUSE);
-			return 1;
-		}
-	}
 	return 0;
 }
 
 bool	Server::verifyPassword(int fd, const std::string &arg) {
-	if (arg != password) {
-		serverReply(fd, clients[fd]->getNickname(), ERR_PASSWDMISMATCH);
+	if (arg.empty())
 		return 1;
-	}
 	clients[fd]->setLog();
 	return 0;
 }
@@ -191,6 +203,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			break;
 		case ERR_ERRONEUSNICKNAME:
 			serverSendReply(fd, "432", token, "Erroneous nickname");
+			break;
+		case ERR_ALREADYREGISTRED:
+			serverSendReply(fd, "462", token, "Unauthorized command (already registered)");
 			break;
 		default:
 			return;

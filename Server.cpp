@@ -100,6 +100,10 @@ void Server::run() {
                     if (bytesRead > 0) {
                         _buffer[bytesRead] = 0;
                         parsBuffer(pollFds[i].fd);
+                        // if (parsBuffer(pollFds[i].fd)) {
+                        //     removeClient(pollFds[i].fd);
+                        //     i--;
+                        // }
                     } else if (bytesRead == 0) {
                         removeClient(pollFds[i].fd);
                         i--;

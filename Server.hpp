@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include <iostream>
+// #include <fstream>
 #include <sys/socket.h>
 #include <cstring>
 #include <cstdlib>
@@ -28,6 +29,7 @@ enum serverRep {
 	ERR_PASSWDMISMATCH,
 	ERR_NICKNAMEINUSE,
 	ERR_ERRONEUSNICKNAME,
+    ERR_ALREADYREGISTRED,
 };
 
 class Server {
@@ -50,6 +52,7 @@ class Server {
         std::map<int, Client *> clients;
         std::vector<Channel *> channels;
   		CmdMap cmd;
+        std::map<std::string, std::string> users;
 
 		void  initCmd();
 
@@ -60,9 +63,9 @@ class Server {
 
         // Parsing
         char _buffer[1024];
-        void    parsBuffer(int fd);
+        bool    parsBuffer(int fd);
         bool    registrationProcess(int fd, std::vector<std::string>& tokens);
-        void    checkRegistration(int fd);
+        bool    checkRegistration(int fd);
         bool    handleCommand(int fd, const std::string& command, const std::vector<std::string>& arg);
         void    processCmd(int fd, std::vector<std::string>& tokens);
         std::string getParam(const std::vector<std::string>& tokens);

@@ -28,6 +28,10 @@ void Client::setRegistration() {
     Client::registered = true;
 }
 
+void Client::setPassword(const std::string& password) {
+    Client::password = password;
+}
+
 
 // Getters
 
@@ -53,5 +57,9 @@ bool Client::isLogged() {
 
 int Client::getSocket() {
     return socketFd;
+}
+
+const std::string   &Client::getPassword() const {
+    return password;
 }
 

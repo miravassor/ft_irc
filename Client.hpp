@@ -17,17 +17,20 @@ class Client {
         std::string nickname;
         std::string username;
         std::string realName;
+        std::string password;
     public:
         Client();
         ~Client();
         const std::string &getNickname() const;
         const std::string &getUsername() const;
+        const std::string &getPassword() const;
         int getSocket();
         bool isRegistered();
         bool isOperator();
         bool isLogged();
         void setNickname(const std::string &nickname);
         void setUsername(const std::string &username);
+        void setPassword(const std::string &password);
         void setRegistration();
         void setLog();
 };
