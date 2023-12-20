@@ -22,7 +22,6 @@ bool	Server::parsBuffer(int fd) {
 			tokens.push_back(token);
 		}
 		std::cout << "[TOKEN END]" << std::endl; // debug
-
 		if (clients[fd]->isRegistered() == false) {
 			if (registrationProcess(fd, tokens))
 				return 1;
@@ -53,19 +52,19 @@ bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 	return checkRegistration(fd);
 }
 
-bool	Server::handleCommand(int fd, const std::string& command, const std::vector<std::string>& arg) {
+bool	Server::handleCommand(int fd, const std::string& command, const std::vector<std::string>& params) {
 	if (command == "PASS") {
-		if (verifyPassword(fd, arg[0]))
+		if (verifyPassword(fd, params[0]))
 			return 1;
 		else
-			clients[fd]->setPassword(arg[0]);
+			clients[fd]->setPassword(params[0]);
 	} else if (command == "NICK") {
-		if (verifyNickname(fd, arg[0]))
+		if (verifyNickname(fd, params[0]))
 			return 1;
 		else
-			clients[fd]->setNickname(arg[0]);
+			clients[fd]->setNickname(params[0]);
 	} else if (command == "USER") {
-		std::string	realname = getParam(arg);
+		std::string	realname = getParam(params);
 		if (verifyUsername(fd, realname))
 			return 1;
 		else
@@ -203,7 +202,7 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "464", token, "Password incorrect");
 			break;
 		case ERR_NICKNAMEINUSE:
-			serverSendReply(fd, "433", "", "Nickname is already in use");
+			serverSendReply(fd, "433", token, "Nickname is already in use");
 			break;
 		case ERR_ERRONEUSNICKNAME:
 			serverSendReply(fd, "432", token, "Erroneous nickname");
@@ -221,13 +220,16 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "501", token, "Unknown MODE flag");
 			break;
 		case PONG:
-			send(fd, "PONG :42.IRC", 13, 0);
+			send(fd, token.c_str(), token.size(), 0);
 			break;
 		case ERR_NOSUCHSERVER:
 			serverSendReply(fd, "402", token, "No such server");
 			break;
 		case ERR_NOORIGIN:
 			serverSendReply(fd, "409", "", "No origin specified");
+			break;
+		case ERR_NOSUCHCHANNEL:
+			serverSendReply(fd, "403", token, "No such channel");
 			break;
 		default:
 			return;

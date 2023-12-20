@@ -34,7 +34,8 @@ enum serverRep {
     ERR_UMODEUNKNOWNFLAG,
     PONG,
     ERR_NOSUCHSERVER,
-    ERR_NOORIGIN
+    ERR_NOORIGIN,
+    ERR_NOSUCHCHANNEL
 };
 
 class Server {
@@ -71,7 +72,7 @@ class Server {
         bool    parsBuffer(int fd);
         bool    registrationProcess(int fd, std::vector<std::string>& tokens);
         bool    checkRegistration(int fd);
-        bool    handleCommand(int fd, const std::string& command, const std::vector<std::string>& arg);
+        bool    handleCommand(int fd, const std::string& command, const std::vector<std::string>& params );
         bool    verifyNickname(int fd, const std::string &arg);
         bool    verifyPassword(int fd, const std::string &arg);
         bool    verifyUsername(int fd, const std::string &arg);

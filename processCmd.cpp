@@ -9,8 +9,32 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens){
 }
 
 void Server::processJoin(int fd, const std::vector<std::string> &tokens){
-	(void)fd;
-	(void) tokens;
+	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
+
+	if (tokens.size() < 2)
+		serverReply(fd, "", ERR_NEEDMOREPARAMS);
+	// search if channel already exist
+	// check if user already in channel ??
+	std::vector<Channel *>::iterator it = channels.begin();
+	for (; it != channels.end(); ++it) {
+		if ((*it)->getName() == tokens[1]) {
+			(*it)->addMember(fd);
+			(*it)->newMember(fd);
+			return;
+		}
+	}
+	// or build one
+	if (tokens[1].find(' ') != std::string::npos) {
+		// no space allowed in channel name
+		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
+		return;
+	}
+	else {
+		channels.push_back(new Channel(tokens[1]));
+		channels.back()->addMember(fd);
+		channels.back()->addOperator(fd);
+		channels.back()->newMember(fd);
+	}
 }
 
 void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
@@ -60,6 +84,8 @@ void Server::processPing(int fd, const std::vector<std::string> &tokens) {
 	else if (tokens[1] != serverName) {
 		serverReply(fd, "", ERR_NOSUCHSERVER);
 	}
-	else
-		serverReply(fd, "", PONG);
+	else {
+		std::string pong = ":42.IRC PONG " + tokens[1];
+		serverReply(fd, pong, PONG);
+	}
 }

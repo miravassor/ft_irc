@@ -9,6 +9,12 @@ enum ChannelMode {
     PUBLIC
 };
 
+enum chanRep {
+    RPL_TOPIC,
+    RPL_NOTOPIC,
+    RPL_NAMREPLY
+};
+
 class Channel {
 
 private:
@@ -40,13 +46,17 @@ public:
 
     void removeMember(int clientFd);
 
-    bool hasMebmer(int clientFd); 
+    bool hasMember(int clientFd);
 
     void addOperator(int clientFd);
 
     void removeOperator(int clientFd);
 
     bool hasOperator(int clientFd);
+
+    void newMember(int fd);
+
+    void chanReply(int fd, chanRep id);
 
     // void broadcastMessage(int speakerFd, const std::string& message);
 

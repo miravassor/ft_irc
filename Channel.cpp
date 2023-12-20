@@ -40,7 +40,7 @@ void Channel::removeMember(int clientFd) {
     memberFds.erase(clientFd);
 }
 
-bool Channel::hasMebmer(int clientFd) {
+bool Channel::hasMember(int clientFd) {
     return memberFds.find(clientFd) != memberFds.end();
 }
 
@@ -57,6 +57,35 @@ void Channel::removeOperator(int clientFd) {
 bool Channel::hasOperator(int clientFd) {
     return operatorFds.find(clientFd) != operatorFds.end();
 }
+
+void    Channel::newMember(int fd) {
+    if (!getTopic().empty()) {
+        chanReply(fd, RPL_TOPIC);
+    }
+    else {
+        chanReply(fd, RPL_NOTOPIC);
+    }
+    chanReply(fd, RPL_NAMREPLY);
+}
+
+void    Channel::chanReply(int fd, chanRep id) {
+    (void)fd;
+    switch (id) {
+        case RPL_TOPIC:
+		// to do: replace <topic> with real value
+            // send(fd, replyStr.c_str(), replyStr.length(), 0);
+			// serverSendReply(fd, "332", "<topic>");
+			break;
+		case RPL_NOTOPIC:
+			// serverSendReply(fd, "331", "No topic is set");
+			break;
+		case RPL_NAMREPLY:
+		// to do: replace <nick> with real value
+			// serverSendReply(fd, "353", "<nick>");
+			break;
+    }
+}
+
 
 // Channel::void broadcastMessage(int speakerFd, const std::string& message) {
 //     std::string fullMessage = "[" + this->name + "] " + message + "\r\n";
