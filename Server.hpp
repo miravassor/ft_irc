@@ -87,6 +87,12 @@ class Server {
   		void processPart(int fd, const std::vector<std::string> &tokens);
         void processMode(int fd, const std::vector<std::string> &tokens);
         void processPing(int fd, const std::vector<std::string> &tokens);
+
+		void addChannel(Channel *channel);
+		Channel *findChannel(const std::string &name);
+
+  		bool isValidChannelName(const std::string &name);
+  		std::vector<std::string> split(const std::string &src, const char delimiter) const;
 };
 
 #endif

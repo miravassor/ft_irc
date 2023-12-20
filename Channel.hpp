@@ -40,7 +40,7 @@ public:
 
     void removeMember(int clientFd);
 
-    bool hasMebmer(int clientFd); 
+    bool hasMember(int clientFd);
 
     void addOperator(int clientFd);
 

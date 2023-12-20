@@ -148,3 +148,16 @@ int Server::acceptConnection() {
 
     return clientSocket;
 }
+
+void Server::addChannel(Channel *channel) {
+	channels.push_back(channel);
+}
+
+Channel* Server::findChannel(const std::string &name) {
+	for (std::vector<Channel*>::iterator it = channels.begin(); it != channels.end(); ++it) {
+		if ((*it)->getName() == name) {
+			return *it;
+		}
+	}
+	return NULL;
+}

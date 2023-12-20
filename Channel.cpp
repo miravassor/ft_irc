@@ -40,7 +40,7 @@ void Channel::removeMember(int clientFd) {
     memberFds.erase(clientFd);
 }
 
-bool Channel::hasMebmer(int clientFd) {
+bool Channel::hasMember(int clientFd) {
     return memberFds.find(clientFd) != memberFds.end();
 }
 
