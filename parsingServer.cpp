@@ -108,7 +108,7 @@ bool	Server::checkRegistration(int fd) {
 					return 1;
 				}
 			}
-			// check if password match previous login
+			// check if _password match previous login
 			if (clients[fd]->getPassword() != users[clients[fd]->getNickname()]) {
 				serverReply(fd, clients[fd]->getNickname(), ERR_PASSWDMISMATCH);
 				return 1;
@@ -213,7 +213,7 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "462", token, "Unauthorized command (already registered)");
 			break;
 		case ERR_USERSDONTMATCH:
-			serverSendReply(fd, "502", token, "Cannot change mode for other users");
+			serverSendReply(fd, "502", token, "Cannot change _mode for other users");
 			break;
 		case RPL_UMODEIS:
 			serverSendReply(fd, "221", token, token);
@@ -232,6 +232,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			break;
 		case ERR_NOSUCHCHANNEL:
 			serverSendReply(fd, "403", token, ": No such channel");
+			break;
+		case ERR_BADCHANNELKEY:
+			serverSendReply(fd, "475", token, ": Cannot join channel");
 			break;
 		default:
 			return;

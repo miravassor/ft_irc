@@ -2,7 +2,7 @@
 
 int main(int argc, char **argv) {
     if (argc < 3) {
-        std::cout << "ERROR! Usage: " << argv[0] << " <port> <password>" << std::endl;
+        std::cout << "ERROR! Usage: " << argv[0] << " <port> <_password>" << std::endl;
         return 1;
     }
     try {

@@ -1,65 +1,78 @@
 #include "Channel.hpp"
 
 Channel::Channel(const std::string &name) {
-    this->name = name;
-    std::cout << "Channel " << this->name << " created." << std::endl;
+    this->_name = name;
+	this->_password = "";
+	_mode = PUBLIC;
+}
+
+Channel::Channel(const std::string &name, std::string &password) {
+	this->_name = name;
+	this->_password = password;
+	_mode = password.empty() ? PUBLIC : PRIVATE;
 }
 
 Channel::~Channel() {
-    std::cout << "Channel " << this->name << " destroyed." << std::endl;
 }
 
 
 const std::string& Channel::getName() const {
-    return name;
+    return _name;
 }
 
 const std::string& Channel::getTopic() const {
-    return topic;
+    return _topic;
 }
 
-const std::string& Channel::getMode() const {
-    return mode;
+const ChannelMode& Channel::getMode() const {
+    return _mode;
 }
 
 const std::set<int>& Channel::getMemberFds() const {
-    return memberFds;
+    return _memberFds;
 }
 
 const std::set<int>& Channel::getOperatorFds() const {
-    return operatorFds;
+    return _operatorFds;
 }
 
 
 void Channel::addMember(int clientFd) {
-    memberFds.insert(clientFd);
+    _memberFds.insert(clientFd);
 }
 
 void Channel::removeMember(int clientFd) {
     removeOperator(clientFd);
-    memberFds.erase(clientFd);
+    _memberFds.erase(clientFd);
 }
 
 bool Channel::hasMember(int clientFd) {
-    return memberFds.find(clientFd) != memberFds.end();
+    return _memberFds.find(clientFd) != _memberFds.end();
 }
 
+bool Channel::authMember(int clientFd, std::string &password) {
+	if (_mode == PRIVATE && password != _password) {
+		return false;
+	}
+	addMember(clientFd);
+	return true;
+}
 
 void Channel::addOperator(int clientFd) {
-    operatorFds.insert(clientFd);
+    _operatorFds.insert(clientFd);
 }
 
 
 void Channel::removeOperator(int clientFd) {
-    operatorFds.erase(clientFd);
+    _operatorFds.erase(clientFd);
 }
 
 bool Channel::hasOperator(int clientFd) {
-    return operatorFds.find(clientFd) != operatorFds.end();
+    return _operatorFds.find(clientFd) != _operatorFds.end();
 }
 
 // Channel::void broadcastMessage(int speakerFd, const std::string& message) {
-//     std::string fullMessage = "[" + this->name + "] " + message + "\r\n";
+//     std::string fullMessage = "[" + this->_name + "] " + message + "\r\n";
 //     // Broadcast the message to all members
 //     for (int clientFd : clientFds) {
 //         ssize_t bytesSent = send(clientFd, fullMessage.c_str(), fullMessage.length(), 0);

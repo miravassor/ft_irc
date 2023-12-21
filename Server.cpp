@@ -24,17 +24,17 @@ Server::Server(int port, const std::string &password) {
     }
 
     this->start = time(0);
-    this->password = password;
+    this->_password = password;
     this->serverName = "42.IRC";
     this->serverVersion = "0.1";
 
 	initCmd();
 
     std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
-              << ":"
-              << ntohs(address.sin_port)
-              << " socketFD=" << socketFd
-              << " password=" << this->password << std::endl;
+			  << ":"
+			  << ntohs(address.sin_port)
+			  << " socketFD=" << socketFd
+			  << " _password=" << this->_password << std::endl;
 }
 
 void Server::initCmd() {

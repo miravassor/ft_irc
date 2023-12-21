@@ -14,6 +14,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <queue>
 
 #include "Client.hpp"
 #include "Channel.hpp"
@@ -36,6 +37,7 @@ enum serverRep {
     ERR_NOSUCHSERVER,
     ERR_NOORIGIN,
   	ERR_NOSUCHCHANNEL,
+  	ERR_BADCHANNELKEY
 };
 
 class Server {
@@ -51,7 +53,7 @@ class Server {
         int socketFd;
         time_t start;
         sockaddr_in address;
-        std::string password;
+        std::string _password;
         std::string serverName;
         std::string serverVersion;
         std::vector<pollfd> pollFds;
@@ -93,7 +95,7 @@ class Server {
 		Channel *findChannel(const std::string &name);
 
   		bool isValidChannelName(const std::string &name);
-  		std::vector<std::string> split(const std::string &src, char delimiter) const;
+  		std::queue<std::string> split(const std::string &src, char delimiter) const;
 };
 
 #endif

@@ -8,38 +8,46 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	(void) tokens;
 }
 
-// todo: private channels, passwords for channels
 void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
-	std::vector<std::string> channels = split(tokens[1], ',');
-	for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); ++it) {
-		std::cout << "Client with fd=" << fd << " requested to join channel " << *it << std::endl;
-		Channel *channel = findChannel(*it);
+	std::queue<std::string> channels = split(tokens[1], ',');
+	std::queue<std::string> passwords;
+	if (tokens.size() > 2) {
+		passwords = split(tokens[2], ',');
+	}
+	for (; !channels.empty(); channels.pop()) {
+		std::string channelName = channels.front();
+		std::string password = passwords.empty() ? "" : passwords.front();
+		Channel *channel = findChannel(channelName);
+		//todo: refactoring
 		if (channel) {
-			channel->addMember(fd);
-			// serverReply(fd, *it, RPL_JOIN);
-			// notifyUsersOfChannel()..
+			if (channel->authMember(fd, password)) {
+				// serverReply(fd, *it, RPL_JOIN);
+				// notifyUsersOfChannel()..
+			} else {
+				serverReply(fd, channelName, ERR_BADCHANNELKEY);
+			}
 		} else {
-			if (isValidChannelName(*it)) {
-				Channel *newChannel = new Channel(*it);
+			if (isValidChannelName(channelName)) {
+				Channel *newChannel = new Channel(channelName, password);
 				newChannel->addMember(fd);
 				newChannel->addOperator(fd);
 				addChannel(newChannel);
 				// serverReply(fd, *it, RPL_JOIN);
 				// notifyUsersOfChannel()..
 			} else {
-				serverReply(fd, *it, ERR_NOSUCHCHANNEL);
+				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
 			}
 		}
 	}
 }
 
 // that method can be moved lately into some utils file
-std::vector<std::string> Server::split(const std::string &src, char delimiter) const {
-	std::vector<std::string> tokens;
+std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
+	std::queue<std::string> tokens;
 	std::istringstream channelStream(src);
 	std::string channel;
 	while (std::getline(channelStream, channel, delimiter)) {
-		tokens.push_back(channel);
+		tokens.push(channel);
 	}
 	return tokens;
 }

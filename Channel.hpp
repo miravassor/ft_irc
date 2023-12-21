@@ -12,15 +12,18 @@ enum ChannelMode {
 class Channel {
 
 private:
-    std::string name;
-    std::string topic;
-    std::string mode;
-    std::set<int> memberFds;
-    std::set<int> operatorFds;
+    std::string _name;
+    std::string _topic;
+    ChannelMode _mode;
+  	std::string _password;
+    std::set<int> _memberFds;
+    std::set<int> _operatorFds;
 
 public:
 
     Channel(const std::string &name);
+
+	Channel(const std::string &name, std::string &password);
 
     ~Channel();
 
@@ -29,7 +32,7 @@ public:
 
     const std::string& getTopic() const;
 
-    const std::string& getMode() const;
+    const ChannelMode& getMode() const;
 
     const std::set<int>& getMemberFds() const;
 
@@ -41,6 +44,8 @@ public:
     void removeMember(int clientFd);
 
     bool hasMember(int clientFd);
+
+	bool authMember(int clientFd, std::string &password);
 
     void addOperator(int clientFd);
 
