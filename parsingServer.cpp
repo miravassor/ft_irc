@@ -244,6 +244,11 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 	fullReply << ":" << serverName << " " << id << " " << token << " :" << reply << "\r\n";
 	std::string replyStr = fullReply.str();
 	getClient(fd).pushSendQueue(replyStr);
-	this->pollFds[fd].events |= POLLOUT;
+	for (size_t i = 0; i < pollFds.size(); i++) {
+		if (pollFds[i].fd == fd) {
+			pollFds[i].events |= POLLOUT;
+			break;
+		}
+	}
 //	send(fd, replyStr.c_str(), replyStr.length(), 0);
 }

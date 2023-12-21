@@ -1,5 +1,7 @@
 #include "Server.hpp"
 #include "Channel.hpp"
+#include <fcntl.h>
+
 #include <cstring>  // for strerror
 #include <cerrno>   // for errno
 
@@ -87,7 +89,7 @@ void Server::run() {
     listenPort();
 
     while (true) {
-        int countEvents = poll(&pollFds[0], pollFds.size(), -1);
+        int countEvents = poll(&pollFds[0], pollFds.size(), 0);
 
         if (countEvents < 0) {
             throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
@@ -157,7 +159,19 @@ int Server::acceptConnection() {
     if (clientSocket == -1) {
         throw std::runtime_error("ERROR! Cannot accept the connection");
     }
-    clientPollFd.fd = clientSocket;
+	int flags = fcntl(socketFd, F_GETFL, 0);
+
+	if (flags == -1) {
+		// Handle error
+		throw std::runtime_error("Failed to get socket flags");
+	}
+
+	if (fcntl(socketFd, F_SETFL, flags | O_NONBLOCK) == -1) {
+		// Handle error
+		throw std::runtime_error("Failed to set socket to non-blocking mode");
+	}
+
+	clientPollFd.fd = clientSocket;
     clientPollFd.events = POLLIN;
     pollFds.push_back(clientPollFd);
 
