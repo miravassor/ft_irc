@@ -71,16 +71,16 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 // 	}
 // }
 
-// // that method can be moved lately into some utils file
-// std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
-// 	std::queue<std::string> tokens;
-// 	std::istringstream channelStream(src);
-// 	std::string channel;
-// 	while (std::getline(channelStream, channel, delimiter)) {
-// 		tokens.push(channel);
-// 	}
-// 	return tokens;
-// }
+// that method can be moved lately into some utils file
+std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
+	std::queue<std::string> tokens;
+	std::istringstream srcStream(src);
+	std::string token;
+	while (std::getline(srcStream, token, delimiter)) {
+		tokens.push(token);
+	}
+	return tokens;
+}
 
 bool Server::isValidChannelName(const std::string &name) {
 	if (name[0] != '#' && name[0] != '&') {
