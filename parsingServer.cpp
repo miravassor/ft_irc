@@ -246,7 +246,7 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 	getClient(fd).pushSendQueue(replyStr);
 	for (size_t i = 0; i < pollFds.size(); i++) {
 		if (pollFds[i].fd == fd) {
-			pollFds[i].events |= POLLOUT;
+			pollFds[i].events = POLLOUT;
 			break;
 		}
 	}

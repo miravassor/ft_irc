@@ -69,7 +69,7 @@ void Client::pushSendQueue(std::string send) {
 }
 
 std::string Client::popSendQueue() {
-	std::string ret = this->_sendQueue.front();
+	std::string ret(this->_sendQueue.front());
 	this->_sendQueue.pop();
 	return ret;
 }

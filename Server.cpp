@@ -87,7 +87,6 @@ void Server::removeClient(int clientSocket) {
 void Server::run() {
 
     listenPort();
-
     while (true) {
         int countEvents = poll(&pollFds[0], pollFds.size(), 0);
 
@@ -95,33 +94,10 @@ void Server::run() {
             throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
         }
         for (size_t i = 0; i < pollFds.size(); i++) {
-			if (pollFds[i].revents & POLLIN) {
-                // if i == 0 -> first connection
-                if (i == 0) {
-                    addClient(acceptConnection());
-                } else {
-                    std::cout << "Client socket has events!" << std::endl;
-                    memset(_buffer, 0, 1024);
-                    int bytesRead = recv(pollFds[i].fd, _buffer, sizeof(_buffer) - 1, 0);
-                    if (bytesRead > 0) {
-                        _buffer[bytesRead] = 0;
-                        if (parsBuffer(pollFds[i].fd)) {
-//                            removeClient(pollFds[i].fd);
-                            i--;
-                        }
-                    } else if (bytesRead == 0) {
-                        removeClient(pollFds[i].fd);
-                        i--;
-                    } else {
-                        throw std::runtime_error("SOME TMP ERROR");
-                    }
-                    pollFds[i].revents = 0;
-                }
-            }
 			if (pollFds[i].revents & POLLOUT) {
 				std::cout << "Client socket has OUT events!" << std::endl;
 				try {
-					Client c = getClient(pollFds[i].fd);
+					Client &c = getClient(pollFds[i].fd);
 					while (!c.sendQueueEmpty()) {
 						std::string msg = c.popSendQueue();
 						std::cout << "[" << pollFds[i].fd << "] Msg to send: " << msg << std::endl;
@@ -136,6 +112,31 @@ void Server::run() {
 				pollFds[i].revents = 0;
 
 			}
+			if (pollFds[i].revents & POLLIN) {
+                // if i == 0 -> first connection
+                if (i == 0) {
+                    addClient(acceptConnection());
+                } else {
+                    std::cout << "Client socket has events!" << std::endl;
+                    memset(_buffer, 0, 1024);
+                    int bytesRead = recv(pollFds[i].fd, _buffer, sizeof(_buffer) - 1, 0);
+                    if (bytesRead > 0) {
+                        _buffer[bytesRead] = 0;
+                        if (parsBuffer(pollFds[i].fd)) {
+//                            removeClient(pollFds[i].fd);
+//                            i--;
+							(void) 0;
+                        }
+                    } else if (bytesRead == 0) {
+                        removeClient(pollFds[i].fd);
+                        i--;
+                    } else {
+                        throw std::runtime_error("SOME TMP ERROR");
+                    }
+                    pollFds[i].revents = 0;
+                }
+            }
+
 		}
 	}
 }
