@@ -8,19 +8,16 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	(void) tokens;
 }
 
+// todo: private channels, passwords for channels
 void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> channels = split(tokens[1], ',');
 	for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); ++it) {
 		std::cout << "Client with fd=" << fd << " requested to join channel " << *it << std::endl;
 		Channel *channel = findChannel(*it);
 		if (channel) {
-			if (channel->hasMember(fd)) {
-				serverReply(fd, *it, ERR_ALREADYREGISTRED); // tmp error?
-			} else {
-				channel->addMember(fd);
-				// serverReply(fd, *it, RPL_JOIN);
-				// notifyUsersOfChannel()..
-			}
+			channel->addMember(fd);
+			// serverReply(fd, *it, RPL_JOIN);
+			// notifyUsersOfChannel()..
 		} else {
 			if (isValidChannelName(*it)) {
 				Channel *newChannel = new Channel(*it);
@@ -30,14 +27,14 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 				// serverReply(fd, *it, RPL_JOIN);
 				// notifyUsersOfChannel()..
 			} else {
-				serverReply(fd, *it, ERR_ERRONEUSNICKNAME); // tmp error?
+				serverReply(fd, *it, ERR_NOSUCHCHANNEL);
 			}
 		}
 	}
 }
 
 // that method can be moved lately into some utils file
-std::vector<std::string> Server::split(const std::string &src, const char delimiter) const {
+std::vector<std::string> Server::split(const std::string &src, char delimiter) const {
 	std::vector<std::string> tokens;
 	std::istringstream channelStream(src);
 	std::string channel;

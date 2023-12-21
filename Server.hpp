@@ -34,7 +34,8 @@ enum serverRep {
     ERR_UMODEUNKNOWNFLAG,
     PONG,
     ERR_NOSUCHSERVER,
-    ERR_NOORIGIN
+    ERR_NOORIGIN,
+  	ERR_NOSUCHCHANNEL,
 };
 
 class Server {
@@ -55,7 +56,7 @@ class Server {
         std::string serverVersion;
         std::vector<pollfd> pollFds;
         std::map<int, Client *> clients;
-        std::vector<Channel *> channels;
+        std::vector<Channel *> _channels;
   		CmdMap cmd;
         std::map<std::string, std::string> users;
 
@@ -92,7 +93,7 @@ class Server {
 		Channel *findChannel(const std::string &name);
 
   		bool isValidChannelName(const std::string &name);
-  		std::vector<std::string> split(const std::string &src, const char delimiter) const;
+  		std::vector<std::string> split(const std::string &src, char delimiter) const;
 };
 
 #endif

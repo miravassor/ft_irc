@@ -59,8 +59,8 @@ void Server::addClient(int clientSocket) {
 }
 
 void Server::removeClient(int clientSocket) {
-    // removing from channels
-   for (std::vector<Channel *>::iterator it = channels.begin(); it != channels.end(); ++it) {
+    // removing from _channels
+   for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
         (*it)->removeMember(clientSocket);
     }
     // removing from pollFds
@@ -150,11 +150,11 @@ int Server::acceptConnection() {
 }
 
 void Server::addChannel(Channel *channel) {
-	channels.push_back(channel);
+	_channels.push_back(channel);
 }
 
 Channel* Server::findChannel(const std::string &name) {
-	for (std::vector<Channel*>::iterator it = channels.begin(); it != channels.end(); ++it) {
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		if ((*it)->getName() == name) {
 			return *it;
 		}

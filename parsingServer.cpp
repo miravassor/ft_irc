@@ -230,6 +230,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case ERR_NOORIGIN:
 			serverSendReply(fd, "409", "", "No origin specified");
 			break;
+		case ERR_NOSUCHCHANNEL:
+			serverSendReply(fd, "403", token, ": No such channel");
+			break;
 		default:
 			return;
 	}
