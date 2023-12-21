@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Client.hpp"
+#include "Channel.hpp"
 
 // implementation of commands
 
@@ -8,49 +9,78 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	(void) tokens;
 }
 
-void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
-	std::queue<std::string> channels = split(tokens[1], ',');
-	std::queue<std::string> passwords;
-	if (tokens.size() > 2) {
-		passwords = split(tokens[2], ',');
-	}
-	for (; !channels.empty(); channels.pop()) {
-		std::string channelName = channels.front();
-		std::string password = passwords.empty() ? "" : passwords.front();
-		Channel *channel = findChannel(channelName);
-		//todo: refactoring
-		if (channel) {
-			if (channel->authMember(fd, password)) {
-				// serverReply(fd, *it, RPL_JOIN);
-				// notifyUsersOfChannel()..
-			} else {
-				serverReply(fd, channelName, ERR_BADCHANNELKEY);
-			}
-		} else {
-			if (isValidChannelName(channelName)) {
-				Channel *newChannel = new Channel(channelName, password);
-				newChannel->addMember(fd);
-				newChannel->addOperator(fd);
-				addChannel(newChannel);
-				// serverReply(fd, *it, RPL_JOIN);
-				// notifyUsersOfChannel()..
-			} else {
-				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
-			}
+void Server::processJoin(int fd, const std::vector<std::string> &tokens){
+	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
+
+	if (tokens.size() < 2)
+		serverReply(fd, "", ERR_NEEDMOREPARAMS);
+	// search if channel already exist
+	// check if user already in channel ??
+	std::vector<Channel *>::iterator it = channels.begin();
+	for (; it != channels.end(); ++it) {
+		if ((*it)->getName() == tokens[1]) {
+			(*it)->addMember(fd);
+			(*it)->newMember(fd);
+			return;
 		}
+	}
+	// or build one
+	if (tokens[1].find(' ') != std::string::npos) {
+		// no space allowed in channel name
+		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
+		return;
+	}
+	else {
+		channels.push_back(new Channel(tokens[1], this));
+		channels.back()->addMember(fd);
+		channels.back()->addOperator(fd);
+		channels.back()->newMember(fd);
 	}
 }
 
-// that method can be moved lately into some utils file
-std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
-	std::queue<std::string> tokens;
-	std::istringstream channelStream(src);
-	std::string channel;
-	while (std::getline(channelStream, channel, delimiter)) {
-		tokens.push(channel);
-	}
-	return tokens;
-}
+// void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
+// 	std::queue<std::string> channels = split(tokens[1], ',');
+// 	std::queue<std::string> passwords;
+// 	if (tokens.size() > 2) {
+// 		passwords = split(tokens[2], ',');
+// 	}
+// 	for (; !channels.empty(); channels.pop()) {
+// 		std::string channelName = channels.front();
+// 		std::string password = passwords.empty() ? "" : passwords.front();
+// 		Channel *channel = findChannel(channelName);
+// 		//todo: refactoring
+// 		if (channel) {
+// 			if (channel->authMember(fd, password)) {
+// 				// serverReply(fd, *it, RPL_JOIN);
+// 				// notifyUsersOfChannel()..
+// 			} else {
+// 				serverReply(fd, channelName, ERR_BADCHANNELKEY);
+// 			}
+// 		} else {
+// 			if (isValidChannelName(channelName)) {
+// 				Channel *newChannel = new Channel(channelName, password);
+// 				newChannel->addMember(fd);
+// 				newChannel->addOperator(fd);
+// 				addChannel(newChannel);
+// 				// serverReply(fd, *it, RPL_JOIN);
+// 				// notifyUsersOfChannel()..
+// 			} else {
+// 				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+// 			}
+// 		}
+// 	}
+// }
+
+// // that method can be moved lately into some utils file
+// std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
+// 	std::queue<std::string> tokens;
+// 	std::istringstream channelStream(src);
+// 	std::string channel;
+// 	while (std::getline(channelStream, channel, delimiter)) {
+// 		tokens.push(channel);
+// 	}
+// 	return tokens;
+// }
 
 bool Server::isValidChannelName(const std::string &name) {
 	if (name[0] != '#' && name[0] != '&') {
@@ -107,6 +137,9 @@ void Server::processPing(int fd, const std::vector<std::string> &tokens) {
 		serverReply(fd, "", ERR_NOORIGIN);
 	} else if (tokens[1] != serverName) {
 		serverReply(fd, "", ERR_NOSUCHSERVER);
-	} else
-		serverReply(fd, "", PONG);
+	}
+	else {
+		std::string pong = ":42.IRC PONG " + tokens[1];
+		serverReply(fd, pong, PONG);
+	}
 }

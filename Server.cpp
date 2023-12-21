@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Channel.hpp"
 
 Server::Server(int port, const std::string &password) {
     // setting the address family - AF_INET for IPv4
@@ -101,7 +102,6 @@ void Server::run() {
                     int bytesRead = recv(pollFds[i].fd, _buffer, sizeof(_buffer) - 1, 0);
                     if (bytesRead > 0) {
                         _buffer[bytesRead] = 0;
-                        parsBuffer(pollFds[i].fd);
                         if (parsBuffer(pollFds[i].fd)) {
                             removeClient(pollFds[i].fd);
                             i--;
@@ -147,6 +147,33 @@ int Server::acceptConnection() {
               << " at fd=" << clientSocket << std::endl;
 
     return clientSocket;
+}
+
+// Channel getters
+
+std::string Server::getServerName() {
+    return serverName;
+}
+
+std::string Server::getNick(int fd) {
+    if (clients.find(fd) != clients.end()) {
+        std::string nick = clients[fd]->getNickname();
+        return nick;
+    }
+    return "";
+}
+
+void Server::addChannel(Channel *channel) {
+	_channels.push_back(channel);
+}
+
+Channel* Server::findChannel(const std::string &name) {
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		if ((*it)->getName() == name) {
+			return *it;
+		}
+	}
+	return NULL;
 }
 
 void Server::addChannel(Channel *channel) {

@@ -3,25 +3,38 @@
 
 #include <iostream>
 #include <set>
+#include <sstream>
+#include <cstring>
+#include <sys/socket.h>
+
+#include "Server.hpp"
 
 enum ChannelMode {
     PRIVATE,
     PUBLIC
 };
 
+enum chanRep {
+    RPL_TOPIC,
+    RPL_NOTOPIC,
+    RPL_NAMREPLY
+};
+
 class Channel {
 
 private:
+    Server *server;
     std::string _name;
     std::string _topic;
     ChannelMode _mode;
   	std::string _password;
+    std::string visibility;
     std::set<int> _memberFds;
     std::set<int> _operatorFds;
 
 public:
 
-    Channel(const std::string &name);
+    Channel(const std::string &name, Server *server);
 
 	Channel(const std::string &name, std::string &password);
 
@@ -43,15 +56,19 @@ public:
 
     void removeMember(int clientFd);
 
-    bool hasMember(int clientFd);
-
-	bool authMember(int clientFd, std::string &password);
+    bool hasMebmer(int clientFd);
 
     void addOperator(int clientFd);
 
     void removeOperator(int clientFd);
 
     bool hasOperator(int clientFd);
+
+    void newMember(int fd);
+
+    void chanReply(int fd, chanRep id);
+
+    void chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply);
 
     // void broadcastMessage(int speakerFd, const std::string& message);
 

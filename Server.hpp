@@ -17,7 +17,8 @@
 #include <queue>
 
 #include "Client.hpp"
-#include "Channel.hpp"
+
+class Channel;
 
 enum serverRep {
 	CAPLS,
@@ -37,7 +38,8 @@ enum serverRep {
     ERR_NOSUCHSERVER,
     ERR_NOORIGIN,
   	ERR_NOSUCHCHANNEL,
-  	ERR_BADCHANNELKEY
+  	ERR_BADCHANNELKEY,
+    ERR_NOSUCHCHANNEL
 };
 
 class Server {
@@ -45,9 +47,15 @@ class Server {
   		typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string>&)> CmdMap;
   		typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string>&)>::iterator CmdMapIterator;
 
+        Server() {};
   		Server(int port, const std::string &password);
   		~Server();
   		void run();
+
+        // Channel getters
+        std::string getServerName();
+        std::string getNick(int fd);
+        std::string simpleSend(std::string send);
 
     private:
         int socketFd;
@@ -74,7 +82,7 @@ class Server {
         bool    parsBuffer(int fd);
         bool    registrationProcess(int fd, std::vector<std::string>& tokens);
         bool    checkRegistration(int fd);
-        bool    handleCommand(int fd, const std::string& command, const std::vector<std::string>& arg);
+        bool    handleCommand(int fd, const std::string& command, const std::vector<std::string>& params );
         bool    verifyNickname(int fd, const std::string &arg);
         bool    verifyPassword(int fd, const std::string &arg);
         bool    verifyUsername(int fd, const std::string &arg);
@@ -83,6 +91,7 @@ class Server {
         void    serverSendReply(int fd, std::string id, const std::string& token, std::string reply);
         std::string getParam(const std::vector<std::string>& tokens);
 
+        // Commands
 		void processPrivmsg(int fd, const std::vector<std::string> &tokens);
   		void processJoin(int fd, const std::vector<std::string> &tokens);
   		void processInvite(int fd, const std::vector<std::string> &tokens);

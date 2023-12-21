@@ -1,14 +1,18 @@
 #include "Channel.hpp"
 
-Channel::Channel(const std::string &name) {
+Channel::Channel(const std::string &name, Server *server) {
     this->_name = name;
 	this->_password = "";
+    this->server = server;
+    this->visibility = "=";
 	_mode = PUBLIC;
 }
 
-Channel::Channel(const std::string &name, std::string &password) {
+Channel::Channel(const std::string &name, std::string &password, Server *server) {
 	this->_name = name;
 	this->_password = password;
+    this->server = server;
+    this->visibility = "=";
 	_mode = password.empty() ? PUBLIC : PRIVATE;
 }
 
@@ -47,7 +51,7 @@ void Channel::removeMember(int clientFd) {
 }
 
 bool Channel::hasMember(int clientFd) {
-    return _memberFds.find(clientFd) != _memberFds.end();
+    return memberFds.find(clientFd) != memberFds.end();
 }
 
 bool Channel::authMember(int clientFd, std::string &password) {
@@ -71,6 +75,49 @@ bool Channel::hasOperator(int clientFd) {
     return _operatorFds.find(clientFd) != _operatorFds.end();
 }
 
+void    Channel::newMember(int fd) {
+    if (!getTopic().empty()) {
+        chanReply(fd, RPL_TOPIC);
+    }
+    else {
+        chanReply(fd, RPL_NOTOPIC);
+    }
+    chanReply(fd, RPL_NAMREPLY);
+}
+
+void    Channel::chanReply(int fd, chanRep id) {
+    switch (id) {
+        case RPL_TOPIC:
+		    // to do: replace <topic> with real value
+            // send(fd, replyStr.c_str(), replyStr.length(), 0);
+			// serverSendReply(fd, "332", "<topic>");
+			break;
+		case RPL_NOTOPIC:
+			chanSendReply(fd, "331", server->getNick(fd) + " " + name, "No topic is set");
+			break;
+		case RPL_NAMREPLY:
+            std::string nmrp = ":" + server->getServerName() + " " + server->getNick(fd) + " 353 " + visibility + " ";
+            std::set<int>::iterator it = memberFds.begin();
+            for (; it != memberFds.end(); ++it) {
+                nmrp.append(server->getNick(fd));
+                std::set<int>::iterator nextIt = it;
+                ++nextIt;
+                if (nextIt != memberFds.end())
+                    nmrp.append(" ");
+            }
+            send(fd, nmrp.c_str(), nmrp.length(), 0);
+			break;
+    }
+}
+
+void    Channel::chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply) {
+    std::stringstream fullReply;
+	fullReply << ":" << server->getServerName() << " " << id << " " << token << " :" << reply << "\r\n";
+	std::string replyStr = fullReply.str();
+	send(fd, replyStr.c_str(), replyStr.length(), 0);
+}
+
+
 // Channel::void broadcastMessage(int speakerFd, const std::string& message) {
 //     std::string fullMessage = "[" + this->_name + "] " + message + "\r\n";
 //     // Broadcast the message to all members
@@ -83,5 +130,3 @@ bool Channel::hasOperator(int clientFd) {
 //     }
 
 // }
-
-
