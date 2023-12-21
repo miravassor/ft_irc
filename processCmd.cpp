@@ -16,8 +16,8 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 	// search if channel already exist
 	// check if user already in channel ??
-	std::vector<Channel *>::iterator it = channels.begin();
-	for (; it != channels.end(); ++it) {
+	std::vector<Channel *>::iterator it = _channels.begin();
+	for (; it != _channels.end(); ++it) {
 		if ((*it)->getName() == tokens[1]) {
 			(*it)->addMember(fd);
 			(*it)->newMember(fd);
@@ -31,10 +31,10 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 		return;
 	}
 	else {
-		channels.push_back(new Channel(tokens[1], this));
-		channels.back()->addMember(fd);
-		channels.back()->addOperator(fd);
-		channels.back()->newMember(fd);
+		_channels.push_back(new Channel(tokens[1], this));
+		_channels.back()->addMember(fd);
+		_channels.back()->addOperator(fd);
+		_channels.back()->newMember(fd);
 	}
 }
 

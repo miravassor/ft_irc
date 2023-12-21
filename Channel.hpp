@@ -23,12 +23,12 @@ enum chanRep {
 class Channel {
 
 private:
-    Server *server;
+    Server *_server;
     std::string _name;
     std::string _topic;
     ChannelMode _mode;
   	std::string _password;
-    std::string visibility;
+    std::string _visibility;
     std::set<int> _memberFds;
     std::set<int> _operatorFds;
 
@@ -36,7 +36,7 @@ public:
 
     Channel(const std::string &name, Server *server);
 
-	Channel(const std::string &name, std::string &password);
+	Channel(const std::string &name, std::string &password, Server *server);
 
     ~Channel();
 
@@ -56,7 +56,7 @@ public:
 
     void removeMember(int clientFd);
 
-    bool hasMebmer(int clientFd);
+    bool hasMember(int clientFd);
 
     void addOperator(int clientFd);
 
@@ -69,6 +69,8 @@ public:
     void chanReply(int fd, chanRep id);
 
     void chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply);
+
+    bool authMember(int clientFd, std::string &password);
 
     // void broadcastMessage(int speakerFd, const std::string& message);
 
