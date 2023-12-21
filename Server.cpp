@@ -1,5 +1,7 @@
 #include "Server.hpp"
 #include "Channel.hpp"
+#include <cstring>  // for strerror
+#include <cerrno>   // for errno
 
 Server::Server(int port, const std::string &password) {
     // setting the address family - AF_INET for IPv4
@@ -10,18 +12,18 @@ Server::Server(int port, const std::string &password) {
     address.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // creating the main listening socket and adding it to pollFds container
-    socketFd = socket(address.sin_family, SOCK_STREAM, 0);
-    if (socketFd == -1) {
-        throw std::runtime_error("ERROR! Cannot create socket");
+    socketFd = socket(address.sin_family, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	if (socketFd == -1) {
+        throw std::runtime_error("Socket error: [" + std::string(strerror(errno)) + "]");
     }
     pollfd serverPollFd;
     serverPollFd.fd = socketFd;
-    serverPollFd.events = POLLIN;
+    serverPollFd.events = POLLIN | POLLOUT;
     pollFds.push_back(serverPollFd);
 
     // binding socket to the port
     if (bind(this->socketFd, (sockaddr *) (&address), sizeof(address)) == -1) {
-        throw std::runtime_error("ERROR! Cannot bind the socket");
+        throw std::runtime_error("Bind error: [" + std::string(strerror(errno)) + "]");
     }
 
     this->start = time(0);
@@ -88,22 +90,21 @@ void Server::run() {
         int countEvents = poll(&pollFds[0], pollFds.size(), -1);
 
         if (countEvents < 0) {
-            throw std::runtime_error("ERROR! Polling error");
+            throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
         }
         for (size_t i = 0; i < pollFds.size(); i++) {
-            if (pollFds[i].revents & POLLIN) {
+			if (pollFds[i].revents & POLLIN) {
                 // if i == 0 -> first connection
                 if (i == 0) {
                     addClient(acceptConnection());
                 } else {
                     std::cout << "Client socket has events!" << std::endl;
-
                     memset(_buffer, 0, 1024);
                     int bytesRead = recv(pollFds[i].fd, _buffer, sizeof(_buffer) - 1, 0);
                     if (bytesRead > 0) {
                         _buffer[bytesRead] = 0;
                         if (parsBuffer(pollFds[i].fd)) {
-                            removeClient(pollFds[i].fd);
+//                            removeClient(pollFds[i].fd);
                             i--;
                         }
                     } else if (bytesRead == 0) {
@@ -116,11 +117,27 @@ void Server::run() {
                 }
             }
 			if (pollFds[i].revents & POLLOUT) {
+				std::cout << "Client socket has OUT events!" << std::endl;
+				try {
+					Client c = getClient(pollFds[i].fd);
+					while (!c.sendQueueEmpty()) {
+						std::string msg = c.popSendQueue();
+						std::cout << "[" << pollFds[i].fd << "] Msg to send: " << msg << std::endl;
+						size_t n = send(pollFds[i].fd, msg.c_str(), msg.length(), 0);
+						if (n == msg.length())
+							pollFds[i].events = POLLIN;
+					}
+				}
+				catch (std::exception &e) {
+					std::cout << "Error: " << e.what() << std::endl;
+				}
+				pollFds[i].revents = 0;
 
 			}
-        }
-    }
+		}
+	}
 }
+
 
 void Server::listenPort() const {
 
@@ -180,5 +197,8 @@ Channel* Server::findChannel(const std::string &name) {
 }
 
 Client &Server::getClient(int fd) {
+	if (clients.find(fd) == clients.end()) {
+		throw std::runtime_error("ERROR! Cannot find client with fd");
+	}
 	return (*this->clients[fd]);
 }

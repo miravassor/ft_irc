@@ -85,6 +85,7 @@ std::queue<std::string> Server::split(const std::string &src, char delimiter) co
 		}
 		return tokens;
 	}
+	return tokens;
 }
 
 bool Server::isValidChannelName(const std::string &name) {
