@@ -16,7 +16,8 @@
 #include <algorithm>
 
 #include "Client.hpp"
-#include "Channel.hpp"
+
+class Channel;
 
 enum serverRep {
 	CAPLS,
@@ -43,9 +44,15 @@ class Server {
   		typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string>&)> CmdMap;
   		typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string>&)>::iterator CmdMapIterator;
 
+        Server() {};
   		Server(int port, const std::string &password);
   		~Server();
   		void run();
+
+        // Channel getters
+        std::string getServerName();
+        std::string getNick(int fd);
+        std::string simpleSend(std::string send);
 
     private:
         int socketFd;
@@ -81,6 +88,7 @@ class Server {
         void    serverSendReply(int fd, std::string id, const std::string& token, std::string reply);
         std::string getParam(const std::vector<std::string>& tokens);
 
+        // Commands
 		void processPrivmsg(int fd, const std::vector<std::string> &tokens);
   		void processJoin(int fd, const std::vector<std::string> &tokens);
   		void processInvite(int fd, const std::vector<std::string> &tokens);

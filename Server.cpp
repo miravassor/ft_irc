@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Channel.hpp"
 
 Server::Server(int port, const std::string &password) {
     // setting the address family - AF_INET for IPv4
@@ -146,4 +147,18 @@ int Server::acceptConnection() {
               << " at fd=" << clientSocket << std::endl;
 
     return clientSocket;
+}
+
+// Channel getters
+
+std::string Server::getServerName() {
+    return serverName;
+}
+
+std::string Server::getNick(int fd) {
+    if (clients.find(fd) != clients.end()) {
+        std::string nick = clients[fd]->getNickname();
+        return nick;
+    }
+    return "";
 }

@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Client.hpp"
+#include "Channel.hpp"
 
 // implementation of commands
 
@@ -30,7 +31,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 		return;
 	}
 	else {
-		channels.push_back(new Channel(tokens[1]));
+		channels.push_back(new Channel(tokens[1], this));
 		channels.back()->addMember(fd);
 		channels.back()->addOperator(fd);
 		channels.back()->newMember(fd);

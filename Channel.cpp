@@ -1,7 +1,9 @@
 #include "Channel.hpp"
 
-Channel::Channel(const std::string &name) {
+Channel::Channel(const std::string &name, Server *server) {
     this->name = name;
+    this->server = server;
+    this->visibility = "=";
     std::cout << "Channel " << this->name << " created." << std::endl;
 }
 
@@ -69,21 +71,35 @@ void    Channel::newMember(int fd) {
 }
 
 void    Channel::chanReply(int fd, chanRep id) {
-    (void)fd;
     switch (id) {
         case RPL_TOPIC:
-		// to do: replace <topic> with real value
+		    // to do: replace <topic> with real value
             // send(fd, replyStr.c_str(), replyStr.length(), 0);
 			// serverSendReply(fd, "332", "<topic>");
 			break;
 		case RPL_NOTOPIC:
-			// serverSendReply(fd, "331", "No topic is set");
+			chanSendReply(fd, "331", server->getNick(fd) + " " + name, "No topic is set");
 			break;
 		case RPL_NAMREPLY:
-		// to do: replace <nick> with real value
-			// serverSendReply(fd, "353", "<nick>");
+            std::string nmrp = ":" + server->getServerName() + " " + server->getNick(fd) + " 353 " + visibility + " ";
+            std::set<int>::iterator it = memberFds.begin();
+            for (; it != memberFds.end(); ++it) {
+                nmrp.append(server->getNick(fd));
+                std::set<int>::iterator nextIt = it;
+                ++nextIt;
+                if (nextIt != memberFds.end())
+                    nmrp.append(" ");
+            }
+            send(fd, nmrp.c_str(), nmrp.length(), 0);
 			break;
     }
+}
+
+void    Channel::chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply) {
+    std::stringstream fullReply;
+	fullReply << ":" << server->getServerName() << " " << id << " " << token << " :" << reply << "\r\n";
+	std::string replyStr = fullReply.str();
+	send(fd, replyStr.c_str(), replyStr.length(), 0);
 }
 
 

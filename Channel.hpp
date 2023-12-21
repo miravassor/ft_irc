@@ -3,6 +3,11 @@
 
 #include <iostream>
 #include <set>
+#include <sstream>
+#include <cstring>
+#include <sys/socket.h>
+
+#include "Server.hpp"
 
 enum ChannelMode {
     PRIVATE,
@@ -18,15 +23,17 @@ enum chanRep {
 class Channel {
 
 private:
+    Server *server;
     std::string name;
     std::string topic;
     std::string mode;
+    std::string visibility;
     std::set<int> memberFds;
     std::set<int> operatorFds;
 
 public:
 
-    Channel(const std::string &name);
+    Channel(const std::string &name, Server *server);
 
     ~Channel();
 
@@ -57,6 +64,8 @@ public:
     void newMember(int fd);
 
     void chanReply(int fd, chanRep id);
+
+    void chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply);
 
     // void broadcastMessage(int speakerFd, const std::string& message);
 
