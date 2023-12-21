@@ -1,3 +1,5 @@
 *.o
 servirc
 .vscode/
+.idea
+

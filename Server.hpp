@@ -70,7 +70,7 @@ class Server {
         std::map<std::string, std::string> users;
 
 		void  initCmd();
-
+		Client& getClient(int fd);
         void addClient(int clientSocket);
         void removeClient(int clientSocket);
         void listenPort() const;

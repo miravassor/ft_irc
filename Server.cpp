@@ -115,6 +115,9 @@ void Server::run() {
                     pollFds[i].revents = 0;
                 }
             }
+			if (pollFds[i].revents & POLLOUT) {
+
+			}
         }
     }
 }
@@ -174,4 +177,8 @@ Channel* Server::findChannel(const std::string &name) {
 		}
 	}
 	return NULL;
+}
+
+Client &Server::getClient(int fd) {
+	return (*this->clients[fd]);
 }
