@@ -60,6 +60,7 @@ Server::~Server() {
 		 it != _channels.end(); ++it) {
 		delete *it;
 	}
+	// Closing sockets
 	for (std::vector<pollfd>::iterator it = pollFds.begin();
 		 it != pollFds.end(); ++it) {
 		close(it->fd);
