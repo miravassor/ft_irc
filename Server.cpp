@@ -60,6 +60,10 @@ Server::~Server() {
 		 it != _channels.end(); ++it) {
 		delete *it;
 	}
+	for (std::vector<pollfd>::iterator it = pollFds.begin();
+		 it != pollFds.end(); ++it) {
+		close(it->fd);
+	}
 }
 
 void Server::addClient(int clientSocket) {
