@@ -107,6 +107,7 @@ private:
 	std::queue<std::string> split(const std::string &src, char delimiter) const;
 	void sendData(size_t index);
 	size_t receiveData(size_t index);
+	void resetEvents(size_t index);
 };
 
 #endif

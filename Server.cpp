@@ -95,7 +95,6 @@ void Server::Run() {
 				"Poll error: [" + std::string(strerror(errno)) + "]");
 	}
 	for (size_t i = 0; i < pollFds.size(); i++) {
-		// TODO : pollFds[i] uninitialized at first iteration after accept
 		if (pollFds[i].revents & POLLIN) {
 			i = receiveData(i);
 		}
@@ -127,7 +126,7 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 			// TODO : handle recv errors
 			throw std::runtime_error("SOME TMP ERROR");
 		}
-		pollFds[index].revents = 0;
+		resetEvents(index);
 	}
 	return index;
 }
@@ -138,7 +137,7 @@ void Server::sendData(size_t index) {
 		while (!c.sendQueueEmpty()) {
 			std::string msg = c.popSendQueue();
 			const char *dataPtr = msg.c_str();
-			size_t dataRemaining = msg.length();
+			ssize_t dataRemaining = msg.length();
 			while (dataRemaining > 0) {
 				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
 				if (n < 0) {
@@ -163,6 +162,10 @@ void Server::sendData(size_t index) {
 	catch (std::exception &e) {
 		std::cout << "[ERR] " << e.what() << std::endl;
 	}
+	resetEvents(index);
+}
+
+void Server::resetEvents(size_t index) {
 	pollFds[index].revents = 0;
 }
 
