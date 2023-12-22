@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <cstring>
 #include <cerrno>
+#include <csignal>
 
 #include "Client.hpp"
 

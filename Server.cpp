@@ -27,13 +27,13 @@ Server::Server(int port, const std::string &password) {
     this->serverName = "42.IRC";
     this->serverVersion = "0.1";
 	initCmd();
-    std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
+	listenPort();
+	std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
 			  << ":"
 			  << ntohs(address.sin_port)
 			  << " socketFD=" << socketFd
 			  << " _password=" << this->_password << std::endl;
 }
-
 void Server::initCmd() {
 	cmd["PRIVMSG"] = &Server::processPrivmsg;
 	cmd["JOIN"] = &Server::processJoin;
@@ -46,7 +46,14 @@ void Server::initCmd() {
 }
 
 Server::~Server() {
-    std::cout << "Server destroyed." << std::endl;
+	// Memory Cleanup
+	std::cout << "[Cleaning before exit]" << std::endl;
+	for (std::map<int, Client *>::iterator it = clients.begin(); it != clients.end(); ++it) {
+		delete it->second;
+	}
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		delete *it;
+	}
 }
 
 
@@ -76,22 +83,19 @@ void Server::removeClient(int clientSocket) {
 }
 
 void Server::run() {
-    listenPort();
-    while (true) {
-        int countEvents = poll(&pollFds[0], pollFds.size(), 0);
-        if (countEvents < 0) {
-            throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
-        }
-        for (size_t i = 0; i < pollFds.size(); i++) {
-			// TODO : pollFds[i] uninitialized at first iteration after accept
-			if (pollFds[i].revents & POLLIN) {
-				i = receiveData(i);
-			}
-			if (pollFds[i].revents & POLLOUT) {
-				send_data(i);
-			}
-
+	int countEvents = poll(&pollFds[0], pollFds.size(), 0);
+	if (countEvents < 0) {
+		throw std::runtime_error("Poll error: [" + std::string(strerror(errno)) + "]");
+	}
+	for (size_t i = 0; i < pollFds.size(); i++) {
+		// TODO : pollFds[i] uninitialized at first iteration after accept
+		if (pollFds[i].revents & POLLIN) {
+			i = receiveData(i);
 		}
+		if (pollFds[i].revents & POLLOUT) {
+			send_data(i);
+		}
+
 	}
 }
 

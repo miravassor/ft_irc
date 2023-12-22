@@ -1,5 +1,11 @@
 #include "Server.hpp"
 #include "Channel.hpp"
+bool running = true;
+
+void signalHandler(int signum) {
+	std::cout << "[SIG:" << signum << "] received.\n";
+	running = false;
+}
 
 int main(int argc, char **argv) {
     if (argc < 3) {
@@ -8,7 +14,9 @@ int main(int argc, char **argv) {
     }
     try {
         Server server(atoi(argv[1]), std::string(argv[2]));
-        server.run();
+		signal(SIGINT, signalHandler);
+        while (running)
+			server.run();
     } catch (std::exception &exception) {
         std::cout << exception.what() << std::endl;
         return 1;
