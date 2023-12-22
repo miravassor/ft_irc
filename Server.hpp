@@ -15,6 +15,9 @@
 #include <set>
 #include <algorithm>
 #include <queue>
+#include <fcntl.h>
+#include <cstring>
+#include <cerrno>
 
 #include "Client.hpp"
 
@@ -104,6 +107,10 @@ class Server {
 
   		bool isValidChannelName(const std::string &name);
   		std::queue<std::string> split(const std::string &src, char delimiter) const;
+
+	void send_data(size_t index);
+
+	size_t receiveData(size_t index);
 };
 
 #endif
