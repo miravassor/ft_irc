@@ -17,6 +17,7 @@ Server::Server(int port, const std::string &password) {
 	pollfd serverPollFd;
 	serverPollFd.fd = socketFd;
 	serverPollFd.events = POLLIN;
+	serverPollFd.revents = 0;
 	pollFds.push_back(serverPollFd);
 	// binding socket to the port
 	if (bind(this->socketFd, (sockaddr *) (&address), sizeof(address)) == -1) {
@@ -178,6 +179,7 @@ int Server::acceptConnection() {
 	}
 	clientPollFd.fd = clientSocket;
 	clientPollFd.events = POLLIN;
+	clientPollFd.revents = 0;
 	pollFds.push_back(clientPollFd);
 	// print information about the accepted connection
 	std::cout << "Accepted connection from: "
