@@ -264,5 +264,4 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 			break;
 		}
 	}
-//	send(fd, replyStr.c_str(), replyStr.length(), 0);
 }
