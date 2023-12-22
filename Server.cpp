@@ -111,18 +111,20 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 		addClient(acceptConnection());
 	} else {
 		memset(_buffer, 0, 1024);
+		// TODO handle if buffer is full or too small
 		int bytesRead = recv(pollFds[index].fd, _buffer, sizeof(_buffer) - 1,
 							 0);
 		if (bytesRead > 0) {
 			_buffer[bytesRead] = 0;
 			if (parsBuffer(pollFds[index].fd)) {
-//                            TODO : handle parsing errors
+		// TODO : handle parsing errors
 				(void) 0;
 			}
 		} else if (bytesRead == 0) {
 			removeClient(pollFds[index].fd);
 			index--;
 		} else {
+			// TODO : handle recv errors
 			throw std::runtime_error("SOME TMP ERROR");
 		}
 		pollFds[index].revents = 0;
@@ -135,10 +137,28 @@ void Server::sendData(size_t index) {
 		Client &c = getClient(pollFds[index].fd);
 		while (!c.sendQueueEmpty()) {
 			std::string msg = c.popSendQueue();
-			size_t n = send(pollFds[index].fd, msg.c_str(), msg.length(), 0);
-			if (n == msg.length())
-				pollFds[index].events = POLLIN;
+			const char *dataPtr = msg.c_str();
+			size_t dataRemaining = msg.length();
+			while (dataRemaining > 0) {
+				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
+				if (n < 0) {
+					if (errno == EWOULDBLOCK || errno == EAGAIN) {
+						c.pushSendQueue(msg);
+						pollFds[index].events = POLLOUT;
+						break;
+					} else {
+						throw std::runtime_error("Send error");
+					}
+				}
+				else if (n == 0) {
+					removeClient(pollFds[index].fd);
+					throw std::runtime_error("Connection closed");
+				}
+				dataPtr += n;
+				dataRemaining -= n;
+			}
 		}
+		pollFds[index].events = POLLIN;
 	}
 	catch (std::exception &e) {
 		std::cout << "[ERR] " << e.what() << std::endl;
@@ -147,7 +167,6 @@ void Server::sendData(size_t index) {
 }
 
 void Server::listenPort() const {
-
 	if (listen(socketFd, SOMAXCONN) == -1) {
 		throw std::runtime_error("ERROR! Cannot listen on the socket");
 	}

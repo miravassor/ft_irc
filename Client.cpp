@@ -65,7 +65,6 @@ const std::string &Client::getPassword() const {
 
 void Client::pushSendQueue(std::string send) {
 	this->_sendQueue.push(send);
-	std::cout << "Pushed to send queue: " << send << std::endl;
 }
 
 std::string Client::popSendQueue() {
