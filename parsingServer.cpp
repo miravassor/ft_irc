@@ -3,10 +3,28 @@
 // Parsing
 
 bool	Server::parsBuffer(int fd) {
-	std::string					bufferStr(_buffer);
+	std::string					bufferStr(this->_buffer);
 	std::stringstream			ss(bufferStr);
 	std::string					line;
 
+	// add recvBuffer at the beginning of ss if not empty
+	Client &client = getClient(fd);
+	if (!client.isRecvBufferEmpty()) {
+		std::cout << "Buffer not empty [" << client.getRecvBuffer() << "]" <<std::endl; // debug
+		ss.str("");
+		ss << client.getRecvBuffer() << bufferStr;
+		client.resetRecvBuffer();
+		std::cout << "Buffer: " << ss.str() << std::endl; // debug
+	}
+	// check if buffer contains a full line
+	size_t	cRet = ss.str().find("\r\n");
+	if (cRet == std::string::npos) {
+		// if not, add buffer to recvBuffer and return
+		std::cout << "Buffer not complete" << std::endl; // debug
+		client.appendRecvBuffer(ss.str());
+		std::cout << "Buffer: " << client.getRecvBuffer() << std::endl; // debug
+		return 0;
+	}
 	// tokenize the buffer line by line
 	while (std::getline(ss, line))
 	{

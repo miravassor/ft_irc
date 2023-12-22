@@ -2,12 +2,12 @@
 
 // Build
 
-Client::Client() : logged(false), registered(false), isOpe(false) {
-    std::cout << "Client created" << std::endl;
+Client::Client() : logged(false), registered(false), isOpe(false),recvBuffer("") {
+//    std::cout << "Client created fd[" << this->socketFd << "]" << std::endl;
 }
 
 Client::~Client() {
-    std::cout << "Client destroyed." << std::endl;
+//    std::cout << "Client [" << this->socketFd <<"] destroyed." << std::endl;
 }
 
 // Setters
@@ -75,5 +75,22 @@ std::string Client::popSendQueue() {
 
 bool Client::sendQueueEmpty() {
 	return this->_sendQueue.empty();
+}
+
+void Client::appendRecvBuffer(std::string recv) {
+	std::cout << "appendRecvBuffer: " << recv << std::endl;
+	this->recvBuffer.append(recv);
+}
+
+std::string Client::getRecvBuffer() {
+	return this->recvBuffer;
+}
+
+void Client::resetRecvBuffer() {
+	this->recvBuffer.clear();
+}
+
+bool Client::isRecvBufferEmpty() {
+	return this->recvBuffer.empty();
 }
 

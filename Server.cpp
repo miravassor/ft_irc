@@ -30,6 +30,7 @@ Server::Server(int port, const std::string &password) {
 	this->serverVersion = "0.1";
 	initCmd();
 	listenPort();
+	memset(_buffer, 0, 1024);
 	std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
 			  << ":"
 			  << ntohs(address.sin_port)
@@ -110,7 +111,6 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 		addClient(acceptConnection());
 	} else {
 		memset(_buffer, 0, 1024);
-		// TODO handle if buffer is full or too small
 		int bytesRead = recv(pollFds[index].fd, _buffer, sizeof(_buffer) - 1,
 							 0);
 		if (bytesRead > 0) {
