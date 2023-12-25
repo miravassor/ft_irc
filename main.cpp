@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
 		Server server(atoi(argv[1]), std::string(argv[2]));
 		signal(SIGINT, signalHandler);
 		while (running)
-			server.Run();
+			server.run();
 	} catch (std::exception &exception) {
 		std::cerr << exception.what() << std::endl;
 		return 1;

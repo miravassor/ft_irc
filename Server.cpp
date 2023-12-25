@@ -94,7 +94,7 @@ void Server::removeClient(int clientSocket) {
 	}
 }
 
-void Server::Run() {
+void Server::run() {
 	int countEvents = poll(&pollFds[0], pollFds.size(), 0);
 	if (countEvents < 0) {
 		throw std::runtime_error(
