@@ -269,12 +269,21 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 	}
 }
 
-void Server::serverSendNotification(int fd, const std::string& prefix, const std::string& cmd, const std::string& parameters) {
+void Server::serverSendNotification(int fd, const std::string& prefix, const std::string& command, const std::string& parameters) {
     std::stringstream fullNotification;
-    fullNotification << ":" << prefix << " " << cmd << " " << parameters << "\r\n";
+    fullNotification << ":" << prefix << " " << command << " " << parameters << "\r\n";
     serverSendMessage(fd, fullNotification.str());
 }
 
+void Server::serverSendNotification(const std::set<int>& fds, const std::string& prefix, const std::string& command, const std::string& parameters) {
+    std::stringstream fullNotification;
+    fullNotification << ":" << prefix << " " << command << " " << parameters << "\r\n";
+    std::string notificationStr = fullNotification.str();
+
+    for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it) {
+        serverSendMessage(*it, notificationStr);
+    }
+}
 
 void Server::serverSendMessage(int fd, const std::string& message) {
     getClient(fd).pushSendQueue(message);

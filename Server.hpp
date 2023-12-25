@@ -93,7 +93,8 @@ private:
         void    processCmd(int fd, std::vector<std::string>& tokens);
         void    serverReply(int fd, const std::string& token, serverRep id);
         void    serverSendReply(int fd, std::string id, const std::string& token, std::string reply);
-        void    serverSendNotification(int fd, const std::string& prefix, const std::string& cmd, const std::string& parameters);
+        void    serverSendNotification(int fd, const std::string& prefix, const std::string& command, const std::string& parameters);
+        void    serverSendNotification(const std::set<int>& fds, const std::string& prefix, const std::string& command, const std::string& parameters);
         void    serverSendMessage(int fd, const std::string& message);
 
     std::string getParam(const std::vector<std::string>& tokens);
