@@ -72,8 +72,6 @@ public:
 
     bool authMember(int clientFd, std::string &password);
 
-    // void broadcastMessage(int speakerFd, const std::string& message);
-
 };
 
 

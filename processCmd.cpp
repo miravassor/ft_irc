@@ -9,6 +9,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	(void) tokens;
 }
 
+// that method will be refactored later
 void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 
@@ -103,24 +104,27 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 	(void) tokens;
 }
 
-void Server::processPart(int fd, const std::vector<std::string> &tokens) {
-	std::queue<std::string> channels = split(tokens[1], ',');
-	std::string reason = tokens.size() > 2 ? tokens[2] : "";
-	while (!channels.empty()) {
-		std::string channelName = channels.front();
-		Channel *channel = findChannel(channelName);
-		if (!channel) {
-			serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
-		} else if (!channel->hasMember(fd))
-			serverReply(fd, channelName, ERR_NOTONCHANNEL);
-		else {
-			processPrivmsg(fd, tokens);
-			channel->removeMember(fd);
-			// serverReply(fd, *it, RPL_PART);
-			// notifyUsersOfChannel()..
-		}
-		channels.pop();
-	}
+void Server::processPart(int fd, const std::vector<std::string>& tokens) {
+    std::queue<std::string> channels = split(tokens[1], ',');
+    std::string reason = tokens.size() > 2 ? tokens[2] : "";
+    while (!channels.empty()) {
+        std::string channelName = channels.front();
+        std::vector<Channel*>::iterator channelIt = findChannelIterator(channelName);
+        if (channelIt == _channels.end()) {
+            serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+        } else if (!(*channelIt)->hasMember(fd)) {
+            serverReply(fd, channelName, ERR_NOTONCHANNEL);
+        } else {
+            (*channelIt)->removeMember(fd);
+            // sendMessage(fd, *channelIt, reason);
+            // deleting channel if empty
+            if ((*channelIt)->getMemberFds().empty()) {
+                delete *channelIt;
+                _channels.erase(channelIt);
+            }
+        }
+        channels.pop();
+    }
 }
 
 // process MODE command (user) !!-> doc has more

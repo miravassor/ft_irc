@@ -102,6 +102,7 @@ class Server {
 
 		void addChannel(Channel *channel);
 		Channel *findChannel(const std::string &name);
+        std::vector<Channel*>::iterator findChannelIterator(const std::string &name);
 
   		bool isValidChannelName(const std::string &name);
   		std::queue<std::string> split(const std::string &src, char delimiter) const;

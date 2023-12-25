@@ -167,6 +167,17 @@ void Server::addChannel(Channel *channel) {
 	_channels.push_back(channel);
 }
 
+std::vector<Channel*>::iterator Server::findChannelIterator(const std::string &name) {
+    std::vector<Channel*>::iterator it = _channels.begin();
+    while (it != _channels.end()) {
+        if ((*it)->getName() == name) {
+            break;
+        }
+        it++;
+    }
+    return it;
+}
+
 Channel* Server::findChannel(const std::string &name) {
 	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		if ((*it)->getName() == name) {
