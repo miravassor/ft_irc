@@ -2,11 +2,49 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
-// implementation of commands
-
+// draft todo: refactoring needed
 void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
-	(void) fd;
-	(void) tokens;
+    if (tokens.size() == 1) {
+        serverReply(fd, "", ERR_NORECIPIENT);
+    } else if (tokens.size() == 2) {
+        serverReply(fd, "", ERR_NOTEXTTOSEND);
+    } else {
+        std::queue<std::string> targets = split(tokens[1], ',');
+        const std::string& message = tokens[2];
+        std::string prefix = getNick(fd);
+        std::set<std::string> uniqueTargets;
+
+        while (!targets.empty()) {
+            const std::string &targetName = targets.front();
+            // if targetName is not double of one of previous names
+            if (uniqueTargets.insert(targetName).second) {
+                if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
+                    std::vector<Channel*>::iterator channelIt = findChannelIterator(targetName);
+                    if (channelIt == _channels.end()) {
+                        serverReply(fd, targetName, ERR_NOSUCHNICK);
+                    } else if (!(*channelIt)->hasMember(fd)) {
+                        serverReply(fd, targetName, ERR_CANNOTSENDTOCHAN);
+                    } else {
+                        std::string parameters = (*channelIt)->getName() + " " + message;
+                        serverSendNotification((*channelIt)->getMemberFds(), prefix, "PRIVMSG", parameters);
+                    }
+                } else { // for user
+                    Client *receiver = findClient(targetName);
+                    if (!receiver) {
+                        serverReply(fd, targetName, ERR_NOSUCHNICK);
+                    } else {
+                        std::string parameters = targetName + " " + message;
+                        serverSendNotification(receiver->getSocket(), prefix, "PRIVMSG", parameters);
+                        if (receiver->activeMode(AWAY)) {
+                            // todo: need an away message for client
+                           serverReply(fd, targetName, RPL_AWAY);
+                        }
+                    }
+                }
+            }
+            targets.pop();
+        }
+    }
 }
 
 // that method will be refactored later

@@ -100,8 +100,7 @@ void Server::processCmd(int fd, std::vector<std::string>& tokens) {
 	if (it != cmd.end()) {
 		(this->*(it->second))(fd, tokens);
 	} else {
-		// handling unknown command
-		std::cout << "Unknown command: " << command << std::endl;
+        serverReply(fd, command, ERR_UNKNOWNCOMMAND);
 	}
 }
 
@@ -251,6 +250,24 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case ERR_NOTONCHANNEL:
 			serverSendReply(fd, "442", token, "You're not on that channel");
 			break;
+        case ERR_NORECIPIENT:
+            serverSendReply(fd, "411", token, "No recipient given");
+            break;
+        case ERR_NOTEXTTOSEND:
+            serverSendReply(fd, "412", token, "No text to send");
+            break;
+        case ERR_NOSUCHNICK:
+            serverSendReply(fd, "401", token, "No such nick/channel");
+            break;
+        case ERR_CANNOTSENDTOCHAN:
+            serverSendReply(fd, "404", token, "Cannot send to channel");
+            break;
+        case RPL_AWAY:
+            serverSendReply(fd, "301", token, "TODO: Here should be an away message of client receiver");
+            break;
+        case ERR_UNKNOWNCOMMAND:
+            serverSendReply(fd, "421", token, "Unknown command");
+            break;
 		default:
 			return;
 	}

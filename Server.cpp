@@ -254,6 +254,15 @@ Channel* Server::findChannel(const std::string &name) {
 	return NULL;
 }
 
+Client *Server::findClient(const std::string& nickname) {
+    for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
+        if (it->second->getNickname() == nickname) {
+            return it->second;
+        }
+    }
+    return NULL;
+}
+
 Client &Server::getClient(int fd) {
 	if (clients.find(fd) == clients.end()) {
 		throw std::runtime_error("Cannot find client with fd");
