@@ -8,6 +8,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <set>
+#include <queue>
 
 enum Mode {
     AWAY, // a: user is flagged as away
@@ -31,6 +32,9 @@ class Client {
         std::string realName;
         std::string password;
         std::set<Mode> modes;
+		std::string		recvBuffer;
+		std::queue<std::string> _sendQueue;
+
     public:
         Client();
         ~Client();
@@ -50,6 +54,13 @@ class Client {
         void removeMode(Mode mode);
         bool activeMode(Mode mode) const;
         Mode getMode(const std::string &mode);
+		std::string getRecvBuffer();
+		void appendRecvBuffer(std::string recv);
+		void resetRecvBuffer();
+		bool isRecvBufferEmpty();
+		void pushSendQueue(std::string send);
+		std::string popSendQueue();
+		bool sendQueueEmpty();
 };
 
 #endif

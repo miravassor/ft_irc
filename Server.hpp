@@ -15,6 +15,10 @@
 #include <set>
 #include <algorithm>
 #include <queue>
+#include <fcntl.h>
+#include <cstring>
+#include <cerrno>
+#include <csignal>
 
 #include "Client.hpp"
 
@@ -57,21 +61,21 @@ class Server {
         std::string getNick(int fd);
         std::string simpleSend(std::string send);
 
-    private:
-        int socketFd;
-        time_t start;
-        sockaddr_in address;
-        std::string _password;
-        std::string serverName;
-        std::string serverVersion;
-        std::vector<pollfd> pollFds;
-        std::map<int, Client *> clients;
-        std::vector<Channel *> _channels;
-  		CmdMap cmd;
-        std::map<std::string, std::string> users;
+private:
+	int socketFd;
+	time_t start;
+	sockaddr_in address;
+	std::string _password;
+	std::string serverName;
+	std::string serverVersion;
+	std::vector<pollfd> pollFds;
+	std::map<int, Client *> clients;
+	std::vector<Channel *> _channels;
+	CmdMap cmd;
+	std::map<std::string, std::string> users;
 
-		void  initCmd();
-
+	void initCmd();
+	Client &getClient(int fd);
         void addClient(int clientSocket);
         void removeClient(int clientSocket);
         void listenPort() const;
@@ -105,7 +109,9 @@ class Server {
         std::vector<Channel*>::iterator findChannelIterator(const std::string &name);
 
   		bool isValidChannelName(const std::string &name);
-  		std::queue<std::string> split(const std::string &src, char delimiter) const;
+  		std::queue<std::string> split(const std::string &src, char delimiter) const;void sendData(size_t index);
+	size_t receiveData(size_t index);
+	void resetEvents(size_t index);
 };
 
 #endif

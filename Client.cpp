@@ -2,7 +2,7 @@
 
 // Build
 
-Client::Client() : logged(false), registered(false), isOpe(false) {
+Client::Client() : logged(false), registered(false), isOpe(false),recvBuffer("") {
     std::cout << "Client created" << std::endl;
 }
 
@@ -61,5 +61,35 @@ int Client::getSocket() {
 
 const std::string &Client::getPassword() const {
     return password;
+}
+
+void Client::pushSendQueue(std::string send) {
+	this->_sendQueue.push(send);
+}
+
+std::string Client::popSendQueue() {
+	std::string ret(this->_sendQueue.front());
+	this->_sendQueue.pop();
+	return ret;
+}
+
+bool Client::sendQueueEmpty() {
+	return this->_sendQueue.empty();
+}
+
+void Client::appendRecvBuffer(std::string recv) {
+	this->recvBuffer.append(recv);
+}
+
+std::string Client::getRecvBuffer() {
+	return this->recvBuffer;
+}
+
+void Client::resetRecvBuffer() {
+	this->recvBuffer.clear();
+}
+
+bool Client::isRecvBufferEmpty() {
+	return this->recvBuffer.empty();
 }
 
