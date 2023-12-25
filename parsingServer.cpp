@@ -234,6 +234,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case ERR_NOSUCHCHANNEL:
 			serverSendReply(fd, "403", token, "No such channel");
 			break;
+		case ERR_NOTONCHANNEL:
+			serverSendReply(fd, "442", token, "You're not on that channel");
+			break;
 		default:
 			return;
 	}

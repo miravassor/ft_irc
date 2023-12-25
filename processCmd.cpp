@@ -9,7 +9,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	(void) tokens;
 }
 
-void Server::processJoin(int fd, const std::vector<std::string> &tokens){
+void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 
 	if (tokens.size() < 2)
@@ -29,8 +29,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 		// no space allowed in channel name
 		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
 		return;
-	}
-	else {
+	} else {
 		_channels.push_back(new Channel(tokens[1], this));
 		_channels.back()->addMember(fd);
 		_channels.back()->addOperator(fd);
@@ -74,17 +73,12 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 // that method can be moved lately into some utils file
 std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
 	std::queue<std::string> tokens;
-	std::istringstream channelStream(src);
-	std::string channel;
-	while (std::getline(channelStream, channel, delimiter)) {
-		tokens.push(channel);
-		std::istringstream srcStream(src);
-		std::string token;
-		while (std::getline(srcStream, token, delimiter)) {
-			tokens.push(token);
-		}
-		return tokens;
+	std::istringstream srcStream(src);
+	std::string token;
+	while (std::getline(srcStream, token, delimiter)) {
+		tokens.push(token);
 	}
+	return tokens;
 }
 
 bool Server::isValidChannelName(const std::string &name) {
@@ -110,8 +104,23 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::processPart(int fd, const std::vector<std::string> &tokens) {
-	(void) fd;
-	(void) tokens;
+	std::queue<std::string> channels = split(tokens[1], ',');
+	std::string reason = tokens.size() > 2 ? tokens[2] : "";
+	while (!channels.empty()) {
+		std::string channelName = channels.front();
+		Channel *channel = findChannel(channelName);
+		if (!channel) {
+			serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+		} else if (!channel->hasMember(fd))
+			serverReply(fd, channelName, ERR_NOTONCHANNEL);
+		else {
+			processPrivmsg(fd, tokens);
+			channel->removeMember(fd);
+			// serverReply(fd, *it, RPL_PART);
+			// notifyUsersOfChannel()..
+		}
+		channels.pop();
+	}
 }
 
 // process MODE command (user) !!-> doc has more
@@ -142,8 +151,7 @@ void Server::processPing(int fd, const std::vector<std::string> &tokens) {
 		serverReply(fd, "", ERR_NOORIGIN);
 	} else if (tokens[1] != serverName) {
 		serverReply(fd, "", ERR_NOSUCHSERVER);
-	}
-	else {
+	} else {
 		std::string pong = ":42.IRC PONG " + tokens[1];
 		serverReply(fd, pong, PONG);
 	}
