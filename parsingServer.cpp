@@ -268,3 +268,21 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 		}
 	}
 }
+
+void Server::serverSendNotification(int fd, const std::string& prefix, const std::string& cmd, const std::string& parameters) {
+    std::stringstream fullNotification;
+    fullNotification << ":" << prefix << " " << cmd << " " << parameters << "\r\n";
+    serverSendMessage(fd, fullNotification.str());
+}
+
+
+void Server::serverSendMessage(int fd, const std::string& message) {
+    getClient(fd).pushSendQueue(message);
+    for (size_t i = 0; i < pollFds.size(); i++) {
+        if (pollFds[i].fd == fd) {
+            pollFds[i].events = POLLOUT;
+            break;
+        }
+    }
+}
+

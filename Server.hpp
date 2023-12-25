@@ -93,7 +93,10 @@ private:
         void    processCmd(int fd, std::vector<std::string>& tokens);
         void    serverReply(int fd, const std::string& token, serverRep id);
         void    serverSendReply(int fd, std::string id, const std::string& token, std::string reply);
-        std::string getParam(const std::vector<std::string>& tokens);
+        void    serverSendNotification(int fd, const std::string& prefix, const std::string& cmd, const std::string& parameters);
+        void    serverSendMessage(int fd, const std::string& message);
+
+    std::string getParam(const std::vector<std::string>& tokens);
 
         // Commands
 		void processPrivmsg(int fd, const std::vector<std::string> &tokens);
@@ -110,8 +113,8 @@ private:
 
   		bool isValidChannelName(const std::string &name);
   		std::queue<std::string> split(const std::string &src, char delimiter) const;void sendData(size_t index);
-	size_t receiveData(size_t index);
-	void resetEvents(size_t index);
+	    size_t receiveData(size_t index);
+	    void resetEvents(size_t index);
 };
 
 #endif
