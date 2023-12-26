@@ -132,9 +132,33 @@ bool Server::isValidChannelName(const std::string &name) {
 	return true;
 }
 
+//todo: finish it
 void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
-	(void) fd;
-	(void) tokens;
+    if (tokens.size() < 3) {
+        serverReply(fd, "INVITE", ERR_NEEDMOREPARAMS);
+        return;
+    }
+
+    std::string invitedNick = tokens[1];
+    std::string channelName = tokens[2];
+
+    Client *invitedClient = findClient(invitedNick);
+    if (!invitedClient) {
+        serverReply(fd, invitedNick, ERR_NOSUCHNICK);
+        return;
+    }
+    Channel *channel = findChannel(channelName);
+    if (!channel) {
+        serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+        return;
+    }
+    if (!channel->hasMember(fd)) {
+        serverReply(fd, channelName, ERR_NOTONCHANNEL);
+        return;
+    }
+
+    // if mode INVITEONLY when invited client is added to the invited container
+    // when join client is removed from invited container
 }
 
 void Server::processKick(int fd, const std::vector<std::string> &tokens) {
@@ -150,12 +174,14 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
     Channel *channel = findChannel(channelName);
     if (!channel) {
         serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+    } else if (!channel->hasMember(fd)) {
+        serverReply(fd, targetNick, ERR_NOTONCHANNEL);
     } else if (!channel->hasOperator(fd)) {
         serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
     } else  {
         Client *targetClient = findClient(targetNick);
         if (!targetClient || !channel->hasMember(targetClient->getSocket())) {
-            serverReply(fd, targetNick, ERR_NOTONCHANNEL);
+            serverReply(fd, targetNick + " " + channelName, ERR_USERNOTINCHANNEL);
         } else {
             std::string parameters = targetNick + " from " + channelName + reason;
             serverSendNotification(channel->getMemberFds(), getNick(fd), "KICK", parameters);

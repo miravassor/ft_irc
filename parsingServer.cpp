@@ -274,6 +274,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
         case ERR_CHANOPRIVSNEEDED:
             serverSendReply(fd, "482", token, "You're not channel operator");
             break;
+        case ERR_USERNOTINCHANNEL:
+            serverSendReply(fd, "441", token, "They aren't on that channel");
+            break;
 		default:
 			return;
 	}

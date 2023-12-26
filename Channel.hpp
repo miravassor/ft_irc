@@ -29,6 +29,7 @@ private:
     std::string _visibility;
     std::set<int> _memberFds;
     std::set<int> _operatorFds;
+    std::set<int> _invitedFds;
 
 public:
 
@@ -69,6 +70,12 @@ public:
     void removeOperator(int clientFd);
 
     bool hasOperator(int clientFd);
+
+    void addInvited(int clientFd);
+
+    void removeInvited(int clientFd);
+
+    bool hasInvited(int clientFd);
 
     void newMember(int fd);
 

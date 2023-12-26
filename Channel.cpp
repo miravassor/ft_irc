@@ -64,6 +64,7 @@ void Channel::addMember(int clientFd) {
 }
 
 void Channel::removeMember(int clientFd) {
+    removeInvited(clientFd);
     removeOperator(clientFd);
     _memberFds.erase(clientFd);
 }
@@ -92,6 +93,19 @@ void Channel::removeOperator(int clientFd) {
 bool Channel::hasOperator(int clientFd) {
     return _operatorFds.find(clientFd) != _operatorFds.end();
 }
+
+void Channel::addInvited(int clientFd) {
+    _invitedFds.insert(clientFd);
+}
+
+void Channel::removeInvited(int clientFd) {
+    _invitedFds.erase(clientFd);
+}
+
+bool Channel::hasInvited(int clientFd) {
+    return _invitedFds.find(clientFd) != _invitedFds.end();
+}
+
 
 void    Channel::newMember(int fd) {
     if (!getTopic().empty()) {
