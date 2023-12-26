@@ -238,6 +238,7 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "501", token, "Unknown MODE flag");
 			break;
 		case PONG:
+			// TODO: use Send Queue instead of send()
 			send(fd, token.c_str(), token.size(), 0);
 			break;
 		case ERR_NOSUCHSERVER:

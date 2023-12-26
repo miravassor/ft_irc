@@ -37,7 +37,7 @@ class Client {
 		std::queue<std::string> _sendQueue;
 
     public:
-        Client();
+        Client(int socket);
         ~Client();
         const std::string &getNickname() const;
         const std::string &getUsername() const;

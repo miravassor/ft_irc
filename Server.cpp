@@ -69,7 +69,7 @@ Server::~Server() {
 
 void Server::addClient(int clientSocket) {
 	// Create a new Client object and insert it into the clients map
-	clients.insert(std::make_pair(clientSocket, new Client()));
+	clients.insert(std::make_pair(clientSocket, new Client(clientSocket)));
 }
 
 void Server::removeClient(int clientSocket) {
@@ -152,7 +152,6 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 
 void Server::sendData(size_t index) {
 	try {
-		Client &c = getClient(pollFds[index].fd);
 		Client &c = getClient(pollFds[index].fd);
 		while (!c.sendQueueEmpty()) {
 			std::string msg = c.popSendQueue();

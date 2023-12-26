@@ -16,7 +16,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 
         while (!targets.empty()) {
             const std::string &targetName = targets.front();
-            // if targetName is not double of one of previous names
+			// if targetName is not double of one of previous names
             if (uniqueTargets.insert(targetName).second) {
                 if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
                     std::vector<Channel*>::iterator channelIt = findChannelIterator(targetName);
