@@ -6,7 +6,7 @@ Channel::Channel(const std::string &name, Server *server) {
     this->_server = server;
     this->_visibility = "=";
     this->_topic = "";
-	_mode = PUBLIC;
+    this->_mode = 0;
 }
 
 Channel::Channel(const std::string &name, std::string &password, Server *server) {
@@ -15,7 +15,7 @@ Channel::Channel(const std::string &name, std::string &password, Server *server)
     this->_server = server;
     this->_visibility = "=";
     this->_topic = "";
-	_mode = password.empty() ? PUBLIC : PRIVATE;
+    this->_mode = 0;
 }
 
 Channel::~Channel() {
@@ -30,7 +30,7 @@ const std::string& Channel::getTopic() const {
     return _topic;
 }
 
-const ChannelMode& Channel::getMode() const {
+unsigned int Channel::getMode() const {
     return _mode;
 }
 
@@ -44,6 +44,18 @@ const std::set<int>& Channel::getOperatorFds() const {
 
 void Channel::setTopic(const std::string &topic) {
     _topic = topic;
+}
+
+void Channel::setMode(unsigned int mode) {
+    _mode |= mode;
+}
+
+void Channel::unsetMode(unsigned int mode) {
+    _mode &= ~mode;
+}
+
+bool Channel::isModeSet(unsigned int mode) const {
+    return (_mode & mode) == mode;
 }
 
 
@@ -61,7 +73,7 @@ bool Channel::hasMember(int clientFd) {
 }
 
 bool Channel::authMember(int clientFd, std::string &password) {
-	if (_mode == PRIVATE && password != _password) {
+	if (password != _password) {
 		return false;
 	}
 	addMember(clientFd);

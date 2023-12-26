@@ -9,10 +9,8 @@
 
 #include "Server.hpp"
 
-enum ChannelMode {
-    PRIVATE,
-    PUBLIC
-};
+#define ALLTOPICSET     0b000001 // if set any member can set topic, otherwise only operators can do it
+#define INVITEONLY      0b000010 // if set clients can join only if invited
 
 enum chanRep {
     RPL_TOPIC,
@@ -26,7 +24,7 @@ private:
     Server *_server;
     std::string _name;
     std::string _topic;
-    ChannelMode _mode;
+    unsigned int _mode;
   	std::string _password;
     std::string _visibility;
     std::set<int> _memberFds;
@@ -45,13 +43,19 @@ public:
 
     const std::string& getTopic() const;
 
-    const ChannelMode& getMode() const;
+    unsigned int getMode() const;
 
     const std::set<int>& getMemberFds() const;
 
     const std::set<int>& getOperatorFds() const;
 
     void setTopic(const std::string &topic);
+
+    void setMode(unsigned int mode);
+
+    void unsetMode(unsigned int mode);
+
+    bool isModeSet(unsigned int mode) const;
 
 
     void addMember(int clientFd);

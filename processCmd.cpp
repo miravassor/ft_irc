@@ -183,7 +183,7 @@ void Server::processTopic(int fd, const std::vector<std::string> &tokens) {
     } else {
         if (!channel->hasMember(fd)) {
             serverReply(fd, channelName, ERR_NOTONCHANNEL);
-        } else if (!channel->hasOperator(fd)) {
+        } else if (!channel->isModeSet(ALLTOPICSET) && !channel->hasOperator(fd)) {
             serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
         } else {
             std::string newTopic = tokens[2];
