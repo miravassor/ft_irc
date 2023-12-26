@@ -268,6 +268,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
         case ERR_UNKNOWNCOMMAND:
             serverSendReply(fd, "421", token, "Unknown command");
             break;
+        case ERR_CHANOPRIVSNEEDED:
+            serverSendReply(fd, "482", token, "You're not channel operator");
+            break;
 		default:
 			return;
 	}
