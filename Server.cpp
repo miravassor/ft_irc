@@ -95,6 +95,20 @@ void Server::removeClient(int clientSocket) {
 }
 
 void Server::run() {
+	// TODO: iterate through clients to check send Queues
+	//  and set sockets to POLLOUT
+	for (std::map<int, Client *>::iterator it = clients.begin();
+		 it != clients.end(); ++it) {
+		if (!it->second->sendQueueEmpty()) {
+			for (std::vector<pollfd>::iterator it2 = pollFds.begin();
+				 it2 != pollFds.end(); ++it2) {
+				if (it2->fd == it->first) {
+					it2->events = POLLOUT;
+					break;
+				}
+			}
+		}
+	}
 	int countEvents = poll(&pollFds[0], pollFds.size(), 0);
 	if (countEvents < 0) {
 		throw std::runtime_error(
@@ -138,6 +152,7 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 
 void Server::sendData(size_t index) {
 	try {
+		Client &c = getClient(pollFds[index].fd);
 		Client &c = getClient(pollFds[index].fd);
 		while (!c.sendQueueEmpty()) {
 			std::string msg = c.popSendQueue();
@@ -193,6 +208,7 @@ int Server::acceptConnection() {
 		throw std::runtime_error(
 				"Accept error: [" + std::string(strerror(errno)) + "]");
 	}
+	// TODO : Not sur if that part is OK with subject restrictions ?
 	int flags = fcntl(socketFd, F_GETFL, 0);
 	if (flags == -1) {
 		// Handle error
