@@ -199,7 +199,7 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "CAP_LS", token, "[...]");
 			break;
 		case RPL_WECLOME:
-				serverSendReply(fd, "001", token, "Welcome to the IRC Network, " + token);
+			serverSendReply(fd, "001", token, "Welcome to the IRC Network, " + token);
 			break;
 		case RPL_YOURHOST:
 			serverSendReply(fd, "002", token, "Your host is " + serverName + ", running version " + serverVersion);
@@ -265,9 +265,6 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
         case ERR_CANNOTSENDTOCHAN:
             serverSendReply(fd, "404", token, "Cannot send to channel");
             break;
-        case RPL_AWAY:
-            serverSendReply(fd, "301", token, "TODO: Here should be an away message of client receiver");
-            break;
         case ERR_UNKNOWNCOMMAND:
             serverSendReply(fd, "421", token, "Unknown command");
             break;
@@ -277,6 +274,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
         case ERR_USERNOTINCHANNEL:
             serverSendReply(fd, "441", token, "They aren't on that channel");
             break;
+		case ERR_USERONCHANNEL:
+			serverSendReply(fd, "443", token, "is already on channel");
+			break;
 		default:
 			return;
 	}
@@ -286,18 +286,7 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 	std::stringstream fullReply;
 	fullReply << ":" << serverName << " " << id << " " << token << " :" << reply << "\r\n";
 	std::string replyStr = fullReply.str();
-	try {
-		getClient(fd).pushSendQueue(replyStr);
-		// TODO: Setting POLLOUT should be made in main loop
-//		for (size_t i = 0; i < pollFds.size(); i++) {
-//			if (pollFds[i].fd == fd) {
-//				pollFds[i].events = POLLOUT;
-//				break;
-//			}
-//		}
-	} catch (std::exception &e) {
-		std::cout << "[ERR] " << e.what() << std::endl;
-	}
+	serverSendMessage(fd, replyStr);
 }
 
 void Server::serverSendNotification(int fd, const std::string& prefix, const std::string& command, const std::string& parameters) {
