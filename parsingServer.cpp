@@ -8,18 +8,23 @@ bool	Server::parsBuffer(int fd) {
 	std::string					line;
 
 	// add recvBuffer at the beginning of ss if not empty
-	Client &client = getClient(fd);
-	if (!client.isRecvBufferEmpty()) {
-		ss.str("");
-		ss << client.getRecvBuffer() << bufferStr;
-		client.resetRecvBuffer();
+	try {
+		Client &client = getClient(fd);
+		if (!client.isRecvBufferEmpty()) {
+			ss.str("");
+			ss << client.getRecvBuffer() << bufferStr;
+			client.resetRecvBuffer();
+		}
+		// check if buffer contains a full line
+		size_t cRet = ss.str().find("\r\n");
+		if (cRet == std::string::npos) {
+			// if not, add buffer to recvBuffer and return
+			client.appendRecvBuffer(ss.str());
+			return 0;
+		}
 	}
-	// check if buffer contains a full line
-	size_t	cRet = ss.str().find("\r\n");
-	if (cRet == std::string::npos) {
-		// if not, add buffer to recvBuffer and return
-		client.appendRecvBuffer(ss.str());
-		return 0;
+	catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
 	}
 	// tokenize the buffer line by line
 	while (std::getline(ss, line))
@@ -230,6 +235,7 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "501", token, "Unknown MODE flag");
 			break;
 		case PONG:
+			// TODO: use Send Queue instead of send()
 			send(fd, token.c_str(), token.size(), 0);
 			break;
 		case ERR_NOSUCHSERVER:
@@ -277,12 +283,17 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 	std::stringstream fullReply;
 	fullReply << ":" << serverName << " " << id << " " << token << " :" << reply << "\r\n";
 	std::string replyStr = fullReply.str();
-	getClient(fd).pushSendQueue(replyStr);
-	for (size_t i = 0; i < pollFds.size(); i++) {
-		if (pollFds[i].fd == fd) {
-			pollFds[i].events = POLLOUT;
-			break;
-		}
+	try {
+		getClient(fd).pushSendQueue(replyStr);
+		// TODO: Setting POLLOUT should be made in main loop
+//		for (size_t i = 0; i < pollFds.size(); i++) {
+//			if (pollFds[i].fd == fd) {
+//				pollFds[i].events = POLLOUT;
+//				break;
+//			}
+//		}
+	} catch (std::exception &e) {
+		std::cout << "[ERR] " << e.what() << std::endl;
 	}
 }
 
@@ -303,12 +314,17 @@ void Server::serverSendNotification(const std::set<int>& fds, const std::string&
 }
 
 void Server::serverSendMessage(int fd, const std::string& message) {
-    getClient(fd).pushSendQueue(message);
-    for (size_t i = 0; i < pollFds.size(); i++) {
-        if (pollFds[i].fd == fd) {
-            pollFds[i].events = POLLOUT;
-            break;
-        }
-    }
+	try {
+		getClient(fd).pushSendQueue(message);
+		// TODO: Setting POLLOUT should be made in main loop
+//		for (size_t i = 0; i < pollFds.size(); i++) {
+//			if (pollFds[i].fd == fd) {
+//				pollFds[i].events = POLLOUT;
+//				break;
+//			}
+//		}
+	} catch (std::exception &e) {
+		std::cout << "[ERR] " << e.what() << std::endl;
+	}
 }
 

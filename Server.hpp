@@ -73,6 +73,9 @@ public:
 
     std::string simpleSend(std::string send);
 
+	Client &getClient(int fd);
+
+
 private:
     int socketFd;
     time_t start;
@@ -88,7 +91,6 @@ private:
 
     void initCmd();
 
-    Client &getClient(int fd);
 
     Client *findClient(const std::string &nickname);
 

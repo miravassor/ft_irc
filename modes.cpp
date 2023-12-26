@@ -1,5 +1,6 @@
 #include "Client.hpp"
 
+// TODO : Rework to make a binary field instead of a set
 Mode	Client::getMode(const std::string &mode) {
 	if (mode.size() != 2)
 		return UNKNOWN;

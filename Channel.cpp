@@ -111,7 +111,12 @@ void    Channel::chanReply(int fd, chanRep id) {
                 if (nextIt != _memberFds.end())
                     nmrp.append(" ");
             }
-            send(fd, nmrp.c_str(), nmrp.length(), 0);
+			try {
+				_server->getClient(fd).pushSendQueue(nmrp);
+			} catch (std::exception &e) {
+				std::cerr << e.what() << std::endl;
+			}
+//            send(fd, nmrp.c_str(), nmrp.length(), 0);
 			break;
     }
 }
@@ -120,5 +125,9 @@ void    Channel::chanSendReply(int fd, std::string id, const std::string &token,
     std::stringstream fullReply;
 	fullReply << ":" << _server->getServerName() << " " << id << " " << token << " :" << reply << "\r\n";
 	std::string replyStr = fullReply.str();
-	send(fd, replyStr.c_str(), replyStr.length(), 0);
+	try {
+		_server->getClient(fd).pushSendQueue(replyStr);
+	} catch (std::exception &e) {
+		std::cout << "[ERR] " << e.what() << std::endl;
+	}
 }
