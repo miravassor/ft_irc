@@ -151,6 +151,10 @@ private:
 
     void processMode(int fd, const std::vector<std::string> &tokens);
 
+	void processChannelMode(int fd, const std::vector<std::string> &tokens);
+
+	void processUserMode(int fd, const std::vector<std::string> &tokens);
+
     void processPing(int fd, const std::vector<std::string> &tokens);
 
     void addChannel(Channel *channel);

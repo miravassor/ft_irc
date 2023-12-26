@@ -258,8 +258,26 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 	}
 }
 
-// process MODE command (user) !!-> doc has more
 void Server::processMode(int fd, const std::vector<std::string> &tokens) {
+	if (tokens.size() < 2) {
+		serverReply(fd, "MODE", ERR_NEEDMOREPARAMS);
+		return;
+	}
+
+	if (tokens[1].at(0) == '#' || tokens[1].at(0) == '&') {
+		processChannelMode(fd, tokens);
+	} else {
+		processUserMode(fd, tokens);
+	}
+}
+
+void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
+	(void) fd;
+	(void) tokens;
+}
+
+// process MODE command (user) !!-> doc has more
+void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 	if (params[0] != clients[fd]->getNickname()) {
 		serverReply(fd, params[0], ERR_USERSDONTMATCH);
