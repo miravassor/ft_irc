@@ -34,6 +34,11 @@ unsigned int Channel::getMode() const {
     return _mode;
 }
 
+std::string Channel::getModeString() const {
+	//todo: implement
+	return "+";
+}
+
 const std::set<int>& Channel::getMemberFds() const {
     return _memberFds;
 }

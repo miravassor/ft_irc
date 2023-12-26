@@ -46,6 +46,8 @@ public:
 
     unsigned int getMode() const;
 
+	std::string getModeString() const;
+
     const std::set<int>& getMemberFds() const;
 
     const std::set<int>& getOperatorFds() const;

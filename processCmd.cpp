@@ -271,9 +271,22 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 	}
 }
 
+// in progress
 void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
-	(void) fd;
-	(void) tokens;
+	const std::string& channelName = tokens[1];
+	Channel *channel = findChannel(channelName);
+	if (!channel) {
+		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+	} else if (tokens.size() == 2) {
+		// display channel modes
+		serverSendReply(fd, "324", getNick(fd) + " " + channelName, channel->getModeString());
+	} else {
+
+		// mode exists
+		// operator rights
+		// change mode or do nothing or reply with error
+		// notify clients
+	}
 }
 
 // process MODE command (user) !!-> doc has more
