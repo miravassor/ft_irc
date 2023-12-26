@@ -2,7 +2,8 @@
 
 // Build
 
-Client::Client() : logged(false), registered(false), isOpe(false),recvBuffer("") {
+Client::Client(int socket)
+		: socketFd(socket), logged(false), registered(false), isOpe(false), recvBuffer("") {
     std::cout << "Client created" << std::endl;
 }
 

@@ -10,6 +10,7 @@
 #include <set>
 #include <queue>
 
+// TODO : Rework to make a binary field instead of a set
 enum Mode {
     AWAY, // a: user is flagged as away
     INVISIBLE, // i: marks a users as invisible
@@ -36,7 +37,7 @@ class Client {
 		std::queue<std::string> _sendQueue;
 
     public:
-        Client();
+        Client(int socket);
         ~Client();
         const std::string &getNickname() const;
         const std::string &getUsername() const;
