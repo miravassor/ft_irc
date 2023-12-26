@@ -51,6 +51,8 @@ public:
 
     const std::set<int>& getOperatorFds() const;
 
+    void setTopic(const std::string &topic);
+
 
     void addMember(int clientFd);
 

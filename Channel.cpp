@@ -5,6 +5,7 @@ Channel::Channel(const std::string &name, Server *server) {
 	this->_password = "";
     this->_server = server;
     this->_visibility = "=";
+    this->_topic = "";
 	_mode = PUBLIC;
 }
 
@@ -13,6 +14,7 @@ Channel::Channel(const std::string &name, std::string &password, Server *server)
 	this->_password = password;
     this->_server = server;
     this->_visibility = "=";
+    this->_topic = "";
 	_mode = password.empty() ? PUBLIC : PRIVATE;
 }
 
@@ -38,6 +40,10 @@ const std::set<int>& Channel::getMemberFds() const {
 
 const std::set<int>& Channel::getOperatorFds() const {
     return _operatorFds;
+}
+
+void Channel::setTopic(const std::string &topic) {
+    _topic = topic;
 }
 
 

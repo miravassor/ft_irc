@@ -90,10 +90,7 @@ bool	Server::handleCommand(int fd, const std::string& command, const std::vector
 void Server::processCmd(int fd, std::vector<std::string>& tokens) {
 	if (tokens.empty())
 		return;
-	if (tokens.size() < 2) {
-		serverReply(fd, "", ERR_NEEDMOREPARAMS);
-		return;
-	}
+    // removed ERR_NEEDMOREPARAMS as it can be different for diff cmd
 
 	std::string command = tokens[0];
 	CmdMapIterator it = cmd.find(command);

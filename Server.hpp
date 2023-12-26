@@ -142,6 +142,8 @@ private:
 
     void processKick(int fd, const std::vector<std::string> &tokens);
 
+    void processTopic(int fd, const std::vector<std::string> &tokens);
+
     void processPart(int fd, const std::vector<std::string> &tokens);
 
     void processMode(int fd, const std::vector<std::string> &tokens);
