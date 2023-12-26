@@ -4,13 +4,19 @@
 
 // draft todo: refactoring needed
 void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
+	//TODO : do not send to sender
     if (tokens.size() == 1) {
         serverReply(fd, "", ERR_NORECIPIENT);
     } else if (tokens.size() == 2) {
         serverReply(fd, "", ERR_NOTEXTTOSEND);
     } else {
         std::queue<std::string> targets = split(tokens[1], ',');
-        const std::string& message = tokens[2];
+        std::string message = "";
+		for (size_t i = 2;i < tokens.size(); i++) {
+			message.append(tokens[i]);
+			if (i != tokens.size() - 1)
+				message.append(" ");
+		}
         std::string prefix = getNick(fd);
         std::set<std::string> uniqueTargets;
 
