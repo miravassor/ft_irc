@@ -2,14 +2,53 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
-// implementation of commands
-
+// draft todo: refactoring needed
 void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
-	(void) fd;
-	(void) tokens;
+    if (tokens.size() == 1) {
+        serverReply(fd, "", ERR_NORECIPIENT);
+    } else if (tokens.size() == 2) {
+        serverReply(fd, "", ERR_NOTEXTTOSEND);
+    } else {
+        std::queue<std::string> targets = split(tokens[1], ',');
+        const std::string& message = tokens[2];
+        std::string prefix = getNick(fd);
+        std::set<std::string> uniqueTargets;
+
+        while (!targets.empty()) {
+            const std::string &targetName = targets.front();
+            // if targetName is not double of one of previous names
+            if (uniqueTargets.insert(targetName).second) {
+                if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
+                    std::vector<Channel*>::iterator channelIt = findChannelIterator(targetName);
+                    if (channelIt == _channels.end()) {
+                        serverReply(fd, targetName, ERR_NOSUCHNICK);
+                    } else if (!(*channelIt)->hasMember(fd)) {
+                        serverReply(fd, targetName, ERR_CANNOTSENDTOCHAN);
+                    } else {
+                        std::string parameters = (*channelIt)->getName() + " " + message;
+                        serverSendNotification((*channelIt)->getMemberFds(), prefix, "PRIVMSG", parameters);
+                    }
+                } else { // for user
+                    Client *receiver = findClient(targetName);
+                    if (!receiver) {
+                        serverReply(fd, targetName, ERR_NOSUCHNICK);
+                    } else {
+                        std::string parameters = targetName + " " + message;
+                        serverSendNotification(receiver->getSocket(), prefix, "PRIVMSG", parameters);
+                        if (receiver->activeMode(AWAY)) {
+                            // todo: need an away message for client
+                           serverReply(fd, targetName, RPL_AWAY);
+                        }
+                    }
+                }
+            }
+            targets.pop();
+        }
+    }
 }
 
-void Server::processJoin(int fd, const std::vector<std::string> &tokens){
+// that method will be refactored later
+void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 
 	if (tokens.size() < 2)
@@ -29,8 +68,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 		// no space allowed in channel name
 		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
 		return;
-	}
-	else {
+	} else {
 		_channels.push_back(new Channel(tokens[1], this));
 		_channels.back()->addMember(fd);
 		_channels.back()->addOperator(fd);
@@ -74,17 +112,12 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens){
 // that method can be moved lately into some utils file
 std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
 	std::queue<std::string> tokens;
-	std::istringstream channelStream(src);
-	std::string channel;
-	while (std::getline(channelStream, channel, delimiter)) {
-		tokens.push(channel);
-		std::istringstream srcStream(src);
-		std::string token;
-		while (std::getline(srcStream, token, delimiter)) {
-			tokens.push(token);
-		}
-		return tokens;
+	std::istringstream srcStream(src);
+	std::string token;
+	while (std::getline(srcStream, token, delimiter)) {
+		tokens.push(token);
 	}
+	return tokens;
 }
 
 bool Server::isValidChannelName(const std::string &name) {
@@ -105,13 +138,55 @@ void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::processKick(int fd, const std::vector<std::string> &tokens) {
-	(void) fd;
-	(void) tokens;
+    if (tokens.size() < 3) {
+        serverReply(fd, "", ERR_NEEDMOREPARAMS);
+        return;
+    }
+
+    std::string channelName = tokens[1];
+    std::string targetNick = tokens[2];
+    std::string reason = (tokens.size() > 3) ? " " + tokens[3] : "";
+
+    Channel *channel = findChannel(channelName);
+    if (!channel) {
+        serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+    } else if (!channel->hasOperator(fd)) {
+        serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
+    } else  {
+        Client *targetClient = findClient(targetNick);
+        if (!targetClient || !channel->hasMember(targetClient->getSocket())) {
+            serverReply(fd, targetNick, ERR_NOTONCHANNEL);
+        } else {
+            std::string parameters = targetNick + " from " + channelName + reason;
+            serverSendNotification(channel->getMemberFds(), getNick(fd), "KICK", parameters);
+            channel->removeMember(targetClient->getSocket());
+        }
+    }
 }
 
-void Server::processPart(int fd, const std::vector<std::string> &tokens) {
-	(void) fd;
-	(void) tokens;
+void Server::processPart(int fd, const std::vector<std::string>& tokens) {
+    std::queue<std::string> channels = split(tokens[1], ',');
+    std::string reason = tokens.size() > 2 ? (" " + tokens[2]) : "";
+    std::string prefix = getNick(fd);
+
+    while (!channels.empty()) {
+        std::string channelName = channels.front();
+        std::vector<Channel*>::iterator channelIt = findChannelIterator(channelName);
+        if (channelIt == _channels.end()) {
+            serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+        } else if (!(*channelIt)->hasMember(fd)) {
+            serverReply(fd, channelName, ERR_NOTONCHANNEL);
+        } else {
+            std::string parameters = (*channelIt)->getName() + reason;
+            serverSendNotification((*channelIt)->getMemberFds(), prefix, "PART", parameters);
+            (*channelIt)->removeMember(fd);
+            if ((*channelIt)->getMemberFds().empty()) {
+                delete *channelIt;
+                _channels.erase(channelIt);
+            }
+        }
+        channels.pop();
+    }
 }
 
 // process MODE command (user) !!-> doc has more
@@ -142,8 +217,7 @@ void Server::processPing(int fd, const std::vector<std::string> &tokens) {
 		serverReply(fd, "", ERR_NOORIGIN);
 	} else if (tokens[1] != serverName) {
 		serverReply(fd, "", ERR_NOSUCHSERVER);
-	}
-	else {
+	} else {
 		std::string pong = ":42.IRC PONG " + tokens[1];
 		serverReply(fd, pong, PONG);
 	}

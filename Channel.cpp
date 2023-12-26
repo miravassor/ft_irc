@@ -116,17 +116,3 @@ void    Channel::chanSendReply(int fd, std::string id, const std::string &token,
 	std::string replyStr = fullReply.str();
 	send(fd, replyStr.c_str(), replyStr.length(), 0);
 }
-
-
-// Channel::void broadcastMessage(int speakerFd, const std::string& message) {
-//     std::string fullMessage = "[" + this->_name + "] " + message + "\r\n";
-//     // Broadcast the message to all members
-//     for (int clientFd : clientFds) {
-//         ssize_t bytesSent = send(clientFd, fullMessage.c_str(), fullMessage.length(), 0);
-//         if (bytesSent < fullMessage.length()) {
-//             ;
-//         // Close the connection and remove client
-//         }
-//     }
-
-// }
