@@ -10,7 +10,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 		serverReply(fd, "", ERR_NOTEXTTOSEND);
 	} else {
 		std::queue<std::string> targets = split(tokens[1], ',');
-		const std::string &message = tokens[2];
+		std::string message = getParam(tokens);
 		std::string prefix = getNick(fd);
 		std::set<std::string> uniqueTargets;
 
