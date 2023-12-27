@@ -9,10 +9,10 @@
 
 #include "Server.hpp"
 
-enum ChannelMode {
-    PRIVATE,
-    PUBLIC
-};
+#define ALLTOPICSET     0b000001 // if set any member can set topic, otherwise only operators can do it
+#define INVITEONLY      0b000010 // if set clients can join only if invited
+#define KEYSET			0b000100 // if set clients can join only with password
+#define LIMITSET		0b001000 // if set no more clients than limit value can join
 
 enum chanRep {
     RPL_TOPIC,
@@ -26,13 +26,17 @@ private:
     Server *_server;
     std::string _name;
     std::string _topic;
-    ChannelMode _mode;
+    unsigned int _mode;
   	std::string _password;
     std::string _visibility;
     std::set<int> _memberFds;
     std::set<int> _operatorFds;
+    std::set<int> _invitedFds;
+	int limitMembers;
 
 public:
+
+	Channel(const std::string &name, std::string &password);
 
     Channel(const std::string &name, Server *server);
 
@@ -45,11 +49,23 @@ public:
 
     const std::string& getTopic() const;
 
-    const ChannelMode& getMode() const;
+    unsigned int getMode() const;
+
+	std::string getModeString() const;
 
     const std::set<int>& getMemberFds() const;
 
     const std::set<int>& getOperatorFds() const;
+
+	int getLimitMembers() const;
+
+	void setTopic(const std::string &topic);
+
+    void setMode(unsigned int mode);
+
+    void unsetMode(unsigned int mode);
+
+    bool isModeSet(unsigned int mode) const;
 
 
     void addMember(int clientFd);
@@ -63,6 +79,12 @@ public:
     void removeOperator(int clientFd);
 
     bool hasOperator(int clientFd);
+
+    void addInvited(int clientFd);
+
+    void removeInvited(int clientFd);
+
+    bool hasInvited(int clientFd);
 
     void newMember(int fd);
 

@@ -43,6 +43,7 @@ void Server::initCmd() {
 	cmd["JOIN"] = &Server::processJoin;
 	cmd["INVITE"] = &Server::processInvite;
 	cmd["KICK"] = &Server::processKick;
+    cmd["TOPIC"] = &Server::processTopic;
 	cmd["PART"] = &Server::processPart;
 	cmd["MODE"] = &Server::processMode;
 	cmd["PING"] = &Server::processPing;

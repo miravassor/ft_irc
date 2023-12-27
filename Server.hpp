@@ -42,15 +42,19 @@ enum serverRep {
     ERR_NOSUCHSERVER,
     ERR_NOORIGIN,
     ERR_NOSUCHCHANNEL,
+	ERR_INVITEONLYCHAN,
     ERR_BADCHANNELKEY,
     ERR_NOTONCHANNEL,
     ERR_NORECIPIENT,
     ERR_NOTEXTTOSEND,
     ERR_NOSUCHNICK,
     ERR_CANNOTSENDTOCHAN,
-    RPL_AWAY,
     ERR_UNKNOWNCOMMAND,
-    ERR_CHANOPRIVSNEEDED
+    ERR_CHANOPRIVSNEEDED,
+    ERR_USERNOTINCHANNEL,
+	ERR_USERONCHANNEL,
+	RPL_ENDOFNAMES,
+	ERR_CHANNELISFULL
 };
 
 class Server {
@@ -144,9 +148,15 @@ private:
 
     void processKick(int fd, const std::vector<std::string> &tokens);
 
+    void processTopic(int fd, const std::vector<std::string> &tokens);
+
     void processPart(int fd, const std::vector<std::string> &tokens);
 
     void processMode(int fd, const std::vector<std::string> &tokens);
+
+	void processChannelMode(int fd, const std::vector<std::string> &tokens);
+
+	void processUserMode(int fd, const std::vector<std::string> &tokens);
 
     void processPing(int fd, const std::vector<std::string> &tokens);
 

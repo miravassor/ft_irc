@@ -95,10 +95,7 @@ bool	Server::handleCommand(int fd, const std::string& command, const std::vector
 void Server::processCmd(int fd, std::vector<std::string>& tokens) {
 	if (tokens.empty())
 		return;
-	if (tokens.size() < 2) {
-		serverReply(fd, "", ERR_NEEDMOREPARAMS);
-		return;
-	}
+    // removed ERR_NEEDMOREPARAMS as it can be different for diff cmd
 
 	std::string command = tokens[0];
 	CmdMapIterator it = cmd.find(command);
@@ -202,7 +199,7 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "CAP_LS", token, "[...]");
 			break;
 		case RPL_WECLOME:
-				serverSendReply(fd, "001", token, "Welcome to the IRC Network, " + token);
+			serverSendReply(fd, "001", token, "Welcome to the IRC Network, " + token);
 			break;
 		case RPL_YOURHOST:
 			serverSendReply(fd, "002", token, "Your host is " + serverName + ", running version " + serverVersion);
@@ -248,10 +245,13 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "409", "", "No origin specified");
 			break;
 		case ERR_BADCHANNELKEY:
-			serverSendReply(fd, "475", token, "Cannot join channel");
+			serverSendReply(fd, "475", token, "Cannot join channel (+k)");
 			break;
 		case ERR_NOSUCHCHANNEL:
 			serverSendReply(fd, "403", token, "No such channel");
+			break;
+		case ERR_INVITEONLYCHAN:
+			serverSendReply(fd, "473", token, "Cannot join channel (+i)");
 			break;
 		case ERR_NOTONCHANNEL:
 			serverSendReply(fd, "442", token, "You're not on that channel");
@@ -268,15 +268,24 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
         case ERR_CANNOTSENDTOCHAN:
             serverSendReply(fd, "404", token, "Cannot send to channel");
             break;
-        case RPL_AWAY:
-            serverSendReply(fd, "301", token, "TODO: Here should be an away message of client receiver");
-            break;
         case ERR_UNKNOWNCOMMAND:
             serverSendReply(fd, "421", token, "Unknown command");
             break;
         case ERR_CHANOPRIVSNEEDED:
             serverSendReply(fd, "482", token, "You're not channel operator");
             break;
+        case ERR_USERNOTINCHANNEL:
+            serverSendReply(fd, "441", token, "They aren't on that channel");
+            break;
+		case ERR_USERONCHANNEL:
+			serverSendReply(fd, "443", token, "is already on channel");
+			break;
+		case RPL_ENDOFNAMES:
+			serverSendReply(fd, "366", token, "End of /NAMES list");
+			break;
+		case ERR_CHANNELISFULL:
+			serverSendReply(fd, "471", token, "Cannot join channel (+l)");
+			break;
 		default:
 			return;
 	}
@@ -286,18 +295,7 @@ void    Server::serverSendReply(int fd, std::string id, const std::string& token
 	std::stringstream fullReply;
 	fullReply << ":" << serverName << " " << id << " " << token << " :" << reply << "\r\n";
 	std::string replyStr = fullReply.str();
-	try {
-		getClient(fd).pushSendQueue(replyStr);
-		// TODO: Setting POLLOUT should be made in main loop
-//		for (size_t i = 0; i < pollFds.size(); i++) {
-//			if (pollFds[i].fd == fd) {
-//				pollFds[i].events = POLLOUT;
-//				break;
-//			}
-//		}
-	} catch (std::exception &e) {
-		std::cout << "[ERR] " << e.what() << std::endl;
-	}
+	serverSendMessage(fd, replyStr);
 }
 
 void Server::serverSendNotification(int fd, const std::string& prefix, const std::string& command, const std::string& parameters) {

@@ -13,3 +13,6 @@
 
 ### 4. Features
 - connection mutiple a des channels en une seule commande ? (JOIN #a #b)
+
+### 5. Server replies formatting
+- probably separate ERR_, RPL_ and notification messages ?

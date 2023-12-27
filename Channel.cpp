@@ -5,7 +5,19 @@ Channel::Channel(const std::string &name, Server *server) {
 	this->_password = "";
     this->_server = server;
     this->_visibility = "=";
-	_mode = PUBLIC;
+    this->_topic = "";
+    this->_mode = 0;
+}
+
+Channel::Channel(const std::string &name, std::string &password) {
+	_name = name;
+	_password = password;
+	_visibility = "=";
+	_topic = "";
+	_mode = 0;
+	if (!_password.empty()) {
+		setMode(KEYSET);
+	}
 }
 
 Channel::Channel(const std::string &name, std::string &password, Server *server) {
@@ -13,7 +25,8 @@ Channel::Channel(const std::string &name, std::string &password, Server *server)
 	this->_password = password;
     this->_server = server;
     this->_visibility = "=";
-	_mode = password.empty() ? PUBLIC : PRIVATE;
+    this->_topic = "";
+    this->_mode = 0;
 }
 
 Channel::~Channel() {
@@ -28,8 +41,13 @@ const std::string& Channel::getTopic() const {
     return _topic;
 }
 
-const ChannelMode& Channel::getMode() const {
+unsigned int Channel::getMode() const {
     return _mode;
+}
+
+std::string Channel::getModeString() const {
+	//todo: implement
+	return "+";
 }
 
 const std::set<int>& Channel::getMemberFds() const {
@@ -40,12 +58,33 @@ const std::set<int>& Channel::getOperatorFds() const {
     return _operatorFds;
 }
 
+int Channel::getLimitMembers() const {
+	return limitMembers;
+}
+
+void Channel::setTopic(const std::string &topic) {
+    _topic = topic;
+}
+
+void Channel::setMode(unsigned int mode) {
+    _mode |= mode;
+}
+
+void Channel::unsetMode(unsigned int mode) {
+    _mode &= ~mode;
+}
+
+bool Channel::isModeSet(unsigned int mode) const {
+    return (_mode & mode) == mode;
+}
+
 
 void Channel::addMember(int clientFd) {
     _memberFds.insert(clientFd);
 }
 
 void Channel::removeMember(int clientFd) {
+    removeInvited(clientFd);
     removeOperator(clientFd);
     _memberFds.erase(clientFd);
 }
@@ -55,9 +94,10 @@ bool Channel::hasMember(int clientFd) {
 }
 
 bool Channel::authMember(int clientFd, std::string &password) {
-	if (_mode == PRIVATE && password != _password) {
+	if (password != _password) {
 		return false;
 	}
+	removeInvited(clientFd);
 	addMember(clientFd);
 	return true;
 }
@@ -74,6 +114,19 @@ void Channel::removeOperator(int clientFd) {
 bool Channel::hasOperator(int clientFd) {
     return _operatorFds.find(clientFd) != _operatorFds.end();
 }
+
+void Channel::addInvited(int clientFd) {
+    _invitedFds.insert(clientFd);
+}
+
+void Channel::removeInvited(int clientFd) {
+    _invitedFds.erase(clientFd);
+}
+
+bool Channel::hasInvited(int clientFd) {
+    return _invitedFds.find(clientFd) != _invitedFds.end();
+}
+
 
 void    Channel::newMember(int fd) {
     if (!getTopic().empty()) {
