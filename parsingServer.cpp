@@ -317,13 +317,6 @@ void Server::serverSendNotification(const std::set<int>& fds, const std::string&
 void Server::serverSendMessage(int fd, const std::string& message) {
 	try {
 		getClient(fd).pushSendQueue(message);
-		// TODO: Setting POLLOUT should be made in main loop
-//		for (size_t i = 0; i < pollFds.size(); i++) {
-//			if (pollFds[i].fd == fd) {
-//				pollFds[i].events = POLLOUT;
-//				break;
-//			}
-//		}
 	} catch (std::exception &e) {
 		std::cout << "[ERR] " << e.what() << std::endl;
 	}

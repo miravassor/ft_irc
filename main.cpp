@@ -14,14 +14,15 @@ int main(int argc, char **argv) {
 				  << std::endl;
 		return 1;
 	}
-	try {
-		Server server(atoi(argv[1]), std::string(argv[2]));
-		signal(SIGINT, signalHandler);
-		while (running)
+	Server server(atoi(argv[1]), std::string(argv[2]));
+	signal(SIGINT, signalHandler);
+	while (running) {
+		try {
 			server.run();
-	} catch (std::exception &exception) {
-		std::cerr << exception.what() << std::endl;
-		return 1;
+		} catch (std::exception &exception) {
+			std::cerr << "[ERROR]\t" << exception.what() << std::endl;
+			return 1;
+		}
 	}
 	return 0;
 }
