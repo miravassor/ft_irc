@@ -58,6 +58,10 @@ const std::set<int>& Channel::getOperatorFds() const {
     return _operatorFds;
 }
 
+int Channel::getLimitMembers() const {
+	return limitMembers;
+}
+
 void Channel::setTopic(const std::string &topic) {
     _topic = topic;
 }

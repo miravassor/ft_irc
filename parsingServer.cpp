@@ -280,6 +280,12 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case ERR_USERONCHANNEL:
 			serverSendReply(fd, "443", token, "is already on channel");
 			break;
+		case RPL_ENDOFNAMES:
+			serverSendReply(fd, "366", token, "End of /NAMES list");
+			break;
+		case ERR_CHANNELISFULL:
+			serverSendReply(fd, "471", token, "Cannot join channel (+l)");
+			break;
 		default:
 			return;
 	}

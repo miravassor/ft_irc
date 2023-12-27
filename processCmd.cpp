@@ -99,11 +99,15 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 //					serverReply(fd, channelName, ERR_INVITEONLYCHAN);
 //					return;
 //				}
+//				if (channel->isModeSet(LIMITSET) && (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
+//					serverReply(fd, channelName, ERR_CHANNELISFULL);
+//					return;
+//				}
 //				if (channel->authMember(fd, password)) { // checking password and removing from invited container
 //					serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channelName);
 //					// RPL_TOPIC
 //					// RPL_NAMEREPLY
-//					// RPL_ENDOFNAMES
+//					serverReply(fd, channelName, RPL_ENDOFNAMES);
 //				} else {
 //					serverReply(fd, channelName, ERR_BADCHANNELKEY);
 //				}
@@ -116,7 +120,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 //					serverSendNotification(newChannel->getMemberFds(), getNick(fd), "JOIN", channelName);
 //					// RPL_TOPIC
 //					// RPL_NAMEREPLY
-//					// RPL_ENDOFNAMES
+//					serverReply(fd, channelName, RPL_ENDOFNAMES);
 //				} else {
 //					serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
 //				}

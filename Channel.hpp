@@ -12,6 +12,7 @@
 #define ALLTOPICSET     0b000001 // if set any member can set topic, otherwise only operators can do it
 #define INVITEONLY      0b000010 // if set clients can join only if invited
 #define KEYSET			0b000100 // if set clients can join only with password
+#define LIMITSET		0b001000 // if set no more clients than limit value can join
 
 enum chanRep {
     RPL_TOPIC,
@@ -31,6 +32,7 @@ private:
     std::set<int> _memberFds;
     std::set<int> _operatorFds;
     std::set<int> _invitedFds;
+	int limitMembers;
 
 public:
 
@@ -55,7 +57,9 @@ public:
 
     const std::set<int>& getOperatorFds() const;
 
-    void setTopic(const std::string &topic);
+	int getLimitMembers() const;
+
+	void setTopic(const std::string &topic);
 
     void setMode(unsigned int mode);
 
