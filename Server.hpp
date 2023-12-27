@@ -181,6 +181,8 @@ private:
 	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
 
 	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
+
+	std::string capitalizeString(const std::string &input);
 };
 
 #endif

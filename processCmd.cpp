@@ -51,7 +51,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	std::set<std::string> uniqueTargets;
 
 	while (!targets.empty()) {
-		const std::string &targetName = targets.front();
+		const std::string &targetName = capitalizeString(targets.front());
 		// if targetName is not double of one of previous names
 		if (uniqueTargets.insert(targetName).second) {
 			if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
@@ -75,7 +75,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	// check if user already in channel ??
 	std::vector<Channel *>::iterator it = _channels.begin();
 	for (; it != _channels.end(); ++it) {
-		if ((*it)->getName() == tokens[1]) {
+		if ((*it)->getName() == capitalizeString(tokens[1])) {
 			(*it)->addMember(fd);
 			(*it)->newMember(fd);
 			return;
@@ -87,11 +87,19 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
 		return;
 	} else {
-		_channels.push_back(new Channel(tokens[1], this));
+		_channels.push_back(new Channel(capitalizeString(tokens[1]), this));
 		_channels.back()->addMember(fd);
 		_channels.back()->addOperator(fd);
 		_channels.back()->newMember(fd);
 	}
+}
+// Could be placed in a util class later
+std::string Server::capitalizeString(const std::string& input) {
+	std::string output(input);
+	for (size_t i = 0; i < input.size(); i++) {
+		output[i] = toupper(input[i]);
+	}
+	return output;
 }
 
 //void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
@@ -184,7 +192,7 @@ void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
 	const std::string &invitedNick = tokens[1];
 	const std::string &channelName = tokens[2];
 	Client *invitedClient = findClient(invitedNick);
-	Channel *channel = findChannel(channelName);
+	Channel *channel = findChannel(capitalizeString(channelName));
 	std::string parameters = invitedNick + " " + channelName;
 
 	if (!invitedClient) {
@@ -221,7 +229,7 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 	const std::string &channelName = tokens[1];
 	const std::string &targetNick = tokens[2];
 	std::string reason = (tokens.size() > 3) ? " " + tokens[3] : "";
-	Channel *channel = findChannel(channelName);
+	Channel *channel = findChannel(capitalizeString(channelName));
 
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
@@ -248,7 +256,7 @@ void Server::processTopic(int fd, const std::vector<std::string> &tokens) {
 	}
 
 	const std::string &channelName = tokens[1];
-	Channel *channel = findChannel(channelName);
+	Channel *channel = findChannel(capitalizeString(channelName));
 
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
@@ -318,7 +326,7 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 // in progress
 void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
 	const std::string &channelName = tokens[1];
-	Channel *channel = findChannel(channelName);
+	Channel *channel = findChannel(capitalizeString(channelName));
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
 	} else if (tokens.size() == 2) {

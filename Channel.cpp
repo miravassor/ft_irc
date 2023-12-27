@@ -179,3 +179,4 @@ void    Channel::chanSendReply(int fd, std::string id, const std::string &token,
 		std::cout << "[ERR] " << e.what() << std::endl;
 	}
 }
+
