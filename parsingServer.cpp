@@ -245,10 +245,13 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 			serverSendReply(fd, "409", "", "No origin specified");
 			break;
 		case ERR_BADCHANNELKEY:
-			serverSendReply(fd, "475", token, "Cannot join channel");
+			serverSendReply(fd, "475", token, "Cannot join channel (+k)");
 			break;
 		case ERR_NOSUCHCHANNEL:
 			serverSendReply(fd, "403", token, "No such channel");
+			break;
+		case ERR_INVITEONLYCHAN:
+			serverSendReply(fd, "473", token, "Cannot join channel (+i)");
 			break;
 		case ERR_NOTONCHANNEL:
 			serverSendReply(fd, "442", token, "You're not on that channel");

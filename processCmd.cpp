@@ -75,38 +75,47 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	}
 }
 
-// void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
-// 	std::queue<std::string> channels = split(tokens[1], ',');
-// 	std::queue<std::string> passwords;
-// 	if (tokens.size() > 2) {
-// 		passwords = split(tokens[2], ',');
-// 	}
-// 	for (; !channels.empty(); channels.pop()) {
-// 		std::string channelName = channels.front();
-// 		std::string password = passwords.empty() ? "" : passwords.front();
-// 		Channel *channel = findChannel(channelName);
-// 		//todo: refactoring
-// 		if (channel) {
-// 			if (channel->authMember(fd, password)) {
-// 				// serverReply(fd, *it, RPL_JOIN);
-// 				// notifyUsersOfChannel()..
-// 			} else {
-// 				serverReply(fd, channelName, ERR_BADCHANNELKEY);
-// 			}
-// 		} else {
-// 			if (isValidChannelName(channelName)) {
-// 				Channel *newChannel = new Channel(channelName, password);
-// 				newChannel->addMember(fd);
-// 				newChannel->addOperator(fd);
-// 				addChannel(newChannel);
-// 				// serverReply(fd, *it, RPL_JOIN);
-// 				// notifyUsersOfChannel()..
-// 			} else {
-// 				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
-// 			}
-// 		}
-// 	}
-// }
+//void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
+//	if (tokens.size() < 2) {
+//		serverReply(fd, "JOIN", ERR_NEEDMOREPARAMS);
+//		return;
+//	}
+//
+//	std::queue<std::string> channels = split(tokens[1], ',');
+//	std::queue<std::string> passwords;
+//	if (tokens.size() > 2) {
+//		passwords = split(tokens[2], ',');
+//	}
+//	for (; !channels.empty(); channels.pop()) { // need unique channels ?
+//		std::string channelName = channels.front();
+//		std::string password = passwords.empty() ? "" : passwords.front();
+//		Channel *channel = findChannel(channelName);
+//		if (channel) {
+//			if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
+//				serverReply(fd, channelName, ERR_INVITEONLYCHAN);
+//			}
+//				if (channel->authMember(fd, password)) {
+//					serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", "");
+//					// RPL_TOPIC
+//					// RPL_NAMEREPLY
+//				} else {
+//					serverReply(fd, channelName, ERR_BADCHANNELKEY);
+//				}
+//		} else {
+//			if (isValidChannelName(channelName)) {
+//				Channel *newChannel = new Channel(channelName, password);
+//				newChannel->addMember(fd);
+//				newChannel->addOperator(fd);
+//				addChannel(newChannel);
+//				serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", "");
+//				// RPL_TOPIC
+//				// RPL_NAMEREPLY
+//			} else {
+//				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+//			}
+//		}
+//	}
+//}
 
 // that method can be moved lately into some utils file
 std::queue<std::string> Server::split(const std::string &src, char delimiter) const {
@@ -273,7 +282,7 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 
 // in progress
 void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
-	const std::string& channelName = tokens[1];
+	const std::string &channelName = tokens[1];
 	Channel *channel = findChannel(channelName);
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);

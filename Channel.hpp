@@ -33,6 +33,8 @@ private:
 
 public:
 
+	Channel(const std::string &name, std::string &password);
+
     Channel(const std::string &name, Server *server);
 
 	Channel(const std::string &name, std::string &password, Server *server);

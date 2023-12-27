@@ -9,6 +9,14 @@ Channel::Channel(const std::string &name, Server *server) {
     this->_mode = 0;
 }
 
+Channel::Channel(const std::string &name, std::string &password) {
+	this->_name = name;
+	this->_password = password;
+	this->_visibility = "=";
+	this->_topic = "";
+	this->_mode = 0;
+}
+
 Channel::Channel(const std::string &name, std::string &password, Server *server) {
 	this->_name = name;
 	this->_password = password;
