@@ -3,47 +3,66 @@
 #include "Channel.hpp"
 
 // draft todo: refactoring needed
-void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
-	if (tokens.size() == 1) {
-		serverReply(fd, "", ERR_NORECIPIENT);
-	} else if (tokens.size() == 2) {
-		serverReply(fd, "", ERR_NOTEXTTOSEND);
-	} else {
-		std::queue<std::string> targets = split(tokens[1], ',');
-		std::string message = getParam(tokens);
-		std::string prefix = getNick(fd);
-		std::set<std::string> uniqueTargets;
 
-		while (!targets.empty()) {
-			const std::string &targetName = targets.front();
-			// if targetName is not double of one of previous names
-			if (uniqueTargets.insert(targetName).second) {
-				if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
-					std::vector<Channel *>::iterator channelIt = findChannelIterator(targetName);
-					if (channelIt == _channels.end()) {
-						serverReply(fd, targetName, ERR_NOSUCHNICK);
-					} else if (!(*channelIt)->hasMember(fd)) {
-						serverReply(fd, targetName, ERR_CANNOTSENDTOCHAN);
-					} else {
-						std::string parameters = (*channelIt)->getName() + " " + message;
-						serverSendNotification((*channelIt)->getMemberFds(), prefix, "PRIVMSG", parameters);
-					}
-				} else { // for user
-					Client *receiver = findClient(targetName);
-					if (!receiver) {
-						serverReply(fd, targetName, ERR_NOSUCHNICK);
-					} else {
-						std::string parameters = targetName + " " + message;
-						serverSendNotification(receiver->getSocket(), prefix, "PRIVMSG", parameters);
-						if (receiver->activeMode(AWAY)) {
-							serverSendReply(fd, "301", targetName, receiver->getAwayMessage()); // RPL_AWAY
-						}
-					}
-				}
-			}
-			targets.pop();
-		}
+bool Server::checkPmTokens(int fd, const std::vector<std::string> &tokens) {
+	if (tokens.size() == 1 || tokens.size() == 2) {
+		serverReply(fd, "", (tokens.size() == 1) ? ERR_NORECIPIENT : ERR_NOTEXTTOSEND);
+		return false;
 	}
+	return true;
+}
+
+void Server::sendPmToUser(int fd,
+						  const std::string &message,
+						  const std::string &prefix,
+						  const std::string &targetName) {
+	Client *receiver = findClient(targetName);
+	if (!receiver) {
+		serverReply(fd, targetName, ERR_NOSUCHNICK);
+		return;
+	}
+	std::string parameters = targetName + " " + message;
+	serverSendNotification(receiver->getSocket(), prefix, "PRIVMSG", parameters);
+	if (receiver->activeMode(AWAY)) {
+		serverSendReply(fd, "301", targetName, receiver->getAwayMessage()); // RPL_AWAY
+	}
+}
+
+void Server::sendPmToChan(int fd,
+						  const std::string &message,
+						  const std::string &prefix,
+						  const std::string &targetName) {
+	std::vector<Channel *>::iterator channelIt = findChannelIterator(targetName);
+	if (channelIt == _channels.end() || !(*channelIt)->hasMember(fd)) {
+		serverReply(fd, targetName, (channelIt == _channels.end()) ? ERR_NOSUCHNICK : ERR_CANNOTSENDTOCHAN);
+		return;
+	}
+	std::string parameters = (*channelIt)->getName() + " " + message;
+	serverSendNotification((*channelIt)->getMemberFds(), prefix, "PRIVMSG", parameters);
+}
+
+void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
+	if (!checkPmTokens(fd,tokens))
+		return;
+
+	std::queue<std::string> targets = split(tokens[1], ',');
+	std::string message = getParam(tokens);
+	std::string prefix = getNick(fd);
+	std::set<std::string> uniqueTargets;
+
+	while (!targets.empty()) {
+		const std::string &targetName = targets.front();
+		// if targetName is not double of one of previous names
+		if (uniqueTargets.insert(targetName).second) {
+			if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
+				sendPmToChan(fd, message, prefix, targetName);
+			} else { // for user
+				sendPmToUser(fd, message, prefix, targetName);
+			}
+		}
+		targets.pop();
+	}
+
 }
 
 // that method will be refactored later

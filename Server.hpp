@@ -175,6 +175,12 @@ private:
     size_t receiveData(size_t index);
 
     void resetEvents(size_t index);
+
+	bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
+
+	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
+
+	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
 };
 
 #endif
