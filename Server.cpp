@@ -156,6 +156,7 @@ void Server::sendData(size_t index) {
 			const char *dataPtr = msg.c_str();
 			ssize_t dataRemaining = msg.length();
 			while (dataRemaining > 0) {
+				std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
 				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
 				if (n < 0) {
 					if (errno == EWOULDBLOCK || errno == EAGAIN) {

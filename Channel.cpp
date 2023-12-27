@@ -149,16 +149,17 @@ void    Channel::chanReply(int fd, chanRep id) {
 			chanSendReply(fd, "331", _server->getNick(fd) + " " + _name, "No topic is set");
 			break;
 		case RPL_NAMREPLY:
-            std::string nmrp = ":" + _server->getServerName() + " " + _server->getNick(fd) + " 353 " + _visibility + " ";
+            std::string nmrp = ":" + _server->getServerName() + " " + _server->getNick(fd) + " 353 " + _visibility + " " + _name + " ";
             std::set<int>::iterator it = _memberFds.begin();
             for (; it != _memberFds.end(); ++it) {
-                nmrp.append(_server->getNick(fd));
+                nmrp.append(_server->getNick(*it));
                 std::set<int>::iterator nextIt = it;
                 ++nextIt;
                 if (nextIt != _memberFds.end())
                     nmrp.append(" ");
             }
 			try {
+				nmrp.append("\n");
 				_server->getClient(fd).pushSendQueue(nmrp);
 			} catch (std::exception &e) {
 				std::cerr << e.what() << std::endl;
