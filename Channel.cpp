@@ -10,11 +10,14 @@ Channel::Channel(const std::string &name, Server *server) {
 }
 
 Channel::Channel(const std::string &name, std::string &password) {
-	this->_name = name;
-	this->_password = password;
-	this->_visibility = "=";
-	this->_topic = "";
-	this->_mode = 0;
+	_name = name;
+	_password = password;
+	_visibility = "=";
+	_topic = "";
+	_mode = 0;
+	if (!_password.empty()) {
+		setMode(KEYSET);
+	}
 }
 
 Channel::Channel(const std::string &name, std::string &password, Server *server) {
@@ -90,6 +93,7 @@ bool Channel::authMember(int clientFd, std::string &password) {
 	if (password != _password) {
 		return false;
 	}
+	removeInvited(clientFd);
 	addMember(clientFd);
 	return true;
 }

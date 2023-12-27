@@ -82,36 +82,48 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 //	}
 //
 //	std::queue<std::string> channels = split(tokens[1], ',');
+//	std::set<std::string> uniqueChannels;
 //	std::queue<std::string> passwords;
 //	if (tokens.size() > 2) {
 //		passwords = split(tokens[2], ',');
 //	}
-//	for (; !channels.empty(); channels.pop()) { // need unique channels ?
+//
+//	while (!channels.empty()) {
 //		std::string channelName = channels.front();
-//		std::string password = passwords.empty() ? "" : passwords.front();
-//		Channel *channel = findChannel(channelName);
-//		if (channel) {
-//			if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
-//				serverReply(fd, channelName, ERR_INVITEONLYCHAN);
-//			}
-//				if (channel->authMember(fd, password)) {
-//					serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", "");
+//		// if channelName is not double of one of previous names
+//		if (uniqueChannels.insert(channelName).second) {
+//			std::string password = passwords.empty() ? "" : passwords.front();
+//			Channel *channel = findChannel(channelName);
+//			if (channel) {
+//				if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
+//					serverReply(fd, channelName, ERR_INVITEONLYCHAN);
+//					return;
+//				}
+//				if (channel->authMember(fd, password)) { // checking password and removing from invited container
+//					serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channelName);
 //					// RPL_TOPIC
 //					// RPL_NAMEREPLY
+//					// RPL_ENDOFNAMES
 //				} else {
 //					serverReply(fd, channelName, ERR_BADCHANNELKEY);
 //				}
-//		} else {
-//			if (isValidChannelName(channelName)) {
-//				Channel *newChannel = new Channel(channelName, password);
-//				newChannel->addMember(fd);
-//				newChannel->addOperator(fd);
-//				addChannel(newChannel);
-//				serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", "");
-//				// RPL_TOPIC
-//				// RPL_NAMEREPLY
 //			} else {
-//				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+//				if (isValidChannelName(channelName)) {
+//					Channel *newChannel = new Channel(channelName, password);
+//					newChannel->addMember(fd);
+//					newChannel->addOperator(fd);
+//					addChannel(newChannel);
+//					serverSendNotification(newChannel->getMemberFds(), getNick(fd), "JOIN", channelName);
+//					// RPL_TOPIC
+//					// RPL_NAMEREPLY
+//					// RPL_ENDOFNAMES
+//				} else {
+//					serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+//				}
+//			}
+//			channels.pop();
+//			if (!passwords.empty()) {
+//				passwords.pop();
 //			}
 //		}
 //	}
