@@ -16,3 +16,7 @@
 
 ### 5. Server replies formatting
 - probably separate ERR_, RPL_ and notification messages ?
+
+### 6. Names capitalization
+Could be nice to have names as it was entered when created
+- Probably store the uppercase version of channel/clients names for better performance
