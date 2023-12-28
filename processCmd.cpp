@@ -336,14 +336,26 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
 	} else if (tokens.size() == 2) {
-		// display channel modes
-		serverSendReply(fd, "324", getNick(fd) + " " + channelName, channel->getModeString());
+		// display channel modes inside and outside
+		serverSendReply(fd, "324", getNick(fd) + " " + channelName, channel->getModeString()); // RPL_CHANNELMODEIS
+	} else if (!channel->hasOperator(fd)) {
+		serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
 	} else {
+		std::string modeChanges = tokens[2];
+		bool settingMode = true;
+		// mode exists otherwise error
+		// change mode and notify or do nothing if needed parameters not provided or mode already changed
 
-		// mode exists
-		// operator rights
-		// change mode or do nothing or reply with error
-		// notify clients
+		// ERR_NEEDMOREPARAMS
+		// ERR_CHANOPRIVSNEEDED
+		// ERR_NOSUCHNICK
+		// RPL_CHANNELMODEIS
+		// ERR_NOTONCHANNEL
+		// ERR_UNKNOWNMODE
+		// ERR_NOSUCHCHANNEL
+
+
+
 	}
 }
 
