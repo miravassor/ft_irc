@@ -188,9 +188,9 @@ private:
     void resetEvents(size_t index);
 
 	void fillChannelsFds(std::map<std::string, std::set<int> > &channelsFds,
-						 std::pair<std::string, std::set<int> > &fdsWithoutChannels,
-						 std::vector<Channel *> &channels) const;
-	
+								 std::pair<std::string, std::set<int> > *fdsWithoutChannels,
+								 std::vector<Channel *> &channels) const;
+
 	std::string mergeTokensToString(const std::vector<std::string>& tokens);
 };
 

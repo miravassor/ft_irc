@@ -107,7 +107,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 				if (channel->authMember(fd, password)) { // checking password and removing from invited container
 					serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channelName);
 					// RPL_TOPIC
-					// RPL_NAMEREPLY
+					processNames(fd, tokens);
 					serverReply(fd, channelName, RPL_ENDOFNAMES);
 				} else {
 					serverReply(fd, channelName, ERR_BADCHANNELKEY);
@@ -120,7 +120,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 					addChannel(newChannel);
 					serverSendNotification(newChannel->getMemberFds(), getNick(fd), "JOIN", channelName);
 					// RPL_TOPIC
-					// RPL_NAMEREPLY
+					processNames(fd, tokens);
 					serverReply(fd, channelName, RPL_ENDOFNAMES);
 				} else {
 					serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
@@ -340,27 +340,36 @@ void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 
 void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 	std::map<std::string, std::set<int> > channelsFds;
-	std::pair<std::string, std::set<int> > fdsWithoutChannels = std::make_pair("", getClientsFds());
 	if (tokens.size() == 1) {
-		fillChannelsFds(channelsFds, fdsWithoutChannels, _channels);
+		std::pair<std::string, std::set<int> > fdsWithoutChannels = std::make_pair("", getClientsFds());
+
+		fillChannelsFds(channelsFds, &fdsWithoutChannels, _channels);
 		channelsFds.insert(fdsWithoutChannels);
 	} else {
 		std::queue<std::string> channelNames = split(tokens[1], ','); // make unique parameter in split
 		std::vector<Channel *> channels = findChannels(channelNames);
 
-		fillChannelsFds(channelsFds, fdsWithoutChannels, channels);
+		fillChannelsFds(channelsFds, NULL, channels);
 	}
 	for (std::map<std::string, std::set<int> >::iterator it = channelsFds.begin(); it != channelsFds.end(); ++it) {
 		std::string nicknamesString = mergeTokensToString(getNicknames((*it).second));
 		serverSendReply(fd, "353", (*it).first, nicknamesString);
 	}
+	serverReply(fd, "", RPL_ENDOFNAMES);
 }
+
 void Server::fillChannelsFds(std::map<std::string, std::set<int> > &channelsFds,
-							 std::pair<std::string, std::set<int> > &fdsWithoutChannels,
+							 std::pair<std::string, std::set<int> > *fdsWithoutChannels,
 							 std::vector<Channel *> &channels) const {
 	for (std::vector<Channel *>::const_iterator it = channels.begin(); it != channels.end(); ++it) {
 		channelsFds.insert(std::make_pair((*it)->getName(), (*it)->getMemberFds()));
-		fdsWithoutChannels.second.erase((*it)->getMemberFds().begin(), (*it)->getMemberFds().end());
+
+		if (fdsWithoutChannels) {
+			for (std::set<int>::const_iterator fdIt = (*it)->getMemberFds().begin();
+				 fdIt != (*it)->getMemberFds().end(); ++fdIt) {
+				fdsWithoutChannels->second.erase(*fdIt);
+			}
+		}
 	}
 }
 
@@ -374,7 +383,6 @@ std::string Server::mergeTokensToString(const std::vector<std::string>& tokens) 
 	}
 	return mergedString;
 }
-
 
 void Server::processList(int fd, const std::vector<std::string> &tokens) {
 	(void) fd;
