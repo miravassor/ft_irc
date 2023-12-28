@@ -48,7 +48,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	std::string prefix = getNick(fd);
 
 	while (!targets.empty()) {
-		const std::string &targetName = capitalizeString(targets.front());
+		const std::string &targetName = targets.front();
 		if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
 			sendPmToChan(fd, message, prefix, targetName);
 		} else { // for user
@@ -88,6 +88,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 //}
 
 // Could be placed in a util class later
+// probably better to have capitalized names/nicknames in channels/clients than capitalize each time when looking
 std::string Server::capitalizeString(const std::string &input) {
 	std::string output(input);
 	for (size_t i = 0; i < input.size(); i++) {
@@ -196,7 +197,7 @@ void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
 	const std::string &invitedNick = tokens[1];
 	const std::string &channelName = tokens[2];
 	Client *invitedClient = findClient(invitedNick);
-	Channel *channel = findChannel(capitalizeString(channelName));
+	Channel *channel = findChannel(channelName);
 	std::string parameters = invitedNick + " " + channelName;
 
 	if (!invitedClient) {
@@ -233,7 +234,7 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 	const std::string &channelName = tokens[1];
 	const std::string &targetNick = tokens[2];
 	std::string reason = (tokens.size() > 3) ? " " + tokens[3] : "";
-	Channel *channel = findChannel(capitalizeString(channelName));
+	Channel *channel = findChannel(channelName);
 
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
@@ -260,7 +261,7 @@ void Server::processTopic(int fd, const std::vector<std::string> &tokens) {
 	}
 
 	const std::string &channelName = tokens[1];
-	Channel *channel = findChannel(capitalizeString(channelName));
+	Channel *channel = findChannel(channelName);
 
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
@@ -330,7 +331,7 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 // in progress
 void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
 	const std::string &channelName = tokens[1];
-	Channel *channel = findChannel(capitalizeString(channelName));
+	Channel *channel = findChannel(channelName);
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
 	} else if (tokens.size() == 2) {

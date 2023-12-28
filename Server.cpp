@@ -259,9 +259,10 @@ void Server::addChannel(Channel *channel) {
 }
 
 std::vector<Channel*>::iterator Server::findChannelIterator(const std::string &name) {
+	std::string upperName = capitalizeString(name);
     std::vector<Channel*>::iterator it = _channels.begin();
     while (it != _channels.end()) {
-        if ((*it)->getName() == name) {
+        if (capitalizeString((*it)->getName()) == upperName) {
             break;
         }
         it++;
@@ -270,8 +271,9 @@ std::vector<Channel*>::iterator Server::findChannelIterator(const std::string &n
 }
 
 Channel* Server::findChannel(const std::string &name) {
+	std::string upperName = capitalizeString(name);
 	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
-		if ((*it)->getName() == name) {
+		if (capitalizeString((*it)->getName()) == upperName) {
 			return *it;
 		}
 	}
@@ -291,8 +293,9 @@ std::vector<Channel *> Server::findChannels(std::queue<std::string> names) {
 }
 
 Client *Server::findClient(const std::string& nickname) {
+	std::string upperName = capitalizeString(nickname);
     for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
-        if (it->second->getNickname() == nickname) {
+        if (capitalizeString(it->second->getNickname()) == upperName) {
             return it->second;
         }
     }
