@@ -54,7 +54,8 @@ enum serverRep {
     ERR_USERNOTINCHANNEL,
 	ERR_USERONCHANNEL,
 	RPL_ENDOFNAMES,
-	ERR_CHANNELISFULL
+	ERR_CHANNELISFULL,
+	RPL_LISTEND
 };
 
 class Server {
@@ -201,6 +202,7 @@ private:
 	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
 
 	std::string capitalizeString(const std::string &input);
+	void listChannels(int fd, std::vector<Channel *> &channels);
 };
 
 #endif

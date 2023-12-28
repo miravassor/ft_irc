@@ -286,6 +286,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case ERR_CHANNELISFULL:
 			serverSendReply(fd, "471", token, "Cannot join channel (+l)");
 			break;
+		case RPL_LISTEND:
+			serverSendReply(fd, "323", token, "End of /LIST");
+			break;
 		default:
 			return;
 	}
