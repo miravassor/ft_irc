@@ -46,6 +46,8 @@ void Server::initCmd() {
     cmd["TOPIC"] = &Server::processTopic;
 	cmd["PART"] = &Server::processPart;
 	cmd["MODE"] = &Server::processMode;
+	cmd["NAMES"] = &Server::processNames;
+	cmd["LIST"] = &Server::processList;
 	cmd["PING"] = &Server::processPing;
 	// and other commands
 }
@@ -246,6 +248,14 @@ std::string Server::getNick(int fd) {
 	return "";
 }
 
+std::vector<std::string> Server::getNicknames(std::set<int> fds) {
+	std::vector<std::string> nicknames;
+	for (std::set<int>::iterator it = fds.begin(); it != fds.end(); ++it) {
+		nicknames.push_back(getNick(*it));
+	}
+	return nicknames;
+}
+
 void Server::addChannel(Channel *channel) {
 	_channels.push_back(channel);
 }
@@ -270,6 +280,18 @@ Channel* Server::findChannel(const std::string &name) {
 	return NULL;
 }
 
+std::vector<Channel *> Server::findChannels(std::queue<std::string> names) {
+	std::vector<Channel *> channels;
+	while (!names.empty()) {
+		Channel *channel = findChannel(names.front());
+		if (channel) {
+			channels.push_back(channel);
+		}
+		names.pop();
+	}
+	return channels;
+}
+
 Client *Server::findClient(const std::string& nickname) {
     for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
         if (it->second->getNickname() == nickname) {
@@ -284,4 +306,16 @@ Client &Server::getClient(int fd) {
 		throw std::runtime_error("Cannot find client with fd");
 	}
 	return (*this->clients[fd]);
+}
+
+const std::map<int, Client *> &Server::getClients() const {
+	return clients;
+}
+
+std::set<int> Server::getClientsFds() const {
+	std::set<int> fds;
+	for (std::map<int, Client *>::const_iterator it = clients.begin(); it != clients.end(); ++it) {
+		fds.insert(it->first);
+	}
+	return fds;
 }

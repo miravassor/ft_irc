@@ -75,10 +75,15 @@ public:
 
     std::string getNick(int fd);
 
+	std::vector<std::string> getNicknames(std::set<int> fds);
+
     std::string simpleSend(std::string send);
 
 	Client &getClient(int fd);
 
+	const std::map<int, Client *> &getClients() const;
+
+	std::set<int> getClientsFds() const;
 
 private:
     int socketFd;
@@ -158,11 +163,17 @@ private:
 
 	void processUserMode(int fd, const std::vector<std::string> &tokens);
 
+	void processNames(int fd, const std::vector<std::string> &tokens);
+
+	void processList(int fd, const std::vector<std::string> &tokens);
+
     void processPing(int fd, const std::vector<std::string> &tokens);
 
     void addChannel(Channel *channel);
 
     Channel *findChannel(const std::string &name);
+
+	std::vector<Channel *> findChannels(std::queue<std::string> names);
 
     std::vector<Channel *>::iterator findChannelIterator(const std::string &name);
 
@@ -175,6 +186,12 @@ private:
     size_t receiveData(size_t index);
 
     void resetEvents(size_t index);
+
+	void fillChannelsFds(std::map<std::string, std::set<int> > &channelsFds,
+						 std::pair<std::string, std::set<int> > &fdsWithoutChannels,
+						 std::vector<Channel *> &channels) const;
+	
+	std::string mergeTokensToString(const std::vector<std::string>& tokens);
 };
 
 #endif
