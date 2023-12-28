@@ -1,7 +1,7 @@
 #include "Server.hpp"
 #include "Channel.hpp"
 
-bool running = true;
+static bool running = true;
 
 void signalHandler(int signum) {
 	std::cout << "[SIG:" << signum << "] received.\n";
@@ -15,13 +15,20 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	try {
-		Server server(atoi(argv[1]), std::string(argv[2]));
+		Server server (atoi(argv[1]), std::string(argv[2]));
 		signal(SIGINT, signalHandler);
-		while (running)
-			server.run();
+		while (running) {
+			try {
+				server.run();
+			} catch (std::exception &exception) {
+				std::cerr << "[ERROR]\t" << exception.what() << std::endl;
+				return 1;
+			}
+		}
 	} catch (std::exception &exception) {
-		std::cerr << exception.what() << std::endl;
+		std::cerr << "[ERROR]\t" << exception.what() << std::endl;
 		return 1;
 	}
+
 	return 0;
 }

@@ -98,8 +98,6 @@ void Server::removeClient(int clientSocket) {
 }
 
 void Server::run() {
-	// TODO: iterate through clients to check send Queues
-	//  and set sockets to POLLOUT
 	for (std::map<int, Client *>::iterator it = clients.begin();
 		 it != clients.end(); ++it) {
 		if (!it->second->sendQueueEmpty()) {
@@ -145,8 +143,7 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 			removeClient(pollFds[index].fd);
 			index--;
 		} else {
-			// TODO : handle recv errors
-			throw std::runtime_error("SOME TMP ERROR");
+			throw std::runtime_error("Recv error: [" + std::string(strerror(errno)) + "]");
 		}
 		resetEvents(index);
 	}
@@ -161,6 +158,7 @@ void Server::sendData(size_t index) {
 			const char *dataPtr = msg.c_str();
 			ssize_t dataRemaining = msg.length();
 			while (dataRemaining > 0) {
+				std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
 				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
 				if (n < 0) {
 					if (errno == EWOULDBLOCK || errno == EAGAIN) {

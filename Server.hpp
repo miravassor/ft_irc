@@ -193,6 +193,14 @@ private:
 
 	std::string mergeTokensToString(const std::vector<std::string>& tokens);
 	void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
+
+	bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
+
+	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
+
+	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
+
+	std::string capitalizeString(const std::string &input);
 };
 
 #endif
