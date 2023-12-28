@@ -10,33 +10,35 @@ bool Server::checkPmTokens(int fd, const std::vector<std::string> &tokens) {
 	return true;
 }
 
-void Server::sendPmToUser(int fd,
-						  const std::string &message,
-						  const std::string &prefix,
-						  const std::string &targetName) {
+void Server::sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
+						  const std::string &command) {
+
 	Client *receiver = findClient(targetName);
-	if (!receiver) {
+	if (receiver) {
+		std::string parameters = targetName + " " + message;
+		serverSendNotification(receiver->getSocket(), prefix, command, parameters);
+		if (command == "PRIVMSG" && receiver->activeMode(AWAY)) {
+			serverSendReply(fd, "301", targetName, receiver->getAwayMessage()); // RPL_AWAY
+		}
+	} else if (command == "PRIVMSG") {
 		serverReply(fd, targetName, ERR_NOSUCHNICK);
-		return;
-	}
-	std::string parameters = targetName + " " + message;
-	serverSendNotification(receiver->getSocket(), prefix, "PRIVMSG", parameters);
-	if (receiver->activeMode(AWAY)) {
-		serverSendReply(fd, "301", targetName, receiver->getAwayMessage()); // RPL_AWAY
 	}
 }
 
-void Server::sendPmToChan(int fd,
-						  const std::string &message,
-						  const std::string &prefix,
-						  const std::string &targetName) {
-	std::vector<Channel *>::iterator channelIt = findChannelIterator(targetName);
-	if (channelIt == _channels.end() || !(*channelIt)->hasMember(fd)) {
-		serverReply(fd, targetName, (channelIt == _channels.end()) ? ERR_NOSUCHNICK : ERR_CANNOTSENDTOCHAN);
-		return;
+void Server::sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
+						  const std::string &command) {
+
+	Channel *channel = findChannel(targetName);
+	if (channel) {
+		if (channel->hasMember(fd)) {
+			std::string parameters = channel->getName() + " " + message;
+			serverSendNotification(channel->getMemberFds(), prefix, command, parameters);
+		} else if (command == "PRIVMSG") {
+			serverReply(fd, targetName, ERR_CANNOTSENDTOCHAN);
+		}
+	} else if (command == "PRIVMSG") {
+		serverReply(fd, targetName, ERR_NOSUCHNICK);
 	}
-	std::string parameters = (*channelIt)->getName() + " " + message;
-	serverSendNotification((*channelIt)->getMemberFds(), prefix, "PRIVMSG", parameters);
 }
 
 void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
@@ -49,10 +51,10 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 
 	while (!targets.empty()) {
 		const std::string &targetName = targets.front();
-		if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
-			sendPmToChan(fd, message, prefix, targetName);
-		} else { // for user
-			sendPmToUser(fd, message, prefix, targetName);
+		if (targetName.at(0) == '#' || targetName.at(0) == '&') {
+			sendPmToChan(fd, message, prefix, targetName, tokens[0]);
+		} else {
+			sendPmToUser(fd, message, prefix, targetName, tokens[0]);
 		}
 	}
 	targets.pop();

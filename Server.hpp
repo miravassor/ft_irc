@@ -197,9 +197,9 @@ private:
 
 	bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
 
-	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
+	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName, const std::string &command);
 
-	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName);
+	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName, const std::string &command);
 
 	std::string capitalizeString(const std::string &input);
 	void listChannels(int fd, std::vector<Channel *> &channels);

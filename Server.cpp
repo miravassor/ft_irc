@@ -40,6 +40,7 @@ Server::Server(int port, const std::string &password) {
 
 void Server::initCmd() {
 	cmd["PRIVMSG"] = &Server::processPrivmsg;
+	cmd["NOTICE"] = &Server::processPrivmsg;
 	cmd["JOIN"] = &Server::processJoin;
 	cmd["INVITE"] = &Server::processInvite;
 	cmd["KICK"] = &Server::processKick;
