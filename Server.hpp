@@ -179,7 +179,7 @@ private:
 
     bool isValidChannelName(const std::string &name);
 
-    std::queue<std::string> split(const std::string &src, char delimiter) const;
+	std::queue<std::string> split(const std::string &src, char delimiter, bool unique) const;
 
     void sendData(size_t index);
 
