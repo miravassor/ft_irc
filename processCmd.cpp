@@ -2,8 +2,6 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
-// draft todo: refactoring needed
-
 bool Server::checkPmTokens(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() == 1 || tokens.size() == 2) {
 		serverReply(fd, "", (tokens.size() == 1) ? ERR_NORECIPIENT : ERR_NOTEXTTOSEND);
@@ -42,122 +40,61 @@ void Server::sendPmToChan(int fd,
 }
 
 void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
-	if (!checkPmTokens(fd,tokens))
+	if (!checkPmTokens(fd, tokens))
 		return;
 
-	std::queue<std::string> targets = split(tokens[1], ',');
+	std::queue<std::string> targets = split(tokens[1], ',', true);
 	std::string message = getParam(tokens);
 	std::string prefix = getNick(fd);
-	std::set<std::string> uniqueTargets;
 
 	while (!targets.empty()) {
 		const std::string &targetName = capitalizeString(targets.front());
-		// if targetName is not double of one of previous names
-		if (uniqueTargets.insert(targetName).second) {
-			if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
-				sendPmToChan(fd, message, prefix, targetName);
-			} else { // for user
-				sendPmToUser(fd, message, prefix, targetName);
-			}
+		if (targetName.at(0) == '#' || targetName.at(0) == '&') { // for channel
+			sendPmToChan(fd, message, prefix, targetName);
+		} else { // for user
+			sendPmToUser(fd, message, prefix, targetName);
 		}
-		targets.pop();
 	}
+	targets.pop();
 }
 
 // that method will be refactored later
-void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
-	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
+//void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
+//	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
+//
+//	if (tokens.size() < 2)
+//		serverReply(fd, "", ERR_NEEDMOREPARAMS);
+//	// search if channel already exist
+//	// check if user already in channel ??
+//	std::vector<Channel *>::iterator it = _channels.begin();
+//	for (; it != _channels.end(); ++it) {
+//		if ((*it)->getName() == capitalizeString(tokens[1])) {
+//			(*it)->addMember(fd);
+//			(*it)->newMember(fd);
+//			return;
+//		}
+//	}
+//	// or build one
+//	if (tokens[1].find(' ') != std::string::npos) {
+//		// no space allowed in channel name
+//		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
+//		return;
+//	} else {
+//		_channels.push_back(new Channel(capitalizeString(tokens[1]), this));
+//		_channels.back()->addMember(fd);
+//		_channels.back()->addOperator(fd);
+//		_channels.back()->newMember(fd);
+//	}
+//}
 
-	if (tokens.size() < 2)
-		serverReply(fd, "", ERR_NEEDMOREPARAMS);
-	// search if channel already exist
-	// check if user already in channel ??
-	std::vector<Channel *>::iterator it = _channels.begin();
-	for (; it != _channels.end(); ++it) {
-		if ((*it)->getName() == capitalizeString(tokens[1])) {
-			(*it)->addMember(fd);
-			(*it)->newMember(fd);
-			return;
-		}
-	}
-	// or build one
-	if (tokens[1].find(' ') != std::string::npos) {
-		// no space allowed in channel name
-		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
-		return;
-	} else {
-		_channels.push_back(new Channel(capitalizeString(tokens[1]), this));
-		_channels.back()->addMember(fd);
-		_channels.back()->addOperator(fd);
-		_channels.back()->newMember(fd);
-	}
-}
 // Could be placed in a util class later
-std::string Server::capitalizeString(const std::string& input) {
+std::string Server::capitalizeString(const std::string &input) {
 	std::string output(input);
 	for (size_t i = 0; i < input.size(); i++) {
 		output[i] = toupper(input[i]);
 	}
 	return output;
 }
-
-//void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
-//	if (tokens.size() < 2) {
-//		serverReply(fd, "JOIN", ERR_NEEDMOREPARAMS);
-//		return;
-//	}
-//
-//	std::queue<std::string> channels = split(tokens[1], ',');
-//	std::set<std::string> uniqueChannels;
-//	std::queue<std::string> passwords;
-//	if (tokens.size() > 2) {
-//		passwords = split(tokens[2], ',');
-//	}
-//
-//	while (!channels.empty()) {
-//		std::string channelName = channels.front();
-//		// if channelName is not double of one of previous names
-//		if (uniqueChannels.insert(channelName).second) {
-//			std::string password = passwords.empty() ? "" : passwords.front();
-//			Channel *channel = findChannel(channelName);
-//			if (channel) {
-//				if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
-//					serverReply(fd, channelName, ERR_INVITEONLYCHAN);
-//					return;
-//				}
-//				if (channel->isModeSet(LIMITSET) && (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
-//					serverReply(fd, channelName, ERR_CHANNELISFULL);
-//					return;
-//				}
-//				if (channel->authMember(fd, password)) { // checking password and removing from invited container
-//					serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channelName);
-//					// RPL_TOPIC
-//					// RPL_NAMEREPLY
-//					serverReply(fd, channelName, RPL_ENDOFNAMES);
-//				} else {
-//					serverReply(fd, channelName, ERR_BADCHANNELKEY);
-//				}
-//			} else {
-//				if (isValidChannelName(channelName)) {
-//					Channel *newChannel = new Channel(channelName, password);
-//					newChannel->addMember(fd);
-//					newChannel->addOperator(fd);
-//					addChannel(newChannel);
-//					serverSendNotification(newChannel->getMemberFds(), getNick(fd), "JOIN", channelName);
-//					// RPL_TOPIC
-//					// RPL_NAMEREPLY
-//					serverReply(fd, channelName, RPL_ENDOFNAMES);
-//				} else {
-//					serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
-//				}
-//			}
-//			channels.pop();
-//			if (!passwords.empty()) {
-//				passwords.pop();
-//			}
-//		}
-//	}
-//}
 
 void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 2) {
