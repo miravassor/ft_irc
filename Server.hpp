@@ -192,6 +192,7 @@ private:
 								 std::vector<Channel *> &channels) const;
 
 	std::string mergeTokensToString(const std::vector<std::string>& tokens);
+	void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
 };
 
 #endif

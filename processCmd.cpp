@@ -87,7 +87,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 		std::string channelName = channels.front();
 		std::string password = passwords.empty() ? "" : passwords.front();
 		Channel *channel = findChannel(channelName);
-		if (channel) {
+		if (channel) { // join existing channel
 			if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
 				serverReply(fd, channelName, ERR_INVITEONLYCHAN);
 				return;
@@ -98,23 +98,17 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 				return;
 			}
 			if (channel->authMember(fd, password)) { // checking password and removing from invited container
-				serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channelName);
-				// RPL_TOPIC
-				//processNames(fd, tokens);
-				serverReply(fd, channelName, RPL_ENDOFNAMES);
+				sendJoinNotificationsAndReplies(fd, channel);
 			} else {
 				serverReply(fd, channelName, ERR_BADCHANNELKEY);
 			}
-		} else {
+		} else { // creating new channel
 			if (isValidChannelName(channelName)) {
 				Channel *newChannel = new Channel(channelName, password);
 				newChannel->addMember(fd);
 				newChannel->addOperator(fd);
 				addChannel(newChannel);
-				serverSendNotification(newChannel->getMemberFds(), getNick(fd), "JOIN", channelName);
-				// RPL_TOPIC
-				//processNames(fd, tokens);
-				serverReply(fd, channelName, RPL_ENDOFNAMES);
+				sendJoinNotificationsAndReplies(fd, newChannel);
 			} else {
 				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
 			}
@@ -124,6 +118,15 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 			passwords.pop();
 		}
 	}
+}
+void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
+	serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channel->getName());
+	if (!channel->getTopic().empty()) {
+		serverSendReply(fd, "332", channel->getName(), channel->getTopic()); // RPL_TOPIC
+	}
+	std::string nicknamesString = mergeTokensToString(getNicknames(channel->getMemberFds()));
+	serverSendReply(fd, "353", channel->getName(), nicknamesString); // RPL_NAMREPLY
+	serverReply(fd, channel->getName(), RPL_ENDOFNAMES);
 }
 
 std::queue<std::string> Server::split(const std::string &src, char delimiter, bool unique) const {
