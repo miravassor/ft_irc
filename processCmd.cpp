@@ -337,55 +337,68 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
 	} else if (tokens.size() == 2) {
-		// display channel modes inside and outside
+		// todo: display channel modes differently for inside and outside clients - with parameters for inside and without for outside
 		serverSendReply(fd, "324", getNick(fd) + " " + channelName, channel->getModeString()); // RPL_CHANNELMODEIS
 	} else if (!channel->hasMember(fd)) {
 		serverReply(fd, channelName, ERR_NOTONCHANNEL); // ?
 	} else if (!channel->hasOperator(fd)) {
 		serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
 	} else {
-		std::string modeChanges = tokens[2];
-		bool settingMode = true;
-		// change mode and notify or do nothing if needed parameters not provided or mode already changed
-		for (size_t i = 0; i < modeChanges.length(); ++i) {
-			char mode = modeChanges[i];
-			if (mode == '+') {
-				settingMode = true;
-			} else if (mode == '-') {
-				settingMode = false;
+		std::string modes = tokens[2];
+		std::string changedModes; // probably add here modes that were actually changed (not ignored and without errors)
+		std::vector<std::string> parametersSet; // probably add here parameters that were successfully set
+		char settingMode = '+';
+		char lastSettingMode = '+';
+
+		for (size_t i = 0; i < modes.length(); ++i) {
+			char mode = modes.at(i);
+			if (mode == '+' || mode == '-') {
+				settingMode = mode;
 			} else {
-				if (false) {
-					// check if mode is unknown
+				if (mode != 'i' && mode != 't' && mode != 'k' && mode != 'o' &&
+				    mode != 'l') { // our irc server should support those modes only: i,t,k,o,l
 					serverReply(fd, std::string(&mode), ERR_UNKNOWNMODE);
-					return;
-					// our irc server should support those modes only: i,t,k,o,l
+					continue;
 
 				}
-				if (settingMode) { // apply or remove the mode
-					if (channel->isModeSet(mode)) {
-						if (true) {
-							// check if the mode requires an additional parameter
-							// check if parameter is present in tokens (maybe need some parsing before)
-							// if needed parameter is absent just ignore and do not set the mode
-							// check if parameter is good for that mode
-							// possible errors for +o bad parameter ERR_NOSUCHNICK, ERR_USERNOTINCHANNEL ?
-							// for bad parameters for other modes just ignore and do not set the mode
-							// if mode set successfully add mode for notification
-						} else {
-							channel->setMode(mode);
-							// add mode for notification
-						}
-					}
-				} else {
-					if (channel->isModeSet(mode)) {
-						channel->unsetMode(mode);
-						// add mode for notification
-					}
+				if (mode != 'o' &&
+				    ((settingMode && channel->isModeSet(mode)) || (!settingMode && !channel->isModeSet(mode)))) {
+					continue;
+					// Ignore if mode is already in the desired state
+					// even if we want to change key we need to unset -k first and then set +k with a new key
 				}
+
+				if (mode == 'k' || mode == 'o' || mode == 'l') { // check if the mode requires an additional parameter
+					std::string parameter;
+					// check if parameter is present in tokens (maybe need some parsing before)
+					// if needed parameter is absent just ignore and do not set the mode
+					// check if parameter is good for that mode
+					// possible errors for +o bad parameter ERR_NOSUCHNICK, ERR_USERNOTINCHANNEL ?
+					// for bad parameters for other modes just ignore and do not set the mode
+					// if mode set successfully // add mode to modeChanged ?
+					// if successfully sent mode had a parameter add it to parametersSet ?
+					parametersSet.push_back(parameter);
+				}
+				if (settingMode == '+') { // apply or remove the mode
+					channel->setMode(mode);
+				} else {
+					channel->unsetMode(mode);
+				}
+				if (lastSettingMode != settingMode) { // add + or - if it changed since last mode flag
+					changedModes += settingMode;
+					lastSettingMode = settingMode;
+				}
+				changedModes += (lastSettingMode != settingMode) ? (settingMode + mode) : mode;
+				lastSettingMode = settingMode;
 			}
+		}
+		if (!changedModes.empty()) {
+			serverSendNotification(channel->getMemberFds(), getNick(fd), "MODE",
+			                       changedModes + " " + mergeTokensToString(parametersSet));
 		}
 	}
 }
+
 
 // process MODE command (user) !!-> doc has more
 void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
