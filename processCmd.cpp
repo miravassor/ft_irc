@@ -345,18 +345,38 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 		bool settingMode = true;
 		// mode exists otherwise error
 		// change mode and notify or do nothing if needed parameters not provided or mode already changed
-
-		// ERR_NEEDMOREPARAMS
-		// ERR_CHANOPRIVSNEEDED
-		// ERR_NOSUCHNICK
-		// RPL_CHANNELMODEIS
-		// ERR_NOTONCHANNEL
-		// ERR_UNKNOWNMODE
-		// ERR_NOSUCHCHANNEL
-
-
-
+		for (size_t i = 0; i < modeChanges.length(); ++i) {
+			char mode = modeChanges[i];
+			if (mode == '+') {
+				settingMode = true;
+			} else if (mode == '-') {
+				settingMode = false;
+			} else {
+				// apply or remove the mode
+				if (settingMode) {
+					// check if the mode requires an additional parameter
+					//if (modeRequiresParameter(mode) && tokens.size() > i + 3) {
+					//	channel->setMode(mode, tokens[i + 3]);
+					//} else {
+					//	channel->setMode(mode);
+					//}
+				} else {
+					channel->unsetMode(mode);
+				}
+			}
+		}
 	}
+	// Possible errors:
+	// ERR_NEEDMOREPARAMS
+	// ERR_CHANOPRIVSNEEDED
+	// ERR_NOSUCHNICK
+	// RPL_CHANNELMODEIS
+	// ERR_NOTONCHANNEL
+	// ERR_UNKNOWNMODE
+	// ERR_NOSUCHCHANNEL
+
+
+
 }
 
 // process MODE command (user) !!-> doc has more
