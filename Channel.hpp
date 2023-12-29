@@ -9,7 +9,7 @@
 
 #include "Server.hpp"
 
-#define ALLTOPICSET     0b000001 // if set any member can set topic, otherwise only operators can do it
+#define TOPICSETOP     0b000001 // if set topic is settable by channel operator only
 #define INVITEONLY      0b000010 // if set clients can join only if invited
 #define KEYSET			0b000100 // if set clients can join only with password
 #define LIMITSET		0b001000 // if set no more clients than limit value can join

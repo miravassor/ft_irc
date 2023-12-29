@@ -11,7 +11,7 @@ bool Server::checkPmTokens(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-						  const std::string &command) {
+                          const std::string &command) {
 
 	Client *receiver = findClient(targetName);
 	if (receiver) {
@@ -26,7 +26,7 @@ void Server::sendPmToUser(int fd, const std::string &message, const std::string 
 }
 
 void Server::sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-						  const std::string &command) {
+                          const std::string &command) {
 
 	Channel *channel = findChannel(targetName);
 	if (channel) {
@@ -121,7 +121,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 				return;
 			}
 			if (channel->isModeSet(LIMITSET)
-				&& (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
+			    && (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
 				serverReply(fd, channelName, ERR_CHANNELISFULL);
 				return;
 			}
@@ -146,6 +146,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 		}
 	}
 }
+
 void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
 	serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channel->getName());
 	if (!channel->getTopic().empty()) {
@@ -276,7 +277,7 @@ void Server::processTopic(int fd, const std::vector<std::string> &tokens) {
 	} else {
 		if (!channel->hasMember(fd)) {
 			serverReply(fd, channelName, ERR_NOTONCHANNEL);
-		} else if (!channel->isModeSet(ALLTOPICSET) && !channel->hasOperator(fd)) {
+		} else if (channel->isModeSet(TOPICSETOP) && !channel->hasOperator(fd)) {
 			serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
 		} else {
 			const std::string &newTopic = tokens[2];
@@ -338,12 +339,13 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 	} else if (tokens.size() == 2) {
 		// display channel modes inside and outside
 		serverSendReply(fd, "324", getNick(fd) + " " + channelName, channel->getModeString()); // RPL_CHANNELMODEIS
+	} else if (!channel->hasMember(fd)) {
+		serverReply(fd, channelName, ERR_NOTONCHANNEL); // ?
 	} else if (!channel->hasOperator(fd)) {
 		serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
 	} else {
 		std::string modeChanges = tokens[2];
 		bool settingMode = true;
-		// mode exists otherwise error
 		// change mode and notify or do nothing if needed parameters not provided or mode already changed
 		for (size_t i = 0; i < modeChanges.length(); ++i) {
 			char mode = modeChanges[i];
@@ -352,31 +354,37 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 			} else if (mode == '-') {
 				settingMode = false;
 			} else {
-				// apply or remove the mode
-				if (settingMode) {
-					// check if the mode requires an additional parameter
-					//if (modeRequiresParameter(mode) && tokens.size() > i + 3) {
-					//	channel->setMode(mode, tokens[i + 3]);
-					//} else {
-					//	channel->setMode(mode);
-					//}
+				if () {
+					// check if mode is unknown
+					serverReply(fd, mode, ERR_UNKNOWNMODE);
+					return;
+					// our irc server should support those modes only: i,t,k,o,l
+
+				}
+				if (settingMode) { // apply or remove the mode
+					if (channel->isModeSet(mode)) {
+						if () {
+							// check if the mode requires an additional parameter
+							// check if parameter is present in tokens (maybe need some parsing before)
+							// if needed parameter is absent just ignore and do not set the mode
+							// check if parameter is good for that mode
+							// possible errors for +o bad parameter ERR_NOSUCHNICK, ERR_USERNOTINCHANNEL ?
+							// for bad parameters for other modes just ignore and do not set the mode
+							// if mode set successfully add mode for notification
+						} else {
+							channel->setMode(mode);
+							// add mode for notification
+						}
+					}
 				} else {
-					channel->unsetMode(mode);
+					if (channel->isModeSet(mode)) {
+						channel->unsetMode(mode);
+						// add mode for notification
+					}
 				}
 			}
 		}
 	}
-	// Possible errors:
-	// ERR_NEEDMOREPARAMS
-	// ERR_CHANOPRIVSNEEDED
-	// ERR_NOSUCHNICK
-	// RPL_CHANNELMODEIS
-	// ERR_NOTONCHANNEL
-	// ERR_UNKNOWNMODE
-	// ERR_NOSUCHCHANNEL
-
-
-
 }
 
 // process MODE command (user) !!-> doc has more
@@ -423,14 +431,14 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::fillChannelsFds(std::map<std::string, std::set<int> > &channelsFds,
-							 std::pair<std::string, std::set<int> > *fdsWithoutChannels,
-							 std::vector<Channel *> &channels) const {
+                             std::pair<std::string, std::set<int> > *fdsWithoutChannels,
+                             std::vector<Channel *> &channels) const {
 	for (std::vector<Channel *>::const_iterator it = channels.begin(); it != channels.end(); ++it) {
 		channelsFds.insert(std::make_pair((*it)->getName(), (*it)->getMemberFds()));
 
 		if (fdsWithoutChannels) {
 			for (std::set<int>::const_iterator fdIt = (*it)->getMemberFds().begin();
-				 fdIt != (*it)->getMemberFds().end(); ++fdIt) {
+			     fdIt != (*it)->getMemberFds().end(); ++fdIt) {
 				fdsWithoutChannels->second.erase(*fdIt);
 			}
 		}
