@@ -354,16 +354,16 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 			} else if (mode == '-') {
 				settingMode = false;
 			} else {
-				if () {
+				if (false) {
 					// check if mode is unknown
-					serverReply(fd, mode, ERR_UNKNOWNMODE);
+					serverReply(fd, std::string(&mode), ERR_UNKNOWNMODE);
 					return;
 					// our irc server should support those modes only: i,t,k,o,l
 
 				}
 				if (settingMode) { // apply or remove the mode
 					if (channel->isModeSet(mode)) {
-						if () {
+						if (true) {
 							// check if the mode requires an additional parameter
 							// check if parameter is present in tokens (maybe need some parsing before)
 							// if needed parameter is absent just ignore and do not set the mode

@@ -289,6 +289,9 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case RPL_LISTEND:
 			serverSendReply(fd, "323", token, "End of /LIST");
 			break;
+		case ERR_UNKNOWNMODE:
+			serverSendReply(fd, "472", token, "is unknown mode char to me");
+			break;
 		default:
 			return;
 	}
