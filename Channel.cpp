@@ -66,12 +66,28 @@ void Channel::setTopic(const std::string &topic) {
     _topic = topic;
 }
 
-void Channel::setMode(unsigned int mode) {
-    _mode |= mode;
+void Channel::setPassword(const std::string &password) {
+	_password = password;
 }
 
-void Channel::unsetMode(unsigned int mode) {
-    _mode &= ~mode;
+void Channel::setLimitMembers(int limitMembers) {
+	Channel::limitMembers = limitMembers;
+}
+
+bool Channel::setMode(unsigned int mode) {
+	if (isModeSet(mode)) {
+		return false;
+	}
+	_mode |= mode;
+	return true;
+}
+
+bool Channel::unsetMode(unsigned int mode) {
+	if (!isModeSet(mode)) {
+		return false;
+	}
+	_mode &= ~mode;
+	return true;
 }
 
 bool Channel::isModeSet(unsigned int mode) const {
@@ -102,13 +118,13 @@ bool Channel::authMember(int clientFd, std::string &password) {
 	return true;
 }
 
-void Channel::addOperator(int clientFd) {
-    _operatorFds.insert(clientFd);
+bool Channel::addOperator(int clientFd) {
+	return _operatorFds.insert(clientFd).second;
 }
 
 
-void Channel::removeOperator(int clientFd) {
-    _operatorFds.erase(clientFd);
+bool Channel::removeOperator(int clientFd) {
+    return _operatorFds.erase(clientFd);
 }
 
 bool Channel::hasOperator(int clientFd) {

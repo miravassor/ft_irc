@@ -61,9 +61,13 @@ public:
 
 	void setTopic(const std::string &topic);
 
-    void setMode(unsigned int mode);
+	void setPassword(const std::string &password);
 
-    void unsetMode(unsigned int mode);
+	void setLimitMembers(int limitMembers);
+
+	bool setMode(unsigned int mode);
+
+    bool unsetMode(unsigned int mode);
 
     bool isModeSet(unsigned int mode) const;
 
@@ -74,9 +78,9 @@ public:
 
     bool hasMember(int clientFd);
 
-    void addOperator(int clientFd);
+    bool addOperator(int clientFd);
 
-    void removeOperator(int clientFd);
+    bool removeOperator(int clientFd);
 
     bool hasOperator(int clientFd);
 

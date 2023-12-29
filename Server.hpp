@@ -204,6 +204,12 @@ private:
 
 	std::string capitalizeString(const std::string &input);
 	void listChannels(int fd, std::vector<Channel *> &channels);
+
+	bool applyModeToChannel(char mode, std::string &parameter, char set, Channel *channel, int fd);
+
+	bool modeParameterNeeded(char set, char mode);
+
+	bool isValidName(const std::string &name);
 };
 
 #endif
