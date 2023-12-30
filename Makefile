@@ -3,7 +3,7 @@ NAME = servirc
 COMPILE = g++ -std=c++98 -Wall -Wextra -Werror -g
 
 SRCS = main.cpp Server.cpp Client.cpp Channel.cpp parsingServer.cpp utils.cpp modes.cpp \
-commands/processInvite.cpp processJoin.cpp processKick.cpp processList.cpp processMode.cpp \
+processInvite.cpp processJoin.cpp processKick.cpp processList.cpp processMode.cpp \
 processNames.cpp processPart.cpp processPing.cpp processPrivmsg.cpp processTopic.cpp
 
 HEADERS = Server.hpp Client.hpp Channel.hpp
