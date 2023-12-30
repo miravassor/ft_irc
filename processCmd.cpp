@@ -285,7 +285,7 @@ void Server::processTopic(int fd, const std::vector<std::string> &tokens) {
 	} else {
 		if (!channel->hasMember(fd)) {
 			serverReply(fd, channelName, ERR_NOTONCHANNEL);
-		} else if (channel->isModeSet(TOPICSETOP) && !channel->hasOperator(fd)) {
+		} else if (channel->isModeSet(TOPICSET) && !channel->hasOperator(fd)) {
 			serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
 		} else {
 			const std::string &newTopic = tokens[2];
@@ -355,200 +355,120 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 		std::string modes = tokens[2];
 		std::string changedModes;
 		std::vector<std::string> parametersSet;
-		char setMode = '+';
-		char lastSetMode = '+';
+		char settingMode = '+';
+		char lastSettingMode = '+';
 		size_t paramIndex = 3;
 
 		for (size_t i = 0; i < modes.length(); ++i) {
 			char mode = modes.at(i);
 			if (mode == '+' || mode == '-') {
-				setMode = mode;
-				continue; // go to the next iteration to process the mode character
+				settingMode = mode;
+				continue; // go to the next iteration to process the channelMode character
 			}
-			if (mode != 'i' && mode != 't' && mode != 'k' && mode != 'o' && mode != 'l') {
+
+			std::string parameter = (modeParameterNeeded(settingMode, mode) && paramIndex < tokens.size())
+			                        ? tokens[paramIndex++]
+			                        : ""; // check if the channelMode requires a parameter and take it
+			ModeHandlerIterator it = channelMode.find(mode);
+			if (it == channelMode.end()) { // check if mode is known
 				serverReply(fd, std::string(&mode), ERR_UNKNOWNMODE);
 				continue;
 			}
-			std::string parameter = (modeParameterNeeded(setMode, mode) && paramIndex < tokens.size())
-			                        ? tokens[paramIndex++]
-			                        : ""; // check if the mode requires a parameter and take it
-			if (applyModeToChannel(mode, parameter, setMode, channel, fd)) { // if mode applied successfully
+			if ((this->*(it->second))(settingMode, parameter, channel, fd)) { // if channelMode applied successfully
 				parametersSet.push_back(parameter);
-				if (lastSetMode != setMode) { // add + or - if it changed since last mode flag
-					changedModes += setMode;
-					lastSetMode = setMode;
+				if (lastSettingMode != settingMode) { // add + or - if it changed since last channelMode flag
+					changedModes += settingMode;
+					lastSettingMode = settingMode;
 				}
 				changedModes += mode;
 			}
 		}
 		if (!changedModes.empty()) {
-			serverSendNotification(channel->getMemberFds(),
-			                       getNick(fd),
-			                       "MODE",
-			                       changedModes + " " + mergeTokensToString(parametersSet));
+			std::string parameters = changedModes + " " + mergeTokensToString(parametersSet);
+			serverSendNotification(channel->getMemberFds(), getNick(fd), "MODE", parameters);
 		}
 	}
 
 }
 
 bool Server::modeParameterNeeded(char set, char mode) {
-	if (mode == 'i' || mode == 't') {
-		return false;
+	if (mode == 'o' || (set == '+' && (mode == 'k' || mode == 'l'))) {
+		return true;
 	}
-	if (set == '-' && mode != 'o') {
-		return false;
-	}
-	return true;
+	return false;
 }
 
-bool Server::applyModeToChannel(char mode, std::string &parameter, char set, Channel *channel, int fd) {
-	if (set == '-') {
-		switch (mode) {
-			case 'i':
-				return channel->unsetMode(INVITEONLY);
-			case 't':
-				return channel->unsetMode(TOPICSETOP);
-			case 'k':
-				channel->setPassword("");
-				return channel->unsetMode(KEYSET);
-			case 'l': {
-				channel->setLimitMembers(-1);
-				return channel->unsetMode(LIMITSET);
-			}
-			case 'o': {
-				if (parameter.empty()) {
-					return false;
-				}
-				Client *client = findClient(parameter);
-				if (!client) {
-					serverReply(fd, parameter, ERR_NOSUCHNICK);
-					return false;
-				}
-				if (!channel->hasMember(fd)) {
-					serverReply(fd, parameter, ERR_USERNOTINCHANNEL);
-					return false;
-				}
-				return channel->removeOperator(client->getSocket());
-			}
-			default:
-				return false;
-		}
+bool Server::handleModeI(char set, const std::string &parameter, Channel *channel, int fd) {
+	(void) fd;
+	(void) parameter;
+	if (set == '+') {
+		return channel->setMode(INVITEONLY);
 	} else {
-		switch (mode) {
-			case 'i':
-				return channel->setMode(INVITEONLY);
-			case 't':
-				return channel->setMode(TOPICSETOP);
-			case 'k': {
-				if (!isValidName(parameter)) {  // check key
-					return false;
-				}
-				channel->setPassword(parameter);
-				channel->setMode(KEYSET);
-				return true;
-			}
-			case 'l': {
-				std::istringstream iss(parameter);
-				int limit;
-				if (!(iss >> limit) || limit < (int) channel->getMemberFds().size()) { // check limit
-					return false;
-				}
-				channel->setLimitMembers(limit);
-				channel->setMode(LIMITSET);
-				return true;
-			}
-			case 'o': {
-				if (parameter.empty()) {
-					return false;
-				}
-				Client *newOperator = findClient(parameter);
-				if (!newOperator) {
-					serverReply(fd, parameter, ERR_NOSUCHNICK);
-					return false;
-				}
-				if (!channel->hasMember(fd)) {
-					serverReply(fd, parameter, ERR_USERNOTINCHANNEL);
-					return false;
-				}
-				return channel->addOperator(newOperator->getSocket());
-			}
-			default:
-				return false;
-		}
+		return channel->unsetMode(INVITEONLY);
 	}
 }
 
-// possible refactoring for applyModeToChannel
-//bool Server::applyModeToChannel(char mode, const std::string& parameter, char set, Channel* channel, int fd) {
-//	if (set == '-') {
-//		return applyUnsetModeToChannel(mode, parameter, channel, fd);
-//	} else {
-//		return applySetModeToChannel(mode, parameter, channel, fd);
-//	}
-//}
-//
-//bool Server::applySetModeToChannel(char mode, const std::string& parameter, Channel* channel, int fd) {
-//	switch (mode) {
-//		case 'i':
-//			return channel->setMode(INVITEONLY);
-//		case 't':
-//			return channel->setMode(TOPICSETOP);
-//		case 'k':
-//			if (!isValidName(parameter)) {
-//				return false;
-//			}
-//			channel->setPassword(parameter);
-//			return channel->setMode(KEYSET);
-//		case 'l':
-//			return handleLimitMode(parameter, channel);
-//		case 'o':
-//			return handleOperatorMode(parameter, channel, fd, true);
-//		default:
-//			return false;
-//	}
-//}
-//
-//bool Server::applyUnsetModeToChannel(char mode, const std::string& parameter, Channel* channel, int fd) {
-//	switch (mode) {
-//		case 'i':
-//			return channel->unsetMode(INVITEONLY);
-//		case 't':
-//			return channel->unsetMode(TOPICSETOP);
-//		case 'k':
-//			channel->setPassword("");
-//			return channel->unsetMode(KEYSET);
-//		case 'l':
-//			channel->setLimitMembers(-1);
-//			return channel->unsetMode(LIMITSET);
-//		case 'o':
-//			return handleOperatorMode(parameter, channel, fd, false);
-//		default:
-//			return false;
-//	}
-//}
-//
-//bool Server::handleLimitMode(const std::string& parameter, Channel* channel) {
-//	std::istringstream iss(parameter);
-//	int limit;
-//	if (!(iss >> limit) || limit < static_cast<int>(channel->getMemberFds().size())) {
-//		return false;
-//	}
-//	channel->setLimitMembers(limit);
-//	return channel->setMode(LIMITSET);
-//}
-//
-//bool Server::handleOperatorMode(const std::string& parameter, Channel* channel, int fd, bool setMode) {
-//	if (parameter.empty()) {
-//		return false;
-//	}
-//	Client* client = findClient(parameter);
-//	if (!client || !channel->hasMember(client->getSocket())) {
-//		serverReply(fd, parameter, !client ? ERR_NOSUCHNICK : ERR_USERNOTINCHANNEL);
-//		return false;
-//	}
-//	return setMode ? channel->addOperator(client->getSocket()) : channel->removeOperator(client->getSocket());
-//}
+bool Server::handleModeT(char set, const std::string &parameter, Channel *channel, int fd) {
+	(void) fd;
+	(void) parameter;
+	if (set == '+') {
+		return channel->setMode(TOPICSET);
+	} else {
+		return channel->unsetMode(TOPICSET);
+	}
+}
 
+bool Server::handleModeK(char set, const std::string &parameter, Channel *channel, int fd) {
+	(void) fd;
+	if (set == '+') {
+		if (!isValidName(parameter)) {
+			return false;
+		}
+		channel->setPassword(parameter);
+		channel->setMode(KEYSET);
+		return true;
+	} else {
+		channel->setPassword("");
+		return channel->unsetMode(KEYSET);
+	}
+}
+
+bool Server::handleModeL(char set, const std::string &parameter, Channel *channel, int fd) {
+	(void) fd;
+	if (set == '+') {
+		std::istringstream iss(parameter);
+		int limit;
+		if (!(iss >> limit) || limit < static_cast<int>(channel->getMemberFds().size())) {
+			return false;
+		}
+		channel->setLimitMembers(limit);
+		channel->setMode(LIMITSET);
+		return true;
+	} else {
+		channel->setLimitMembers(-1);
+		return channel->unsetMode(LIMITSET);
+	}
+}
+
+bool Server::handleModeO(char set, const std::string &parameter, Channel *channel, int fd) {
+	if (parameter.empty()) {
+		return false;
+	}
+	Client *client = findClient(parameter);
+	if (!client) {
+		serverReply(fd, parameter, ERR_NOSUCHNICK);
+		return false;
+	}
+	if (set == '+') {
+		if (!channel->hasMember(client->getSocket())) {
+			serverReply(fd, parameter, ERR_USERNOTINCHANNEL);
+			return false;
+		}
+		return channel->addOperator(client->getSocket());
+	} else {
+		return channel->removeOperator(client->getSocket());
+	}
+}
 
 // process MODE command (user) !!-> doc has more
 void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {

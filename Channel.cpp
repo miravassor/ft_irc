@@ -15,6 +15,7 @@ Channel::Channel(const std::string &name, std::string &password) {
 	_visibility = "=";
 	_topic = "";
 	_mode = 0;
+	setMode(TOPICSET);
 	if (!_password.empty()) {
 		setMode(KEYSET);
 	}

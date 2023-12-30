@@ -29,13 +29,14 @@ Server::Server(int port, const std::string &password) {
 	this->serverName = "42.IRC";
 	this->serverVersion = "0.1";
 	initCmd();
+	initChannelMode();
 	listenPort();
 	memset(_buffer, 0, 1024);
 	std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
-			  << ":"
-			  << ntohs(address.sin_port)
-			  << " socketFD=" << socketFd
-			  << " _password=" << this->_password << std::endl;
+	          << ":"
+	          << ntohs(address.sin_port)
+	          << " socketFD=" << socketFd
+	          << " _password=" << this->_password << std::endl;
 }
 
 void Server::initCmd() {
@@ -44,7 +45,7 @@ void Server::initCmd() {
 	cmd["JOIN"] = &Server::processJoin;
 	cmd["INVITE"] = &Server::processInvite;
 	cmd["KICK"] = &Server::processKick;
-    cmd["TOPIC"] = &Server::processTopic;
+	cmd["TOPIC"] = &Server::processTopic;
 	cmd["PART"] = &Server::processPart;
 	cmd["MODE"] = &Server::processMode;
 	cmd["NAMES"] = &Server::processNames;
@@ -53,20 +54,28 @@ void Server::initCmd() {
 	// and other commands
 }
 
+void Server::initChannelMode() {
+	channelMode['i'] = &Server::handleModeI;
+	channelMode['t'] = &Server::handleModeT;
+	channelMode['k'] = &Server::handleModeK;
+	channelMode['l'] = &Server::handleModeL;
+	channelMode['o'] = &Server::handleModeO;
+}
+
 Server::~Server() {
 	// Memory Cleanup
 	std::cout << "[Cleaning before exit]" << std::endl;
 	for (std::map<int, Client *>::iterator it = clients.begin();
-		 it != clients.end(); ++it) {
+	     it != clients.end(); ++it) {
 		delete it->second;
 	}
 	for (std::vector<Channel *>::iterator it = _channels.begin();
-		 it != _channels.end(); ++it) {
+	     it != _channels.end(); ++it) {
 		delete *it;
 	}
 	// Closing sockets
 	for (std::vector<pollfd>::iterator it = pollFds.begin();
-		 it != pollFds.end(); ++it) {
+	     it != pollFds.end(); ++it) {
 		close(it->fd);
 	}
 }
@@ -79,12 +88,12 @@ void Server::addClient(int clientSocket) {
 void Server::removeClient(int clientSocket) {
 	// removing from _channels
 	for (std::vector<Channel *>::iterator it = _channels.begin();
-		 it != _channels.end(); ++it) {
+	     it != _channels.end(); ++it) {
 		(*it)->removeMember(clientSocket);
 	}
 	// removing from pollFds
 	for (std::vector<pollfd>::iterator it = pollFds.begin();
-		 it != pollFds.end(); ++it) {
+	     it != pollFds.end(); ++it) {
 		if (it->fd == clientSocket) {
 			pollFds.erase(it);
 			break;
@@ -100,10 +109,10 @@ void Server::removeClient(int clientSocket) {
 
 void Server::run() {
 	for (std::map<int, Client *>::iterator it = clients.begin();
-		 it != clients.end(); ++it) {
+	     it != clients.end(); ++it) {
 		if (!it->second->sendQueueEmpty()) {
 			for (std::vector<pollfd>::iterator it2 = pollFds.begin();
-				 it2 != pollFds.end(); ++it2) {
+			     it2 != pollFds.end(); ++it2) {
 				if (it2->fd == it->first) {
 					it2->events = POLLOUT;
 					break;
@@ -133,11 +142,11 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 	} else {
 		memset(_buffer, 0, 1024);
 		int bytesRead = recv(pollFds[index].fd, _buffer, sizeof(_buffer) - 1,
-							 0);
+		                     0);
 		if (bytesRead > 0) {
 			_buffer[bytesRead] = 0;
 			if (parsBuffer(pollFds[index].fd)) {
-		// TODO : handle parsing errors
+				// TODO : handle parsing errors
 				(void) 0;
 			}
 		} else if (bytesRead == 0) {
@@ -169,8 +178,7 @@ void Server::sendData(size_t index) {
 					} else {
 						throw std::runtime_error("Send error");
 					}
-				}
-				else if (n == 0) {
+				} else if (n == 0) {
 					removeClient(pollFds[index].fd);
 					throw std::runtime_error("Connection closed");
 				}
@@ -204,7 +212,7 @@ int Server::acceptConnection() {
 
 	// accept connection and dd the new client's socket to the pollFds container
 	int clientSocket = accept(socketFd, (sockaddr *) (&clientAddress),
-							  &clientAddressLength);
+	                          &clientAddressLength);
 	if (clientSocket == -1) {
 		throw std::runtime_error(
 				"Accept error: [" + std::string(strerror(errno)) + "]");
@@ -227,9 +235,9 @@ int Server::acceptConnection() {
 	pollFds.push_back(clientPollFd);
 	// print information about the accepted connection
 	std::cout << "Accepted connection from: "
-			  << inet_ntoa(clientAddress.sin_addr) << ":"
-			  << ntohs(clientAddress.sin_port)
-			  << " at fd=" << clientSocket << std::endl;
+	          << inet_ntoa(clientAddress.sin_addr) << ":"
+	          << ntohs(clientAddress.sin_port)
+	          << " at fd=" << clientSocket << std::endl;
 	return clientSocket;
 }
 
@@ -259,21 +267,21 @@ void Server::addChannel(Channel *channel) {
 	_channels.push_back(channel);
 }
 
-std::vector<Channel*>::iterator Server::findChannelIterator(const std::string &name) {
+std::vector<Channel *>::iterator Server::findChannelIterator(const std::string &name) {
 	std::string upperName = capitalizeString(name);
-    std::vector<Channel*>::iterator it = _channels.begin();
-    while (it != _channels.end()) {
-        if (capitalizeString((*it)->getName()) == upperName) {
-            break;
-        }
-        it++;
-    }
-    return it;
+	std::vector<Channel *>::iterator it = _channels.begin();
+	while (it != _channels.end()) {
+		if (capitalizeString((*it)->getName()) == upperName) {
+			break;
+		}
+		it++;
+	}
+	return it;
 }
 
-Channel* Server::findChannel(const std::string &name) {
+Channel *Server::findChannel(const std::string &name) {
 	std::string upperName = capitalizeString(name);
-	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		if (capitalizeString((*it)->getName()) == upperName) {
 			return *it;
 		}
@@ -293,14 +301,14 @@ std::vector<Channel *> Server::findChannels(std::queue<std::string> names) {
 	return channels;
 }
 
-Client *Server::findClient(const std::string& nickname) {
+Client *Server::findClient(const std::string &nickname) {
 	std::string upperName = capitalizeString(nickname);
-    for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
-        if (capitalizeString(it->second->getNickname()) == upperName) {
-            return it->second;
-        }
-    }
-    return NULL;
+	for (std::map<int, Client *>::iterator it = clients.begin(); it != clients.end(); ++it) {
+		if (capitalizeString(it->second->getNickname()) == upperName) {
+			return it->second;
+		}
+	}
+	return NULL;
 }
 
 Client &Server::getClient(int fd) {

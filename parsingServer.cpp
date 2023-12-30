@@ -98,7 +98,7 @@ void Server::processCmd(int fd, std::vector<std::string>& tokens) {
     // removed ERR_NEEDMOREPARAMS as it can be different for diff cmd
 
 	std::string command = tokens[0];
-	CmdMapIterator it = cmd.find(command);
+	CmdIterator it = cmd.find(command);
 	if (it != cmd.end()) {
 		(this->*(it->second))(fd, tokens);
 	} else {
