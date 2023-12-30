@@ -14,11 +14,11 @@
 #define KEYSET            0b000100 // if set clients can join only with password
 #define LIMITSET        0b001000 // if set no more clients than limit value can join
 
-enum chanRep {
-	RPL_TOPIC,
-	RPL_NOTOPIC,
-	RPL_NAMREPLY
-};
+//enum chanRep {
+//	RPL_TOPIC,
+//	RPL_NOTOPIC,
+//	RPL_NAMREPLY
+//};
 
 class Channel {
 
@@ -28,7 +28,6 @@ private:
 	std::string _topic;
 	unsigned int _mode;
 	std::string _password;
-	std::string _visibility;
 	std::set<int> _memberFds;
 	std::set<int> _operatorFds;
 	std::set<int> _invitedFds;

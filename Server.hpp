@@ -22,8 +22,58 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
-#include "rpl.hpp"
-#include "err.hpp"
+
+class Channel;
+
+enum serverRep {
+
+	CAPLS = 0,
+	RPL_WELCOME = 1,
+	RPL_YOURHOST = 2,
+	RPL_CREATED = 3,
+	RPL_MYINFO = 4,
+	PONG = 5,
+
+	RPL_UMODEIS = 221,
+	RPL_AWAY = 301,
+	RPL_LISTSTART = 321,
+	RPL_LIST = 322,
+	RPL_LISTEND = 323,
+	RPL_CHANNELMODEIS = 324,
+	RPL_NOTOPIC = 331,
+	RPL_TOPIC = 332,
+	RPL_INVITING = 341,
+	RPL_NAMREPLY = 353,
+	RPL_ENDOFNAMES = 366,
+	RPL_INFO = 371,
+	RPL_ENDOFINFO = 374,
+	RPL_TIME = 391,
+
+	ERR_NOSUCHNICK = 401,
+	ERR_NOSUCHSERVER = 402,
+	ERR_NOSUCHCHANNEL = 403,
+	ERR_CANNOTSENDTOCHAN = 404,
+	ERR_NOORIGIN = 409,
+	ERR_NORECIPIENT = 411,
+	ERR_NOTEXTTOSEND = 412,
+	ERR_UNKNOWNCOMMAND = 421,
+	ERR_ERRONEUSNICKNAME = 432,
+	ERR_NICKNAMEINUSE = 433,
+	ERR_USERNOTINCHANNEL = 441,
+	ERR_NOTONCHANNEL = 442,
+	ERR_USERONCHANNEL = 443,
+	ERR_NEEDMOREPARAMS = 461,
+	ERR_ALREADYREGISTRED = 462,
+	ERR_PASSWDMISMATCH = 464,
+	ERR_CHANNELISFULL = 471,
+	ERR_UNKNOWNMODE = 472,
+	ERR_INVITEONLYCHAN = 473,
+	ERR_BADCHANNELKEY = 475,
+	ERR_CHANOPRIVSNEEDED = 482,
+	ERR_UMODEUNKNOWNFLAG = 501,
+	ERR_USERSDONTMATCH = 502
+
+};
 
 class Server {
 public:
@@ -56,9 +106,6 @@ public:
 	std::set<int> getClientsFds() const;
 
 private:
-	static std::map<int, std::string> rpl;
-	static std::map<int, std::string> err;
-
 	int socketFd;
 	time_t start;
 	sockaddr_in address;
@@ -106,11 +153,9 @@ private:
 
 	void processCmd(int fd, std::vector<std::string> &tokens);
 
-	void serverReply(int fd, const std::string &token, int id);
+	void serverReply(int fd, const std::string &token, serverRep id);
 
 	void serverSendReply(int fd, std::string id, const std::string &token, std::string reply);
-
-	void serverSendError(int fd, std::string id, const std::string &token, std::string reply);
 
 	void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
 	                            const std::string &parameters);
