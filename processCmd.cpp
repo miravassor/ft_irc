@@ -464,6 +464,7 @@ bool Server::applyModeToChannel(char mode, std::string &parameter, char set, Cha
 				Client *newOperator = findClient(parameter);
 				if (!newOperator) {
 					serverReply(fd, parameter, ERR_NOSUCHNICK);
+					return false;
 				}
 				if (!channel->hasMember(fd)) {
 					serverReply(fd, parameter, ERR_USERNOTINCHANNEL);
@@ -476,6 +477,78 @@ bool Server::applyModeToChannel(char mode, std::string &parameter, char set, Cha
 		}
 	}
 }
+
+// possible refactoring for applyModeToChannel
+//bool Server::applyModeToChannel(char mode, const std::string& parameter, char set, Channel* channel, int fd) {
+//	if (set == '-') {
+//		return applyUnsetModeToChannel(mode, parameter, channel, fd);
+//	} else {
+//		return applySetModeToChannel(mode, parameter, channel, fd);
+//	}
+//}
+//
+//bool Server::applySetModeToChannel(char mode, const std::string& parameter, Channel* channel, int fd) {
+//	switch (mode) {
+//		case 'i':
+//			return channel->setMode(INVITEONLY);
+//		case 't':
+//			return channel->setMode(TOPICSETOP);
+//		case 'k':
+//			if (!isValidName(parameter)) {
+//				return false;
+//			}
+//			channel->setPassword(parameter);
+//			return channel->setMode(KEYSET);
+//		case 'l':
+//			return handleLimitMode(parameter, channel);
+//		case 'o':
+//			return handleOperatorMode(parameter, channel, fd, true);
+//		default:
+//			return false;
+//	}
+//}
+//
+//bool Server::applyUnsetModeToChannel(char mode, const std::string& parameter, Channel* channel, int fd) {
+//	switch (mode) {
+//		case 'i':
+//			return channel->unsetMode(INVITEONLY);
+//		case 't':
+//			return channel->unsetMode(TOPICSETOP);
+//		case 'k':
+//			channel->setPassword("");
+//			return channel->unsetMode(KEYSET);
+//		case 'l':
+//			channel->setLimitMembers(-1);
+//			return channel->unsetMode(LIMITSET);
+//		case 'o':
+//			return handleOperatorMode(parameter, channel, fd, false);
+//		default:
+//			return false;
+//	}
+//}
+//
+//bool Server::handleLimitMode(const std::string& parameter, Channel* channel) {
+//	std::istringstream iss(parameter);
+//	int limit;
+//	if (!(iss >> limit) || limit < static_cast<int>(channel->getMemberFds().size())) {
+//		return false;
+//	}
+//	channel->setLimitMembers(limit);
+//	return channel->setMode(LIMITSET);
+//}
+//
+//bool Server::handleOperatorMode(const std::string& parameter, Channel* channel, int fd, bool setMode) {
+//	if (parameter.empty()) {
+//		return false;
+//	}
+//	Client* client = findClient(parameter);
+//	if (!client || !channel->hasMember(client->getSocket())) {
+//		serverReply(fd, parameter, !client ? ERR_NOSUCHNICK : ERR_USERNOTINCHANNEL);
+//		return false;
+//	}
+//	return setMode ? channel->addOperator(client->getSocket()) : channel->removeOperator(client->getSocket());
+//}
+
 
 // process MODE command (user) !!-> doc has more
 void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
