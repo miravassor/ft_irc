@@ -47,8 +47,34 @@ unsigned int Channel::getMode() const {
 }
 
 std::string Channel::getModeString() const {
-	//todo: implement
-	return "+";
+	std::string modeString = "+";
+
+	if (isModeSet(INVITEONLY)) {
+		modeString += 'i';
+	}
+	if (isModeSet(TOPICSET)) {
+		modeString += 't';
+	}
+	if (isModeSet(KEYSET)) {
+		modeString += 'k';
+	}
+	if (isModeSet(LIMITSET)) {
+		modeString += 'l';
+	}
+	return modeString;
+}
+
+std::string Channel::getModeStringWithParameters() const {
+	std::string modeString = getModeString();
+	if (isModeSet(KEYSET) && !_password.empty()) {
+		modeString += " " + _password;
+	}
+	if (isModeSet(LIMITSET) && limitMembers > 0) {
+		std::ostringstream oss;
+		oss << limitMembers;
+		modeString += " " + oss.str();
+	}
+	return modeString;
 }
 
 const std::set<int>& Channel::getMemberFds() const {

@@ -338,15 +338,18 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 	}
 }
 
-// in progress
 void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
 	const std::string &channelName = tokens[1];
 	Channel *channel = findChannel(channelName);
+	std::string nickname = getNick(fd);
 	if (!channel) {
 		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
-	} else if (tokens.size() == 2) {
-		// todo: display channel modes differently for inside and outside clients - with parameters for inside and without for outside
-		serverSendReply(fd, "324", getNick(fd) + " " + channelName, channel->getModeString()); // RPL_CHANNELMODEIS
+	} else if (tokens.size() == 2) { // RPL_CHANNELMODEIS
+		if (channel->hasMember(fd)) {
+			serverSendReply(fd, "324", nickname + " " + channelName, channel->getModeStringWithParameters());
+		} else {
+			serverSendReply(fd, "324", nickname + " " + channelName, channel->getModeString());
+		}
 	} else if (!channel->hasMember(fd)) {
 		serverReply(fd, channelName, ERR_NOTONCHANNEL); // ?
 	} else if (!channel->hasOperator(fd)) {
@@ -365,7 +368,6 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 				settingMode = mode;
 				continue; // go to the next iteration to process the channelMode character
 			}
-
 			std::string parameter = (modeParameterNeeded(settingMode, mode) && paramIndex < tokens.size())
 			                        ? tokens[paramIndex++]
 			                        : ""; // check if the channelMode requires a parameter and take it
@@ -385,10 +387,9 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 		}
 		if (!changedModes.empty()) {
 			std::string parameters = changedModes + " " + mergeTokensToString(parametersSet);
-			serverSendNotification(channel->getMemberFds(), getNick(fd), "MODE", parameters);
+			serverSendNotification(channel->getMemberFds(), nickname, "MODE", parameters);
 		}
 	}
-
 }
 
 bool Server::modeParameterNeeded(char set, char mode) {
