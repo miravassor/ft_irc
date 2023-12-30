@@ -51,7 +51,6 @@ void Server::initCmd() {
 	cmd["NAMES"] = &Server::processNames;
 	cmd["LIST"] = &Server::processList;
 	cmd["PING"] = &Server::processPing;
-	// and other commands
 }
 
 void Server::initChannelMode() {

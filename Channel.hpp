@@ -7,7 +7,7 @@
 #include <cstring>
 #include <sys/socket.h>
 
-#include "Server.hpp"
+//#include "Server.hpp"
 
 #define TOPICSET     0b000001 // if set topic is settable by channel operator only
 #define INVITEONLY      0b000010 // if set clients can join only if invited
@@ -23,7 +23,7 @@ enum chanRep {
 class Channel {
 
 private:
-	Server *_server;
+//	Server *_server;
 	std::string _name;
 	std::string _topic;
 	unsigned int _mode;
@@ -38,9 +38,9 @@ public:
 
 	Channel(const std::string &name, std::string &password);
 
-	Channel(const std::string &name, Server *server);
-
-	Channel(const std::string &name, std::string &password, Server *server);
+//	Channel(const std::string &name, Server *server);
+//
+//	Channel(const std::string &name, std::string &password, Server *server);
 
 	~Channel();
 
@@ -92,11 +92,11 @@ public:
 
 	bool hasInvited(int clientFd);
 
-	void newMember(int fd);
+//	void newMember(int fd);
 
-	void chanReply(int fd, chanRep id);
-
-	void chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply);
+//	void chanReply(int fd, chanRep id);
+//
+//	void chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply);
 
 	bool authMember(int clientFd, std::string &password);
 

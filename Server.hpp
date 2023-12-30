@@ -21,6 +21,7 @@
 #include <csignal>
 
 #include "Client.hpp"
+#include "Channel.hpp"
 
 class Channel;
 
