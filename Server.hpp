@@ -97,8 +97,6 @@ public:
 
 	std::vector<std::string> getNicknames(std::set<int> fds);
 
-	std::string simpleSend(std::string send);
-
 	Client &getClient(int fd);
 
 	const std::map<int, Client *> &getClients() const;
@@ -156,6 +154,8 @@ private:
 	void serverReply(int fd, const std::string &token, serverRep id);
 
 	void serverSendReply(int fd, std::string id, const std::string &token, std::string reply);
+
+	void serverSendError(int fd, std::string id, const std::string &token, std::string reply);
 
 	void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
 	                            const std::string &parameters);

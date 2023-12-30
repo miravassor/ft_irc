@@ -189,7 +189,7 @@ bool Server::verifyPassword(int fd, const std::string &arg) {
 
 // Server reply
 
-void Server::serverReply(int fd, const std::string &token, int id) {
+void Server::serverReply(int fd, const std::string &token, serverRep id) {
 	switch (id) {
 		case CAPLS:
 			serverSendReply(fd, "CAP_LS", token, "[...]");
