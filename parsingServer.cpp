@@ -2,10 +2,10 @@
 
 // Parsing
 
-bool	Server::parsBuffer(int fd) {
-	std::string					bufferStr(this->_buffer);
-	std::stringstream			ss(bufferStr);
-	std::string					line;
+bool Server::parsBuffer(int fd) {
+	std::string bufferStr(this->_buffer);
+	std::stringstream ss(bufferStr);
+	std::string line;
 
 	// add recvBuffer at the beginning of ss if not empty
 	try {
@@ -27,9 +27,8 @@ bool	Server::parsBuffer(int fd) {
 		std::cerr << e.what() << std::endl;
 	}
 	// tokenize the buffer line by line
-	while (std::getline(ss, line))
-	{
-		size_t	cRet = line.find('\r');
+	while (std::getline(ss, line)) {
+		size_t cRet = line.find('\r');
 		if (cRet != std::string::npos)
 			line.erase(cRet);
 
@@ -44,16 +43,15 @@ bool	Server::parsBuffer(int fd) {
 		if (clients[fd]->isRegistered() == false) {
 			if (registrationProcess(fd, tokens))
 				return 1;
-		}
-		else
+		} else
 			processCmd(fd, tokens);
 	}
 	return 0;
 }
 
-bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
+bool Server::registrationProcess(int fd, std::vector<std::string> &tokens) {
 	if (tokens.empty())
-			return 0; // or 1?
+		return 0; // or 1?
 	if (tokens.size() < 2) {
 		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 		return 1;
@@ -64,14 +62,13 @@ bool	Server::registrationProcess(int fd, std::vector<std::string>& tokens) {
 		if (tokens[1] == "LS") {
 			serverReply(fd, "", CAPLS);
 		}
-	}
-	else if (handleCommand(fd, command, params)) {
+	} else if (handleCommand(fd, command, params)) {
 		return 1;
 	}
 	return checkRegistration(fd);
 }
 
-bool	Server::handleCommand(int fd, const std::string& command, const std::vector<std::string>& params) {
+bool Server::handleCommand(int fd, const std::string &command, const std::vector<std::string> &params) {
 	if (command == "PASS") {
 		if (verifyPassword(fd, params[0]))
 			return 1;
@@ -83,7 +80,7 @@ bool	Server::handleCommand(int fd, const std::string& command, const std::vector
 		else
 			clients[fd]->setNickname(params[0]);
 	} else if (command == "USER") {
-		std::string	realname = getParam(params);
+		std::string realname = getParam(params);
 		if (verifyUsername(fd, realname))
 			return 1;
 		else
@@ -92,25 +89,25 @@ bool	Server::handleCommand(int fd, const std::string& command, const std::vector
 	return 0;
 }
 
-void Server::processCmd(int fd, std::vector<std::string>& tokens) {
+void Server::processCmd(int fd, std::vector<std::string> &tokens) {
 	if (tokens.empty())
 		return;
-    // removed ERR_NEEDMOREPARAMS as it can be different for diff cmd
+	// removed ERR_NEEDMOREPARAMS as it can be different for diff cmd
 
 	std::string command = tokens[0];
 	CmdIterator it = cmd.find(command);
 	if (it != cmd.end()) {
 		(this->*(it->second))(fd, tokens);
 	} else {
-        serverReply(fd, command, ERR_UNKNOWNCOMMAND);
+		serverReply(fd, command, ERR_UNKNOWNCOMMAND);
 	}
 }
 
 // Registration utils
 
-bool	Server::checkRegistration(int fd) {
+bool Server::checkRegistration(int fd) {
 	// check if logging is complete
-	if (clients[fd]->isLogged() && (!clients[fd]->getNickname().empty() && !clients[fd]->getUsername().empty()) ) {
+	if (clients[fd]->isLogged() && (!clients[fd]->getNickname().empty() && !clients[fd]->getUsername().empty())) {
 		// check if user (nickname) is in database
 		if (users.find(clients[fd]->getNickname()) != users.end()) {
 			// check if user is already connected
@@ -126,14 +123,13 @@ bool	Server::checkRegistration(int fd) {
 				serverReply(fd, clients[fd]->getNickname(), ERR_PASSWDMISMATCH);
 				return 1;
 			}
-		}
-		else {
+		} else {
 			// if first time user connect: add to database
 			users.insert(std::make_pair(clients[fd]->getNickname(), clients[fd]->getPassword()));
 		}
 		// resgitration complete, send welcome
 		clients[fd]->setRegistration();
-		serverReply(fd, clients[fd]->getNickname(), RPL_WECLOME);
+		serverReply(fd, clients[fd]->getNickname(), RPL_WELCOME);
 		serverReply(fd, clients[fd]->getNickname(), RPL_YOURHOST);
 		serverReply(fd, clients[fd]->getNickname(), RPL_CREATED);
 		serverReply(fd, clients[fd]->getNickname(), RPL_MYINFO);
@@ -142,27 +138,27 @@ bool	Server::checkRegistration(int fd) {
 }
 
 // Find the parameters in command (after ':')
-std::string	Server::getParam(const std::vector<std::string>& tokens) {
+std::string Server::getParam(const std::vector<std::string> &tokens) {
 	std::vector<std::string>::const_iterator it = tokens.begin();
 	for (; it != tokens.end(); ++it) {
 		if (it[0][0] == ':')
 			break;
 	}
-	std::string	param;
+	std::string param;
 	for (; it != tokens.end(); ++it) {
 		param.append(*it);
 		if (it + 1 != tokens.end())
 			param.append(" ");
 	}
-	size_t	cRet = param.find(':');
-		if (cRet != std::string::npos)
-			param.erase(cRet, 1);
+	size_t cRet = param.find(':');
+	if (cRet != std::string::npos)
+		param.erase(cRet, 1);
 	if (!param.empty())
 		return param;
 	return "";
 }
 
-bool	Server::verifyUsername(int fd, const std::string &arg) {
+bool Server::verifyUsername(int fd, const std::string &arg) {
 	if (arg.empty()) {
 		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 		return 1;
@@ -170,11 +166,11 @@ bool	Server::verifyUsername(int fd, const std::string &arg) {
 	return 0;
 }
 
-bool	Server::verifyNickname(int fd, const std::string &arg) {
+bool Server::verifyNickname(int fd, const std::string &arg) {
 	// look for illegal characters
 	if (arg[0] == ':' || arg[0] == '$')
 		return (serverReply(fd, arg, ERR_ERRONEUSNICKNAME), 1);
-	std::string	ill = " ,*?!@.";
+	std::string ill = " ,*?!@.";
 	for (int i = 0; i < 8; ++i) {
 		if (arg.find(ill[i]) != std::string::npos)
 			return (serverReply(fd, arg, ERR_ERRONEUSNICKNAME), 1);
@@ -182,7 +178,7 @@ bool	Server::verifyNickname(int fd, const std::string &arg) {
 	return 0;
 }
 
-bool	Server::verifyPassword(int fd, const std::string &arg) {
+bool Server::verifyPassword(int fd, const std::string &arg) {
 	if (arg.empty()) {
 		serverReply(fd, "", ERR_NEEDMOREPARAMS);
 		return 1;
@@ -193,12 +189,12 @@ bool	Server::verifyPassword(int fd, const std::string &arg) {
 
 // Server reply
 
-void	Server::serverReply(int fd, const std::string& token, serverRep id) {
+void Server::serverReply(int fd, const std::string &token, int id) {
 	switch (id) {
 		case CAPLS:
 			serverSendReply(fd, "CAP_LS", token, "[...]");
 			break;
-		case RPL_WECLOME:
+		case RPL_WELCOME:
 			serverSendReply(fd, "001", token, "Welcome to the IRC Network, " + token);
 			break;
 		case RPL_YOURHOST:
@@ -256,27 +252,27 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 		case ERR_NOTONCHANNEL:
 			serverSendReply(fd, "442", token, "You're not on that channel");
 			break;
-        case ERR_NORECIPIENT:
-            serverSendReply(fd, "411", token, "No recipient given");
-            break;
-        case ERR_NOTEXTTOSEND:
-            serverSendReply(fd, "412", token, "No text to send");
-            break;
-        case ERR_NOSUCHNICK:
-            serverSendReply(fd, "401", token, "No such nick/channel");
-            break;
-        case ERR_CANNOTSENDTOCHAN:
-            serverSendReply(fd, "404", token, "Cannot send to channel");
-            break;
-        case ERR_UNKNOWNCOMMAND:
-            serverSendReply(fd, "421", token, "Unknown command");
-            break;
-        case ERR_CHANOPRIVSNEEDED:
-            serverSendReply(fd, "482", token, "You're not channel operator");
-            break;
-        case ERR_USERNOTINCHANNEL:
-            serverSendReply(fd, "441", token, "They aren't on that channel");
-            break;
+		case ERR_NORECIPIENT:
+			serverSendReply(fd, "411", token, "No recipient given");
+			break;
+		case ERR_NOTEXTTOSEND:
+			serverSendReply(fd, "412", token, "No text to send");
+			break;
+		case ERR_NOSUCHNICK:
+			serverSendReply(fd, "401", token, "No such nick/channel");
+			break;
+		case ERR_CANNOTSENDTOCHAN:
+			serverSendReply(fd, "404", token, "Cannot send to channel");
+			break;
+		case ERR_UNKNOWNCOMMAND:
+			serverSendReply(fd, "421", token, "Unknown command");
+			break;
+		case ERR_CHANOPRIVSNEEDED:
+			serverSendReply(fd, "482", token, "You're not channel operator");
+			break;
+		case ERR_USERNOTINCHANNEL:
+			serverSendReply(fd, "441", token, "They aren't on that channel");
+			break;
 		case ERR_USERONCHANNEL:
 			serverSendReply(fd, "443", token, "is already on channel");
 			break;
@@ -297,30 +293,39 @@ void	Server::serverReply(int fd, const std::string& token, serverRep id) {
 	}
 }
 
-void    Server::serverSendReply(int fd, std::string id, const std::string& token, std::string reply) {
+void Server::serverSendError(int fd, std::string id, const std::string &token, std::string reply) {
+	(void) fd;
+	(void) id;
+	(void) token;
+	(void) reply;
+}
+
+void Server::serverSendReply(int fd, std::string id, const std::string &token, std::string reply) {
 	std::stringstream fullReply;
 	fullReply << ":" << serverName << " " << id << " " << token << " :" << reply << "\r\n";
 	std::string replyStr = fullReply.str();
 	serverSendMessage(fd, replyStr);
 }
 
-void Server::serverSendNotification(int fd, const std::string& prefix, const std::string& command, const std::string& parameters) {
-    std::stringstream fullNotification;
-    fullNotification << ":" << prefix << " " << command << " " << parameters << "\r\n";
-    serverSendMessage(fd, fullNotification.str());
+void Server::serverSendNotification(int fd, const std::string &prefix, const std::string &command,
+                                    const std::string &parameters) {
+	std::stringstream fullNotification;
+	fullNotification << ":" << prefix << " " << command << " " << parameters << "\r\n";
+	serverSendMessage(fd, fullNotification.str());
 }
 
-void Server::serverSendNotification(const std::set<int>& fds, const std::string& prefix, const std::string& command, const std::string& parameters) {
-    std::stringstream fullNotification;
-    fullNotification << ":" << prefix << " " << command << " " << parameters << "\r\n";
-    std::string notificationStr = fullNotification.str();
+void Server::serverSendNotification(const std::set<int> &fds, const std::string &prefix, const std::string &command,
+                                    const std::string &parameters) {
+	std::stringstream fullNotification;
+	fullNotification << ":" << prefix << " " << command << " " << parameters << "\r\n";
+	std::string notificationStr = fullNotification.str();
 
-    for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it) {
-        serverSendMessage(*it, notificationStr);
-    }
+	for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it) {
+		serverSendMessage(*it, notificationStr);
+	}
 }
 
-void Server::serverSendMessage(int fd, const std::string& message) {
+void Server::serverSendMessage(int fd, const std::string &message) {
 	try {
 		getClient(fd).pushSendQueue(message);
 	} catch (std::exception &e) {

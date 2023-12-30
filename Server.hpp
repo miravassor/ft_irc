@@ -22,43 +22,8 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
-
-class Channel;
-
-enum serverRep {
-	CAPLS,
-	RPL_WECLOME,
-	RPL_YOURHOST,
-	RPL_CREATED,
-	RPL_MYINFO,
-	ERR_NEEDMOREPARAMS,
-	ERR_PASSWDMISMATCH,
-	ERR_NICKNAMEINUSE,
-	ERR_ERRONEUSNICKNAME,
-	ERR_ALREADYREGISTRED,
-	ERR_USERSDONTMATCH,
-	RPL_UMODEIS,
-	ERR_UMODEUNKNOWNFLAG,
-	PONG,
-	ERR_NOSUCHSERVER,
-	ERR_NOORIGIN,
-	ERR_NOSUCHCHANNEL,
-	ERR_INVITEONLYCHAN,
-	ERR_BADCHANNELKEY,
-	ERR_NOTONCHANNEL,
-	ERR_NORECIPIENT,
-	ERR_NOTEXTTOSEND,
-	ERR_NOSUCHNICK,
-	ERR_CANNOTSENDTOCHAN,
-	ERR_UNKNOWNCOMMAND,
-	ERR_CHANOPRIVSNEEDED,
-	ERR_USERNOTINCHANNEL,
-	ERR_USERONCHANNEL,
-	RPL_ENDOFNAMES,
-	ERR_CHANNELISFULL,
-	RPL_LISTEND,
-	ERR_UNKNOWNMODE
-};
+#include "rpl.hpp"
+#include "err.hpp"
 
 class Server {
 public:
@@ -91,6 +56,9 @@ public:
 	std::set<int> getClientsFds() const;
 
 private:
+	static std::map<int, std::string> rpl;
+	static std::map<int, std::string> err;
+
 	int socketFd;
 	time_t start;
 	sockaddr_in address;
@@ -138,9 +106,11 @@ private:
 
 	void processCmd(int fd, std::vector<std::string> &tokens);
 
-	void serverReply(int fd, const std::string &token, serverRep id);
+	void serverReply(int fd, const std::string &token, int id);
 
 	void serverSendReply(int fd, std::string id, const std::string &token, std::string reply);
+
+	void serverSendError(int fd, std::string id, const std::string &token, std::string reply);
 
 	void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
 	                            const std::string &parameters);

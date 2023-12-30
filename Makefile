@@ -6,7 +6,7 @@ SRCS = main.cpp Server.cpp Client.cpp Channel.cpp parsingServer.cpp utils.cpp mo
 processInvite.cpp processJoin.cpp processKick.cpp processList.cpp processMode.cpp \
 processNames.cpp processPart.cpp processPing.cpp processPrivmsg.cpp processTopic.cpp
 
-HEADERS = Server.hpp Client.hpp Channel.hpp
+HEADERS = Server.hpp Client.hpp Channel.hpp rpl.hpp err.hpp
 
 OBJPATH = .obj
 
