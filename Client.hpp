@@ -10,16 +10,9 @@
 #include <set>
 #include <queue>
 
-// TODO : Rework to make a binary field instead of a set
-
 enum Mode {
     AWAY = 0b000001, // a: user is flagged as away
-    INVISIBLE = 0b000010, // i: marks a users as invisible
-    OPERATOR = 0b000100, // o: operator flag
-    RESTRICTED = 0b001000, // r: restricted user connection
-//    WALLOPS = 0b000100, // w: user receives wallops
-//    LOCAL_OPERATOR , // O: local operator flag
-//    SERVER_NOTICES, // s: marks a user for receipt of server notices
+    INVISIBLE = 0b001000, // i: marks a users as invisible
     UNKNOWN
 };
 
@@ -34,7 +27,7 @@ class Client {
         std::string username;
         std::string realName;
         std::string password;
-		std::string		recvBuffer;
+		std::string	recvBuffer;
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
 

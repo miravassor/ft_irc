@@ -17,6 +17,7 @@ As there's no mention of user modes in subject probably those two will be enough
 - s - marks a user for receipt of server notices;
 - gerer le mode passer en argument de la commande user
 - gerer les mode user / channel 
+- REWORK USER COMMAND
 @ alexandre
 ### List des users d'un chan 
 - ajouter @ aux op 
@@ -37,6 +38,8 @@ As there's no mention of user modes in subject probably those two will be enough
 @ alexandre 
 ### PING
 - verifier comporterment (print du pong)
+### WHOIS
+- implement WHOIS command
 
 #### Print de dbug
 - penser a virer tous les print des debug 
@@ -49,7 +52,13 @@ As there's no mention of user modes in subject probably those two will be enough
 - @ Julien 
 
 ### Kill du client
-- verifier comportement en cas de kill du client 
+- verifier comportement en cas de kill du client
+
+### Server password 
+- Implementation password server
+
+### ERR_UNKNOWNMODE
+- return garbage char into server response
 
 ### 6. Packages organizing
 - Something like

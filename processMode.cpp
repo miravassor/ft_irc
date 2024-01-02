@@ -165,10 +165,10 @@ void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 			return;
 		} else if (it[0][0] == '+') {
 			clients[fd]->addMode(mode);
-			serverSendReply(fd, *it, RPL_UMODEIS, "");
+			serverSendReply(fd, "", RPL_UMODEIS, clients[fd]->returnModes());
 		} else if (it[0][0] == '-') {
 			clients[fd]->removeMode(mode);
-			serverSendReply(fd, *it, RPL_UMODEIS, "");
+			serverSendReply(fd, "", RPL_UMODEIS, clients[fd]->returnModes());
 		}
 	}
 }
