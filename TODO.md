@@ -7,7 +7,8 @@
  
 ### 3. Buffer Overflow
 - prevent buffer overflow in the `_buffer`
-
+@ Julien 
+- 
 ### 4. Names capitalization
 - Probably store the uppercase version of channel/clients names for better performance
 
@@ -41,17 +42,20 @@ As there's no mention of user modes in subject probably those two will be enough
 ### WHOIS
 - implement WHOIS command
 
+@ Julien
 #### Print de dbug
 - penser a virer tous les print des debug 
 - 
 ### Boucle du main
 - eviter de quitter la boucle principale en cas d exception 
-
+@ Julien
 ### Fcntl 
 - corriger fcntl
 - @ Julien 
 
 ### Kill du client
+- verifier comportement en cas de kill du client 
+@ Julien
 - verifier comportement en cas de kill du client
 
 ### Server password 
