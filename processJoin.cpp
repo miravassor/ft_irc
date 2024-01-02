@@ -23,6 +23,9 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::joinExistingChannel(int fd, Channel *channel, std::string password) {
+	if (channel->hasMember(fd)) {
+		return;
+	}
 	if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
 		serverSendError(fd, channel->getName(), ERR_INVITEONLYCHAN);
 		return;
@@ -56,7 +59,7 @@ void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
 		serverSendReply(fd, channel->getName(), RPL_TOPIC, channel->getTopic());
 	}
 	std::string nicknamesString = mergeTokensToString(getNicknames(channel->getMemberFds()), false);
-	serverSendReply(fd, channel->getName(), RPL_NAMREPLY, nicknamesString);
+	serverSendReply(fd, channel->getName(), RPL_NAMREPLY, + ":" + nicknamesString);
 	serverSendReply(fd, channel->getName(), RPL_ENDOFNAMES, "");
 }
 
