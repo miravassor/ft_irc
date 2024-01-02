@@ -213,7 +213,7 @@ void Server::serverSendReply(int fd, const std::string &token, serverRep id, con
 		fullReply << _serverMessages[id];
 	}
 	if (!reply.empty()) {
-		fullReply << " " << reply;
+		fullReply << " :" << reply;
 	}
 	fullReply << "\r\n";
 	serverSendMessage(fd, fullReply.str());
