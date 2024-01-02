@@ -201,11 +201,11 @@ void Server::serverSendError(int fd, const std::string &token, serverRep id) {
 void Server::serverSendReply(int fd, const std::string &token, serverRep id, const std::string &reply) {
 	std::stringstream fullReply;
 	if (id == CAPLS) { // todo: ??
-		fullReply << ":" << serverName << " " << "CAP_LS" << " " << "[...]";
+		fullReply << ":" << serverName << " " << "CAP_LS" << " " << "[...]" << "\r\n";
 		serverSendMessage(fd, fullReply.str());
 		return;
 	}
-	fullReply << ":" << serverName << " " << id << " " << getNick(fd);
+	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
 	if (!token.empty()) {
 		fullReply << " " << token;
 	}
@@ -243,5 +243,11 @@ void Server::serverSendMessage(int fd, const std::string &message) {
 	} catch (std::exception &e) {
 		std::cout << "[ERR] " << e.what() << std::endl;
 	}
+}
+
+std::string Server::paddDigits(int i) {
+    std::ostringstream  stream;
+    stream << std::setw(3) << std::setfill('0') << i;
+    return stream.str();
 }
 

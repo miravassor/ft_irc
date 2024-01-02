@@ -19,6 +19,7 @@
 #include <cstring>
 #include <cerrno>
 #include <csignal>
+#include <iomanip>
 
 #include "Client.hpp"
 #include "Channel.hpp"
@@ -241,6 +242,8 @@ private:
 	bool modeParameterNeeded(char set, char mode);
 
 	bool isValidName(const std::string &name);
+
+    std::string paddDigits(int i);
 };
 
 #endif
