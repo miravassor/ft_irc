@@ -8,24 +8,24 @@ bool Server::parsBuffer(int fd) {
 	std::string line;
 
 	// add recvBuffer at the beginning of ss if not empty
-	try {
-		Client &client = getClient(fd);
-		if (!client.isRecvBufferEmpty()) {
-			ss.str("");
-			ss << client.getRecvBuffer() << bufferStr;
-			client.resetRecvBuffer();
-		}
-		// check if buffer contains a full line
-		size_t cRet = ss.str().find("\r\n");
-		if (cRet == std::string::npos) {
-			// if not, add buffer to recvBuffer and return
-			client.appendRecvBuffer(ss.str());
-			return 0;
-		}
-	}
-	catch (std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
+	//try {
+	//	Client &client = getClient(fd);
+	//	if (!client.isRecvBufferEmpty()) {
+	//		ss.str("");
+	//		ss << client.getRecvBuffer() << bufferStr;
+	//		client.resetRecvBuffer();
+	//	}
+	//	// check if buffer contains a full line
+	//	size_t cRet = ss.str().find("\r\n");
+	//	if (cRet == std::string::npos) {
+	//		// if not, add buffer to recvBuffer and return
+	//		client.appendRecvBuffer(ss.str());
+	//		return 0;
+	//	}
+	//}
+	//catch (std::exception &e) {
+	//	std::cerr << e.what() << std::endl;
+	//}
 	// tokenize the buffer line by line
 	while (std::getline(ss, line)) {
 		size_t cRet = line.find('\r');
@@ -40,10 +40,10 @@ bool Server::parsBuffer(int fd) {
 			tokens.push_back(token);
 		}
 		std::cout << "[TOKEN END]" << std::endl; // debug
-		if (!clients[fd]->isRegistered()) {
-			if (registrationProcess(fd, tokens))
-				return 1;
-		} else
+		//if (!clients[fd]->isRegistered()) {
+		//	if (registrationProcess(fd, tokens))
+		//		return 1;
+		//} else
 			processCmd(fd, tokens);
 	}
 	return 0;

@@ -13,7 +13,7 @@ void Server::sendPmToUser(int fd, const std::string &message, const std::string 
 
 	Client *receiver = findClient(targetName);
 	if (receiver) {
-		std::string parameters = targetName + " " + message;
+		std::string parameters = targetName + " :" + message;
 		serverSendNotification(receiver->getSocket(), prefix, command, parameters);
 		if (command == "PRIVMSG" && receiver->activeMode(AWAY)) {
 			serverSendReply(fd, targetName, RPL_AWAY, receiver->getAwayMessage());
@@ -29,7 +29,7 @@ void Server::sendPmToChan(int fd, const std::string &message, const std::string 
 	Channel *channel = findChannel(targetName);
 	if (channel) {
 		if (channel->hasMember(fd)) {
-			std::string parameters = channel->getName() + " " + message;
+			std::string parameters = channel->getName() + " :" + message;
 			serverSendNotification(channel->getMemberFds(), prefix, command, parameters);
 		} else if (command == "PRIVMSG") {
 			serverSendError(fd, targetName, ERR_CANNOTSENDTOCHAN);

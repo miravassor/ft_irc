@@ -2,7 +2,7 @@
 
 ### 1. MAX_XXX variable
 - MAXCHANNELS and ERR_TOOMANYCHANNELS to join for clients ? - optional in rfc1459
-- MAXTARGETS and ERR_TOOMANYTARGETS for PRIVMSG and other cmd ? - rfc1459
+- MAXTARGETS and ERR_TOOMANYTARGETS for PRIVMSG and other cmd ? - optional in rfc1459
 
 ### 2. Clean Signal Quit
 - Ctrl+D signal

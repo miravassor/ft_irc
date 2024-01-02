@@ -1,4 +1,4 @@
-NAME = servirc
+NAME = ircserv
 
 COMPILE = g++ -std=c++98 -Wall -Wextra -Werror -g
 
