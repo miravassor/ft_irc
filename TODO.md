@@ -28,10 +28,10 @@ As there's no mention of user modes in subject probably those two will be enough
 ### CAP LS 
 - revoir le fonctionnement de CAP 
 
-### PRIVMSG 
-- debugger 
-@ Maria
-- 
+### ~~PRIVMSG~~ done
+~~- debugger 
+@ Maria~~
+
 ### Commande NICK 
 - a implementer 
 @ alexandre 
