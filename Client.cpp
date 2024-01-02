@@ -124,10 +124,10 @@ std::string Client::returnModes() {
         fullModes.append("a");
     if (activeMode(INVISIBLE))
         fullModes.append("i");
-    if (activeMode(OPERATOR))
-        fullModes.append("o");
-    if (activeMode(RESTRICTED))
-        fullModes.append("r");
+//    if (activeMode(OPERATOR))
+//        fullModes.append("o");
+//    if (activeMode(RESTRICTED))
+//        fullModes.append("r");
     if (!fullModes.empty()) {
         fullModes.insert(0, "+");
         return fullModes;
