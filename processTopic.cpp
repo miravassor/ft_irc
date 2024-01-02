@@ -23,7 +23,8 @@ void Server::processTopic(int fd, const std::vector<std::string> &tokens) {
 		} else if (channel->isModeSet(TOPICSET) && !channel->hasOperator(fd)) {
 			serverSendError(fd, channelName, ERR_CHANOPRIVSNEEDED);
 		} else {
-			const std::string &newTopic = tokens[2];
+			const std::string
+				&newTopic = mergeTokensToString(std::vector<std::string>(tokens.begin() + 2, tokens.end()), true);
 			channel->setTopic(newTopic);
 			serverSendNotification(channel->getMemberFds(), getNick(fd), "TOPIC", channelName + " :" + newTopic);
 		}

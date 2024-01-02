@@ -223,7 +223,7 @@ private:
 	                     std::pair<std::string, std::set<int> > *fdsWithoutChannels,
 	                     std::vector<Channel *> &channels) const;
 
-	std::string mergeTokensToString(const std::vector<std::string> &tokens);
+	std::string mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon);
 
 	void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
 
@@ -234,6 +234,10 @@ private:
 
 	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
 	                  const std::string &command);
+
+	void joinExistingChannel(int fd, Channel *channel, std::string password);
+
+	void createAndJoinNewChannel(int fd, std::string channelName, std::string password);
 
 	std::string capitalizeString(const std::string &input);
 

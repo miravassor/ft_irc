@@ -12,7 +12,7 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 		fillChannelsFds(channelsFds, NULL, channels);
 	}
 	for (std::map<std::string, std::set<int> >::iterator it = channelsFds.begin(); it != channelsFds.end(); ++it) {
-		std::string nicknamesString = mergeTokensToString(getNicknames((*it).second));
+		std::string nicknamesString = mergeTokensToString(getNicknames((*it).second), false);
 		serverSendReply(fd, (*it).first, RPL_NAMREPLY, nicknamesString);
 	}
 	serverSendReply(fd, "", RPL_ENDOFNAMES, "");

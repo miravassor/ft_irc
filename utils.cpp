@@ -33,13 +33,6 @@ std::queue<std::string> Server::split(const std::string &src, char delimiter, bo
 	return tokensQueue;
 }
 
-bool Server::isValidChannelName(const std::string &name) {
-	if (name[0] != '#' && name[0] != '&') {
-		return false;
-	}
-	return isValidName(name.substr(1));
-}
-
 bool Server::isValidName(const std::string &name) {
 	if (name.empty()) {
 		return false;
@@ -52,7 +45,7 @@ bool Server::isValidName(const std::string &name) {
 	return true;
 }
 
-std::string Server::mergeTokensToString(const std::vector<std::string> &tokens) {
+std::string Server::mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon) {
 	std::string mergedString;
 	for (size_t i = 0; i < tokens.size(); ++i) {
 		mergedString += tokens[i];
@@ -60,5 +53,10 @@ std::string Server::mergeTokensToString(const std::vector<std::string> &tokens) 
 			mergedString += " ";
 		}
 	}
+	if (removeColon && !mergedString.empty() && mergedString[0] == ':') {
+		mergedString.erase(0, 1);
+	}
+
+
 	return mergedString;
 }
