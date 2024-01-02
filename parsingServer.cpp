@@ -190,7 +190,7 @@ bool Server::verifyPassword(int fd, const std::string &arg) {
 
 void Server::serverSendError(int fd, const std::string &token, serverRep id) {
 	std::stringstream fullReply;
-	fullReply << ":" << serverName << " " << id << " " << getNick(fd);
+	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
 	if (!token.empty()) {
 		fullReply << " " << token;
 	}

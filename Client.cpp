@@ -3,7 +3,7 @@
 // Build
 
 Client::Client(int socket)
-		: socketFd(socket), logged(false), registered(false), isOpe(false), recvBuffer(""), _awayMessage("") {
+		: socketFd(socket), logged(false), registered(false), isOpe(false), modes(0), recvBuffer(""), _awayMessage("") {
     std::cout << "Client created" << std::endl;
 }
 
@@ -95,5 +95,24 @@ bool Client::isRecvBufferEmpty() {
 }
 const std::string &Client::getAwayMessage() const {
 	return _awayMessage;
+}
+
+std::string Client::returnModes() {
+    std::string fullModes;
+
+    if (activeMode(AWAY))
+        fullModes.append("a");
+    if (activeMode(INVISIBLE))
+        fullModes.append("i");
+    if (activeMode(OPERATOR))
+        fullModes.append("o");
+    if (activeMode(RESTRICTED))
+        fullModes.append("r");
+    if (!fullModes.empty()) {
+        fullModes.assign("+", 0);
+        return fullModes;
+    }
+    else
+        return "";
 }
 
