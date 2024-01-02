@@ -109,7 +109,7 @@ std::string Client::returnModes() {
     if (activeMode(RESTRICTED))
         fullModes.append("r");
     if (!fullModes.empty()) {
-        fullModes.assign("+", 0);
+        fullModes.insert(0, "+");
         return fullModes;
     }
     else
