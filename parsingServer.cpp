@@ -128,10 +128,10 @@ bool Server::checkRegistration(int fd) {
 		}
 		// resgitration complete, send welcome
 		clients[fd]->setRegistration();
-		serverSendReply(fd, clients[fd]->getNickname(), RPL_WELCOME, "");
-		serverSendReply(fd, clients[fd]->getNickname(), RPL_YOURHOST, "");
-		serverSendReply(fd, clients[fd]->getNickname(), RPL_CREATED, "");
-		serverSendReply(fd, clients[fd]->getNickname(), RPL_MYINFO, "");
+		serverSendReply(fd, "", RPL_WELCOME, "");
+		serverSendReply(fd, "", RPL_YOURHOST, "");
+		serverSendReply(fd, "", RPL_CREATED, "");
+		serverSendReply(fd, "", RPL_MYINFO, "");
 	}
 	return 0;
 }
