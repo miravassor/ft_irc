@@ -222,7 +222,7 @@ private:
 	                     std::pair<std::string, std::set<int> > *fdsWithoutChannels,
 	                     std::vector<Channel *> &channels) const;
 
-	std::string mergeTokensToString(const std::vector<std::string> &tokens);
+	std::string mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon);
 
 	void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
 

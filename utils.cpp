@@ -45,7 +45,7 @@ bool Server::isValidName(const std::string &name) {
 	return true;
 }
 
-std::string Server::mergeTokensToString(const std::vector<std::string> &tokens) {
+std::string Server::mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon) {
 	std::string mergedString;
 	for (size_t i = 0; i < tokens.size(); ++i) {
 		mergedString += tokens[i];
@@ -53,5 +53,10 @@ std::string Server::mergeTokensToString(const std::vector<std::string> &tokens) 
 			mergedString += " ";
 		}
 	}
+	if (removeColon && !mergedString.empty() && mergedString[0] == ':') {
+		mergedString.erase(0, 1);
+	}
+
+
 	return mergedString;
 }
