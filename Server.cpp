@@ -66,7 +66,7 @@ void Server::initServerMessages() {
 	_serverMessages[RPL_WELCOME] = " Welcome to the IRC Network";
 	_serverMessages[RPL_YOURHOST] = " :Your host is " + serverName + " version " + serverVersion;
 	_serverMessages[RPL_CREATED] = " :This server was created " + static_cast<std::string>(ctime(&start));
-	_serverMessages[RPL_MYINFO] = serverName + " " + serverVersion + " available user/channel modes: +is/+itkl";
+	_serverMessages[RPL_MYINFO] = " " + serverName + " " + serverVersion + " available user/channel modes: +is/+itkl";
 
 	_serverMessages[RPL_LISTEND] = " :End of /LIST";
 	_serverMessages[RPL_NOTOPIC] = " :No topic is set";
