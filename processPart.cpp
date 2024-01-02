@@ -2,7 +2,7 @@
 
 void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 2) {
-		serverReply(fd, "PART", ERR_NEEDMOREPARAMS);
+		serverSendError(fd, "PART", ERR_NEEDMOREPARAMS);
 		return;
 	}
 
@@ -14,9 +14,9 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 		std::string channelName = channels.front();
 		std::vector<Channel *>::iterator channelIt = findChannelIterator(channelName);
 		if (channelIt == _channels.end()) {
-			serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+			serverSendError(fd, channelName, ERR_NOSUCHCHANNEL);
 		} else if (!(*channelIt)->hasMember(fd)) {
-			serverReply(fd, channelName, ERR_NOTONCHANNEL);
+			serverSendError(fd, channelName, ERR_NOTONCHANNEL);
 		} else {
 			std::string parameters = (*channelIt)->getName() + reason;
 			serverSendNotification((*channelIt)->getMemberFds(), prefix, "PART", parameters);

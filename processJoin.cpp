@@ -2,7 +2,7 @@
 
 void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 2) {
-		serverReply(fd, "JOIN", ERR_NEEDMOREPARAMS);
+		serverSendError(fd, "JOIN", ERR_NEEDMOREPARAMS);
 		return;
 	}
 
@@ -18,18 +18,17 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 		Channel *channel = findChannel(channelName);
 		if (channel) { // join existing channel
 			if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
-				serverReply(fd, channelName, ERR_INVITEONLYCHAN);
+				serverSendError(fd, channelName, ERR_INVITEONLYCHAN);
 				return;
 			}
-			if (channel->isModeSet(LIMITSET)
-			    && (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
-				serverReply(fd, channelName, ERR_CHANNELISFULL);
+			if (channel->isModeSet(LIMITSET) && (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
+				serverSendError(fd, channelName, ERR_CHANNELISFULL);
 				return;
 			}
 			if (channel->authMember(fd, password)) { // checking password and removing from invited container
 				sendJoinNotificationsAndReplies(fd, channel);
 			} else {
-				serverReply(fd, channelName, ERR_BADCHANNELKEY);
+				serverSendError(fd, channelName, ERR_BADCHANNELKEY);
 			}
 		} else { // creating new channel
 			if (isValidChannelName(channelName)) {
@@ -39,7 +38,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 				addChannel(newChannel);
 				sendJoinNotificationsAndReplies(fd, newChannel);
 			} else {
-				serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+				serverSendError(fd, channelName, ERR_NOSUCHCHANNEL);
 			}
 		}
 		if (!passwords.empty()) {
@@ -51,11 +50,12 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
 	serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channel->getName());
 	if (!channel->getTopic().empty()) {
-		serverSendReply(fd, "332", channel->getName(), channel->getTopic()); // RPL_TOPIC
+		serverSendReply(fd, channel->getName(), RPL_TOPIC, channel->getTopic());
 	}
 	std::string nicknamesString = mergeTokensToString(getNicknames(channel->getMemberFds()));
-	serverSendReply(fd, "353", channel->getName(), nicknamesString); // RPL_NAMREPLY
-	serverReply(fd, channel->getName(), RPL_ENDOFNAMES);
+	serverSendReply(fd, channel->getName(), RPL_NAMREPLY, nicknamesString);
+
+	serverSendReply(fd, channel->getName(), RPL_ENDOFNAMES, "");
 }
 
 // that method will be refactored later

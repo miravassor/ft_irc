@@ -2,7 +2,7 @@
 
 void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 3) {
-		serverReply(fd, "INVITE", ERR_NEEDMOREPARAMS);
+		serverSendError(fd, "INVITE", ERR_NEEDMOREPARAMS);
 		return;
 	}
 
@@ -12,26 +12,25 @@ void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
 	Channel *channel = findChannel(channelName);
 	std::string parameters = invitedNick + " " + channelName;
 	if (!invitedClient) {
-		serverReply(fd, invitedNick, ERR_NOSUCHNICK);
+		serverSendError(fd, invitedNick, ERR_NOSUCHNICK);
 	} else if (!channel) {
-		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
+		serverSendError(fd, channelName, ERR_NOSUCHCHANNEL);
 	} else if (!channel->hasMember(fd)) {
-		serverReply(fd, channelName, ERR_NOTONCHANNEL);
+		serverSendError(fd, channelName, ERR_NOTONCHANNEL);
 	} else if (channel->hasMember(invitedClient->getSocket())) {
-		serverReply(fd, parameters, ERR_USERONCHANNEL);
+		serverSendError(fd, parameters, ERR_USERONCHANNEL);
 	} else {
 		if (channel->isModeSet(INVITEONLY)) {
 			if (!channel->hasOperator(fd)) {
-				serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
+				serverSendError(fd, channelName, ERR_CHANOPRIVSNEEDED);
 				return;
 			}
 			channel->addInvited(invitedClient->getSocket());
 		}
-		const std::string &inviterNick = getNick(fd);
-		serverSendNotification(invitedClient->getSocket(), inviterNick, "INVITE", parameters);
-		serverSendReply(fd, "341", inviterNick, parameters); // RPL_INVITING
+		serverSendNotification(invitedClient->getSocket(), getNick(fd), "INVITE", parameters);
+		serverSendReply(fd, parameters, RPL_INVITING, "");
 		if (invitedClient->activeMode(AWAY)) {
-			serverSendReply(fd, "301", invitedNick, invitedClient->getAwayMessage()); // RPL_AWAY
+			serverSendReply(fd, invitedNick, RPL_AWAY, invitedClient->getAwayMessage());
 		}
 	}
 }

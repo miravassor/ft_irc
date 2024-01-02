@@ -13,20 +13,20 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 	}
 	for (std::map<std::string, std::set<int> >::iterator it = channelsFds.begin(); it != channelsFds.end(); ++it) {
 		std::string nicknamesString = mergeTokensToString(getNicknames((*it).second));
-		serverSendReply(fd, "353", (*it).first, nicknamesString);
+		serverSendReply(fd, (*it).first, RPL_NAMREPLY, nicknamesString);
 	}
-	serverReply(fd, "", RPL_ENDOFNAMES);
+	serverSendReply(fd, "", RPL_ENDOFNAMES, "");
 }
 
 void Server::fillChannelsFds(std::map<std::string, std::set<int> > &channelsFds,
-                             std::pair<std::string, std::set<int> > *fdsWithoutChannels,
-                             std::vector<Channel *> &channels) const {
+							 std::pair<std::string, std::set<int> > *fdsWithoutChannels,
+							 std::vector<Channel *> &channels) const {
 	for (std::vector<Channel *>::const_iterator it = channels.begin(); it != channels.end(); ++it) {
 		channelsFds.insert(std::make_pair((*it)->getName(), (*it)->getMemberFds()));
 
 		if (fdsWithoutChannels) {
 			for (std::set<int>::const_iterator fdIt = (*it)->getMemberFds().begin();
-			     fdIt != (*it)->getMemberFds().end(); ++fdIt) {
+				 fdIt != (*it)->getMemberFds().end(); ++fdIt) {
 				fdsWithoutChannels->second.erase(*fdIt);
 			}
 		}

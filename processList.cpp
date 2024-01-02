@@ -8,15 +8,16 @@ void Server::processList(int fd, const std::vector<std::string> &tokens) {
 		std::vector<Channel *> channels = findChannels(channelNames);
 		listChannels(fd, channels);
 	}
-	serverReply(fd, "", RPL_LISTEND);
+	serverSendReply(fd, "", RPL_LISTEND, "");
 }
 
 void Server::listChannels(int fd, std::vector<Channel *> &channels) {
 	for (std::vector<Channel *>::const_iterator it = channels.begin(); it != channels.end(); ++it) {
-		std::string topic;
-		if (!(*it)->getTopic().empty()) {
-			topic = (*it)->getTopic();
-		}
-		serverSendReply(fd, "322", (*it)->getName(), topic);
+		std::stringstream clientCount;
+		clientCount << (*it)->getMemberFds().size();
+		serverSendReply(fd,
+						(*it)->getName() + " " + clientCount.str(),
+						RPL_LIST,
+						!(*it)->getTopic().empty() ? (*it)->getTopic() : "");
 	}
 }

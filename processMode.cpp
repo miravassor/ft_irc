@@ -2,7 +2,7 @@
 
 void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 2) {
-		serverReply(fd, "MODE", ERR_NEEDMOREPARAMS);
+		serverSendError(fd, "MODE", ERR_NEEDMOREPARAMS);
 		return;
 	}
 
@@ -18,17 +18,17 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 	Channel *channel = findChannel(channelName);
 	std::string nickname = getNick(fd);
 	if (!channel) {
-		serverReply(fd, channelName, ERR_NOSUCHCHANNEL);
-	} else if (tokens.size() == 2) { // RPL_CHANNELMODEIS
+		serverSendError(fd, channelName, ERR_NOSUCHCHANNEL);
+	} else if (tokens.size() == 2) {
 		if (channel->hasMember(fd)) {
-			serverSendReply(fd, "324", nickname + " " + channelName, channel->getModeStringWithParameters());
+			serverSendReply(fd, channelName + " " + channel->getModeStringWithParameters(), RPL_CHANNELMODEIS, "");
 		} else {
-			serverSendReply(fd, "324", nickname + " " + channelName, channel->getModeString());
+			serverSendReply(fd, channelName + " " + channel->getModeString(), RPL_CHANNELMODEIS, "");
 		}
 	} else if (!channel->hasMember(fd)) {
-		serverReply(fd, channelName, ERR_NOTONCHANNEL); // ?
+		serverSendError(fd, channelName, ERR_NOTONCHANNEL); // ?
 	} else if (!channel->hasOperator(fd)) {
-		serverReply(fd, channelName, ERR_CHANOPRIVSNEEDED);
+		serverSendError(fd, channelName, ERR_CHANOPRIVSNEEDED);
 	} else {
 		std::string modes = tokens[2];
 		std::string changedModes;
@@ -44,11 +44,11 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 				continue; // go to the next iteration to process the channelMode character
 			}
 			std::string parameter = (modeParameterNeeded(settingMode, mode) && paramIndex < tokens.size())
-			                        ? tokens[paramIndex++]
-			                        : ""; // check if the channelMode requires a parameter and take it
+									? tokens[paramIndex++]
+									: ""; // check if the channelMode requires a parameter and take it
 			ModeHandlerIterator it = channelMode.find(mode);
 			if (it == channelMode.end()) { // check if mode is known
-				serverReply(fd, std::string(&mode), ERR_UNKNOWNMODE);
+				serverSendError(fd, std::string(&mode), ERR_UNKNOWNMODE); // todo: char to string
 				continue;
 			}
 			if ((this->*(it->second))(settingMode, parameter, channel, fd)) { // if channelMode applied successfully
@@ -132,12 +132,12 @@ bool Server::handleModeO(char set, const std::string &parameter, Channel *channe
 	}
 	Client *client = findClient(parameter);
 	if (!client) {
-		serverReply(fd, parameter, ERR_NOSUCHNICK);
+		serverSendError(fd, parameter, ERR_NOSUCHNICK);
 		return false;
 	}
 	if (set == '+') {
 		if (!channel->hasMember(client->getSocket())) {
-			serverReply(fd, parameter, ERR_USERNOTINCHANNEL);
+			serverSendError(fd, parameter, ERR_USERNOTINCHANNEL);
 			return false;
 		}
 		return channel->addOperator(client->getSocket());
@@ -150,21 +150,21 @@ bool Server::handleModeO(char set, const std::string &parameter, Channel *channe
 void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 	if (params[0] != clients[fd]->getNickname()) {
-		serverReply(fd, params[0], ERR_USERSDONTMATCH);
+		serverSendError(fd, params[0], ERR_USERSDONTMATCH);
 		return;
 	}
 	std::vector<std::string>::const_iterator it = tokens.begin() + 2;
 	for (; it != tokens.end(); ++it) {
 		Mode mode = clients[fd]->getMode(*it);
 		if (mode == UNKNOWN) {
-			serverReply(fd, *it, ERR_UMODEUNKNOWNFLAG);
+			serverSendError(fd, *it, ERR_UMODEUNKNOWNFLAG);
 			return;
 		} else if (it[0][0] == '+') {
 			clients[fd]->addMode(mode);
-			serverReply(fd, *it, RPL_UMODEIS);
+			serverSendReply(fd, *it, RPL_UMODEIS, "");
 		} else if (it[0][0] == '-') {
 			clients[fd]->removeMode(mode);
-			serverReply(fd, *it, RPL_UMODEIS);
+			serverSendReply(fd, *it, RPL_UMODEIS, "");
 		}
 	}
 }

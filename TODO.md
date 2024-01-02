@@ -11,9 +11,6 @@
 ### 3. Buffer Overflow
 - prevent buffer overflow in the `_buffer`
 
-### 4. Server replies formatting
-- probably separate ERR_, RPL_ and notification messages ?
-
-### 5. Names capitalization
+### 4. Names capitalization
 Could be nice to have names as it was entered when created
 - Probably store the uppercase version of channel/clients names for better performance

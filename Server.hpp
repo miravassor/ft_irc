@@ -36,7 +36,6 @@ enum serverRep {
 
 	RPL_UMODEIS = 221,
 	RPL_AWAY = 301,
-	RPL_LISTSTART = 321,
 	RPL_LIST = 322,
 	RPL_LISTEND = 323,
 	RPL_CHANNELMODEIS = 324,
@@ -45,9 +44,6 @@ enum serverRep {
 	RPL_INVITING = 341,
 	RPL_NAMREPLY = 353,
 	RPL_ENDOFNAMES = 366,
-	RPL_INFO = 371,
-	RPL_ENDOFINFO = 374,
-	RPL_TIME = 391,
 
 	ERR_NOSUCHNICK = 401,
 	ERR_NOSUCHSERVER = 402,
@@ -63,7 +59,7 @@ enum serverRep {
 	ERR_NOTONCHANNEL = 442,
 	ERR_USERONCHANNEL = 443,
 	ERR_NEEDMOREPARAMS = 461,
-	ERR_ALREADYREGISTRED = 462,
+	ERR_ALREADYREGISTERED = 462,
 	ERR_PASSWDMISMATCH = 464,
 	ERR_CHANNELISFULL = 471,
 	ERR_UNKNOWNMODE = 472,
@@ -81,6 +77,8 @@ public:
 	typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string> &)>::iterator CmdIterator;
 	typedef std::map<char, bool (Server::*)(char, const std::string &, Channel *, int)> ModeHandler;
 	typedef std::map<char, bool (Server::*)(char, const std::string &, Channel *, int)>::iterator ModeHandlerIterator;
+
+	std::map<int, std::string> _serverMessages;
 
 	Server() {};
 
@@ -121,6 +119,8 @@ private:
 
 	void initChannelMode();
 
+	void initServerMessages();
+
 
 	Client *findClient(const std::string &nickname);
 
@@ -151,11 +151,9 @@ private:
 
 	void processCmd(int fd, std::vector<std::string> &tokens);
 
-	void serverReply(int fd, const std::string &token, serverRep id);
+	void serverSendReply(int fd, const std::string &token, serverRep id, const std::string &reply);
 
-	void serverSendReply(int fd, std::string id, const std::string &token, std::string reply);
-
-	void serverSendError(int fd, std::string id, const std::string &token, std::string reply);
+	void serverSendError(int fd, const std::string &token, serverRep id);
 
 	void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
 	                            const std::string &parameters);
