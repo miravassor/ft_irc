@@ -30,6 +30,7 @@ class Client {
 		std::string	recvBuffer;
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
+		std::vector<Channel *> _channels;
 
     public:
         Client(int socket);
@@ -39,7 +40,9 @@ class Client {
         const std::string &getPassword() const;
         int getSocket();
 		const std::string &getAwayMessage() const;
-		bool isRegistered();
+		const std::vector<Channel *> &getChannels() const;
+
+	bool isRegistered();
         bool isOperator();
         bool isLogged();
         void setNickname(const std::string &nickname);
@@ -59,6 +62,8 @@ class Client {
 		void pushSendQueue(std::string send);
 		std::string popSendQueue();
 		bool sendQueueEmpty();
+		void addChannel(Channel *channel);
+		void removeChannel(Channel *channel);
 };
 
 #endif
