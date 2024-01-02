@@ -1,5 +1,8 @@
 #include "Server.hpp"
 
+// todo: take the whole reason message after :
+// remove channel if operator kicks himself and he was the last member?
+// in progress
 void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 3) {
 		serverSendError(fd, "KICK", ERR_NEEDMOREPARAMS);

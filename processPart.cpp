@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+// todo: take the whole reason message after :
+// in progress
 void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 2) {
 		serverSendError(fd, "PART", ERR_NEEDMOREPARAMS);
