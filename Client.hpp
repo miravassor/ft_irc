@@ -14,13 +14,8 @@ class Channel;
 
 // TODO : Rework to make a binary field instead of a set
 enum Mode {
-    AWAY, // a: user is flagged as away
-    INVISIBLE, // i: marks a users as invisible
-    WALLOPS, // w: user receives wallops
-    RESTRICTED, // r: restricted user connection
-    OPERATOR, // o: operator flag
-    LOCAL_OPERATOR, // O: local operator flag
-    SERVER_NOTICES, // s: marks a user for receipt of server notices
+    AWAY = 0b000001, // a: user is flagged as away
+    INVISIBLE = 0b001000, // i: marks a users as invisible
     UNKNOWN
 };
 
@@ -30,12 +25,12 @@ class Client {
         bool        logged;
         bool        registered;
         bool        isOpe;
+        unsigned int modes;
         std::string nickname;
         std::string username;
         std::string realName;
         std::string password;
-        std::set<Mode> modes;
-		std::string		recvBuffer;
+		std::string	recvBuffer;
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
 		std::vector<Channel *> _channels;
@@ -62,6 +57,7 @@ class Client {
         void removeMode(Mode mode);
         bool activeMode(Mode mode) const;
         Mode getMode(const std::string &mode);
+        std::string returnModes();
 		std::string getRecvBuffer();
 		void appendRecvBuffer(std::string recv);
 		void resetRecvBuffer();

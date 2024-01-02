@@ -3,65 +3,65 @@
 // Build
 
 Client::Client(int socket)
-		: socketFd(socket), logged(false), registered(false), isOpe(false), recvBuffer(""), _awayMessage("") {
-	std::cout << "Client created" << std::endl;
+		: socketFd(socket), logged(false), registered(false), isOpe(false), modes(0), recvBuffer(""), _awayMessage("") {
+    std::cout << "Client created" << std::endl;
 }
 
 Client::~Client() {
-	std::cout << "Client destroyed." << std::endl;
+    std::cout << "Client destroyed." << std::endl;
 }
 
 // Setters
 
 void Client::setNickname(const std::string &nickname) {
-	Client::nickname = nickname;
+    Client::nickname = nickname;
 }
 
 void Client::setUsername(const std::string &username) {
-	Client::username = username;
+    Client::username = username;
 }
 
 void Client::setLog() {
-	Client::logged = true;
+    Client::logged = true;
 }
 
 void Client::setRegistration() {
-	Client::registered = true;
+    Client::registered = true;
 }
 
-void Client::setPassword(const std::string &password) {
-	Client::password = password;
+void Client::setPassword(const std::string& password) {
+    Client::password = password;
 }
 
 
 // Getters
 
 const std::string &Client::getNickname() const {
-	return nickname;
+    return nickname;
 }
 
 const std::string &Client::getUsername() const {
-	return username;
+    return username;
 }
 
 bool Client::isRegistered() {
-	return registered;
+    return registered;
 }
 
 bool Client::isOperator() {
-	return isOpe;
+    return isOpe;
 }
 
 bool Client::isLogged() {
-	return logged;
+    return logged;
 }
 
 int Client::getSocket() {
-	return socketFd;
+    return socketFd;
 }
 
 const std::string &Client::getPassword() const {
-	return password;
+    return password;
 }
 
 void Client::pushSendQueue(std::string send) {
@@ -115,5 +115,24 @@ void Client::removeChannel(Channel *channel) {
 			break;
 		}
 	}
+}
+
+std::string Client::returnModes() {
+    std::string fullModes;
+
+    if (activeMode(AWAY))
+        fullModes.append("a");
+    if (activeMode(INVISIBLE))
+        fullModes.append("i");
+    if (activeMode(OPERATOR))
+        fullModes.append("o");
+    if (activeMode(RESTRICTED))
+        fullModes.append("r");
+    if (!fullModes.empty()) {
+        fullModes.insert(0, "+");
+        return fullModes;
+    }
+    else
+        return "";
 }
 

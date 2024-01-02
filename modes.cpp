@@ -1,6 +1,5 @@
 #include "Client.hpp"
 
-// TODO : Rework to make a binary field instead of a set
 Mode	Client::getMode(const std::string &mode) {
 	if (mode.size() != 2)
 		return UNKNOWN;
@@ -11,29 +10,23 @@ Mode	Client::getMode(const std::string &mode) {
 			return AWAY;
 		case 'i':
 			return INVISIBLE;
-		case 'w':
-			return WALLOPS;
-		case 'r':
-			return RESTRICTED;
-		case 'o':
-			return OPERATOR;
-		case 'O':
-			return LOCAL_OPERATOR;
-		case 's':
-			return SERVER_NOTICES;
 		default:
 			return UNKNOWN;
 	}
 }
 
 void	Client::addMode(Mode mode) {
-	modes.insert(mode);
+    if (activeMode(mode))
+        return;
+    modes |= mode;
 }
 
 void	Client::removeMode(Mode mode) {
-	modes.erase(mode);
+    if (!activeMode(mode))
+        return;
+    modes &= ~mode;
 }
 
 bool	Client::activeMode(Mode mode) const {
-	return modes.find(mode) != modes.end();
+	return (modes & mode) == mode;
 }
