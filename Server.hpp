@@ -234,6 +234,10 @@ private:
 	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
 	                  const std::string &command);
 
+	void joinExistingChannel(int fd, Channel *channel, std::string password);
+
+	void createAndJoinNewChannel(int fd, std::string channelName, std::string password);
+
 	std::string capitalizeString(const std::string &input);
 
 	void listChannels(int fd, std::vector<Channel *> &channels);

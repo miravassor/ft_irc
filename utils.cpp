@@ -33,13 +33,6 @@ std::queue<std::string> Server::split(const std::string &src, char delimiter, bo
 	return tokensQueue;
 }
 
-bool Server::isValidChannelName(const std::string &name) {
-	if (name[0] != '#' && name[0] != '&') {
-		return false;
-	}
-	return isValidName(name.substr(1));
-}
-
 bool Server::isValidName(const std::string &name) {
 	if (name.empty()) {
 		return false;

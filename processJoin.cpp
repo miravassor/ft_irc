@@ -7,43 +7,46 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	}
 
 	std::queue<std::string> channels = split(tokens[1], ',', true);
-	std::queue<std::string> passwords;
-	if (tokens.size() > 2) {
-		passwords = split(tokens[2], ',', false);
-	}
-
-	for (; !channels.empty(); channels.pop()) {
+	std::queue<std::string> passwords = (tokens.size() > 2) ? split(tokens[2], ',', false) : std::queue<std::string>();
+	while (!channels.empty()) {
 		std::string channelName = channels.front();
-		std::string password = passwords.empty() ? "" : passwords.front();
+		channels.pop();
+		std::string password = !passwords.empty() ? passwords.front() : "";
+		if (!passwords.empty()) passwords.pop();
 		Channel *channel = findChannel(channelName);
-		if (channel) { // join existing channel
-			if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
-				serverSendError(fd, channelName, ERR_INVITEONLYCHAN);
-				return;
-			}
-			if (channel->isModeSet(LIMITSET) && (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
-				serverSendError(fd, channelName, ERR_CHANNELISFULL);
-				return;
-			}
-			if (channel->authMember(fd, password)) { // checking password and removing from invited container
-				sendJoinNotificationsAndReplies(fd, channel);
-			} else {
-				serverSendError(fd, channelName, ERR_BADCHANNELKEY);
-			}
-		} else { // creating new channel
-			if (isValidChannelName(channelName)) {
-				Channel *newChannel = new Channel(channelName, password);
-				newChannel->addMember(fd);
-				newChannel->addOperator(fd);
-				addChannel(newChannel);
-				sendJoinNotificationsAndReplies(fd, newChannel);
-			} else {
-				serverSendError(fd, channelName, ERR_NOSUCHCHANNEL);
-			}
+		if (channel) {
+			joinExistingChannel(fd, channel, password);
+		} else {
+			createAndJoinNewChannel(fd, channelName, password);
 		}
-		if (!passwords.empty()) {
-			passwords.pop();
-		}
+	}
+}
+
+void Server::joinExistingChannel(int fd, Channel *channel, std::string password) {
+	if (channel->isModeSet(INVITEONLY) && !channel->hasInvited(fd)) {
+		serverSendError(fd, channel->getName(), ERR_INVITEONLYCHAN);
+		return;
+	}
+	if (channel->isModeSet(LIMITSET) && (int) channel->getMemberFds().size() == channel->getLimitMembers()) {
+		serverSendError(fd, channel->getName(), ERR_CHANNELISFULL);
+		return;
+	}
+	if (channel->authMember(fd, password)) { // checking password and removing from invited container
+		sendJoinNotificationsAndReplies(fd, channel);
+	} else {
+		serverSendError(fd, channel->getName(), ERR_BADCHANNELKEY);
+	}
+}
+
+void Server::createAndJoinNewChannel(int fd, std::string channelName, std::string password) {
+	if (isValidChannelName(channelName)) {
+		Channel *newChannel = new Channel(channelName, password);
+		newChannel->addMember(fd);
+		newChannel->addOperator(fd);
+		addChannel(newChannel);
+		sendJoinNotificationsAndReplies(fd, newChannel);
+	} else {
+		serverSendError(fd, channelName, ERR_NOSUCHCHANNEL);
 	}
 }
 
@@ -54,8 +57,14 @@ void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
 	}
 	std::string nicknamesString = mergeTokensToString(getNicknames(channel->getMemberFds()));
 	serverSendReply(fd, channel->getName(), RPL_NAMREPLY, nicknamesString);
-
 	serverSendReply(fd, channel->getName(), RPL_ENDOFNAMES, "");
+}
+
+bool Server::isValidChannelName(const std::string &name) {
+	if (name[0] != '#' && name[0] != '&') {
+		return false;
+	}
+	return isValidName(name.substr(1));
 }
 
 // that method will be refactored later
