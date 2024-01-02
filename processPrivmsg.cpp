@@ -9,7 +9,7 @@ bool Server::checkPmTokens(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-						  const std::string &command) {
+                          const std::string &command) {
 
 	Client *receiver = findClient(targetName);
 	if (receiver) {
@@ -24,7 +24,7 @@ void Server::sendPmToUser(int fd, const std::string &message, const std::string 
 }
 
 void Server::sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-						  const std::string &command) {
+                          const std::string &command) {
 
 	Channel *channel = findChannel(targetName);
 	if (channel) {
@@ -47,12 +47,12 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	std::string message = getParam(tokens);
 	std::string prefix = getNick(fd);
 	while (!targets.empty()) {
-		const std::string &targetName = targets.front();
+		const std::string targetName = targets.front();
+		targets.pop();
 		if (targetName.at(0) == '#' || targetName.at(0) == '&') {
 			sendPmToChan(fd, message, prefix, targetName, tokens[0]);
 		} else {
 			sendPmToUser(fd, message, prefix, targetName, tokens[0]);
 		}
 	}
-	targets.pop();
 }
