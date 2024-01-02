@@ -3,7 +3,7 @@
 // Build
 
 Client::Client(int socket)
-		: socketFd(socket), logged(false), registered(false), isOpe(false), recvBuffer("") {
+		: socketFd(socket), logged(false), registered(false), isOpe(false), recvBuffer(""), _awayMessage("") {
     std::cout << "Client created" << std::endl;
 }
 
@@ -92,5 +92,8 @@ void Client::resetRecvBuffer() {
 
 bool Client::isRecvBufferEmpty() {
 	return this->recvBuffer.empty();
+}
+const std::string &Client::getAwayMessage() const {
+	return _awayMessage;
 }
 

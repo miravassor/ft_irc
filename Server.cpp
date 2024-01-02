@@ -12,7 +12,7 @@ Server::Server(int port, const std::string &password) {
 	socketFd = socket(address.sin_family, SOCK_STREAM | SOCK_NONBLOCK, 0);
 	if (socketFd == -1) {
 		throw std::runtime_error(
-				"Socket error: [" + std::string(strerror(errno)) + "]");
+			"Socket error: [" + std::string(strerror(errno)) + "]");
 	}
 	pollfd serverPollFd;
 	serverPollFd.fd = socketFd;
@@ -22,13 +22,15 @@ Server::Server(int port, const std::string &password) {
 	// binding socket to the port
 	if (bind(this->socketFd, (sockaddr *) (&address), sizeof(address)) == -1) {
 		throw std::runtime_error(
-				"Bind error: [" + std::string(strerror(errno)) + "]");
+			"Bind error: [" + std::string(strerror(errno)) + "]");
 	}
 	this->start = time(0);
 	this->_password = password;
 	this->serverName = "42.IRC";
 	this->serverVersion = "0.1";
 	initCmd();
+	initChannelMode();
+	initServerMessages();
 	listenPort();
 	memset(_buffer, 0, 1024);
 	std::cout << "Server created: address=" << inet_ntoa(address.sin_addr)
@@ -40,13 +42,59 @@ Server::Server(int port, const std::string &password) {
 
 void Server::initCmd() {
 	cmd["PRIVMSG"] = &Server::processPrivmsg;
+	cmd["NOTICE"] = &Server::processPrivmsg;
 	cmd["JOIN"] = &Server::processJoin;
 	cmd["INVITE"] = &Server::processInvite;
 	cmd["KICK"] = &Server::processKick;
+	cmd["TOPIC"] = &Server::processTopic;
 	cmd["PART"] = &Server::processPart;
 	cmd["MODE"] = &Server::processMode;
+	cmd["NAMES"] = &Server::processNames;
+	cmd["LIST"] = &Server::processList;
 	cmd["PING"] = &Server::processPing;
-	// and other commands
+}
+
+void Server::initChannelMode() {
+	channelMode['i'] = &Server::handleModeI;
+	channelMode['t'] = &Server::handleModeT;
+	channelMode['k'] = &Server::handleModeK;
+	channelMode['l'] = &Server::handleModeL;
+	channelMode['o'] = &Server::handleModeO;
+}
+
+void Server::initServerMessages() {
+	_serverMessages[RPL_WELCOME] = " Welcome to the IRC Network";
+	_serverMessages[RPL_YOURHOST] = " :Your host is " + serverName + " version " + serverVersion;
+	_serverMessages[RPL_CREATED] = " :This server was created " + static_cast<std::string>(ctime(&start));
+	_serverMessages[RPL_MYINFO] = " " + serverName + " " + serverVersion + " available user/channel modes: +is/+itkl";
+
+	_serverMessages[RPL_LISTEND] = " :End of /LIST";
+	_serverMessages[RPL_NOTOPIC] = " :No topic is set";
+	_serverMessages[RPL_ENDOFNAMES] = " :End of /NAMES list";
+
+	_serverMessages[ERR_NOSUCHNICK] = " :No such nick/channel";
+	_serverMessages[ERR_NOSUCHSERVER] = " :No such server";
+	_serverMessages[ERR_NOSUCHCHANNEL] = " :No such channel";
+	_serverMessages[ERR_CANNOTSENDTOCHAN] = " :Cannot send to channel";
+	_serverMessages[ERR_NOORIGIN] = " :No origin specified";
+	_serverMessages[ERR_NORECIPIENT] = " :No recipient given";
+	_serverMessages[ERR_NOTEXTTOSEND] = " :No text to send";
+	_serverMessages[ERR_UNKNOWNCOMMAND] = " :Unknown command";
+	_serverMessages[ERR_ERRONEUSNICKNAME] = " :Erroneus nickname";
+	_serverMessages[ERR_NICKNAMEINUSE] = " :Nickname is already in use";
+	_serverMessages[ERR_USERNOTINCHANNEL] = " :They aren't on that channel";
+	_serverMessages[ERR_NOTONCHANNEL] = " :You're not on that channel";
+	_serverMessages[ERR_USERONCHANNEL] = " :is already on channel";
+	_serverMessages[ERR_NEEDMOREPARAMS] = " :Not enough parameters";
+	_serverMessages[ERR_ALREADYREGISTERED] = " :You may not reregister";
+	_serverMessages[ERR_PASSWDMISMATCH] = " :Password incorrect";
+	_serverMessages[ERR_CHANNELISFULL] = " :Cannot join channel (+l)";
+	_serverMessages[ERR_UNKNOWNMODE] = " :is unknown mode char to me";
+	_serverMessages[ERR_INVITEONLYCHAN] = " :Cannot join channel (+i)";
+	_serverMessages[ERR_BADCHANNELKEY] = " :Cannot join channel (+k)";
+	_serverMessages[ERR_CHANOPRIVSNEEDED] = " :You're not channel operator";
+	_serverMessages[ERR_UMODEUNKNOWNFLAG] = " :Unknown MODE flag";
+	_serverMessages[ERR_USERSDONTMATCH] = " :Cant change mode for other users";
 }
 
 Server::~Server() {
@@ -95,8 +143,6 @@ void Server::removeClient(int clientSocket) {
 }
 
 void Server::run() {
-	// TODO: iterate through clients to check send Queues
-	//  and set sockets to POLLOUT
 	for (std::map<int, Client *>::iterator it = clients.begin();
 		 it != clients.end(); ++it) {
 		if (!it->second->sendQueueEmpty()) {
@@ -112,7 +158,7 @@ void Server::run() {
 	int countEvents = poll(&pollFds[0], pollFds.size(), 0);
 	if (countEvents < 0) {
 		throw std::runtime_error(
-				"Poll error: [" + std::string(strerror(errno)) + "]");
+			"Poll error: [" + std::string(strerror(errno)) + "]");
 	}
 	for (size_t i = 0; i < pollFds.size(); i++) {
 		if (pollFds[i].revents & POLLIN) {
@@ -135,15 +181,14 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 		if (bytesRead > 0) {
 			_buffer[bytesRead] = 0;
 			if (parsBuffer(pollFds[index].fd)) {
-		// TODO : handle parsing errors
+				// TODO : handle parsing errors
 				(void) 0;
 			}
 		} else if (bytesRead == 0) {
 			removeClient(pollFds[index].fd);
 			index--;
 		} else {
-			// TODO : handle recv errors
-			throw std::runtime_error("SOME TMP ERROR");
+			throw std::runtime_error("Recv error: [" + std::string(strerror(errno)) + "]");
 		}
 		resetEvents(index);
 	}
@@ -158,6 +203,7 @@ void Server::sendData(size_t index) {
 			const char *dataPtr = msg.c_str();
 			ssize_t dataRemaining = msg.length();
 			while (dataRemaining > 0) {
+				std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
 				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
 				if (n < 0) {
 					if (errno == EWOULDBLOCK || errno == EAGAIN) {
@@ -167,8 +213,7 @@ void Server::sendData(size_t index) {
 					} else {
 						throw std::runtime_error("Send error");
 					}
-				}
-				else if (n == 0) {
+				} else if (n == 0) {
 					removeClient(pollFds[index].fd);
 					throw std::runtime_error("Connection closed");
 				}
@@ -205,19 +250,19 @@ int Server::acceptConnection() {
 							  &clientAddressLength);
 	if (clientSocket == -1) {
 		throw std::runtime_error(
-				"Accept error: [" + std::string(strerror(errno)) + "]");
+			"Accept error: [" + std::string(strerror(errno)) + "]");
 	}
 	// TODO : Not sur if that part is OK with subject restrictions ?
 	int flags = fcntl(socketFd, F_GETFL, 0);
 	if (flags == -1) {
 		// Handle error
 		throw std::runtime_error(
-				"Fcntl error: [" + std::string(strerror(errno)) + "]");
+			"Fcntl error: [" + std::string(strerror(errno)) + "]");
 	}
 	if (fcntl(socketFd, F_SETFL, flags | O_NONBLOCK) == -1) {
 		// Handle error
 		throw std::runtime_error(
-				"Fcntl error: [" + std::string(strerror(errno)) + "]");
+			"Fcntl error: [" + std::string(strerror(errno)) + "]");
 	}
 	clientPollFd.fd = clientSocket;
 	clientPollFd.events = POLLIN;
@@ -245,37 +290,60 @@ std::string Server::getNick(int fd) {
 	return "";
 }
 
+std::vector<std::string> Server::getNicknames(std::set<int> fds) {
+	std::vector<std::string> nicknames;
+	for (std::set<int>::iterator it = fds.begin(); it != fds.end(); ++it) {
+		nicknames.push_back(getNick(*it));
+	}
+	return nicknames;
+}
+
 void Server::addChannel(Channel *channel) {
 	_channels.push_back(channel);
 }
 
-std::vector<Channel*>::iterator Server::findChannelIterator(const std::string &name) {
-    std::vector<Channel*>::iterator it = _channels.begin();
-    while (it != _channels.end()) {
-        if ((*it)->getName() == name) {
-            break;
-        }
-        it++;
-    }
-    return it;
+std::vector<Channel *>::iterator Server::findChannelIterator(const std::string &name) {
+	std::string upperName = capitalizeString(name);
+	std::vector<Channel *>::iterator it = _channels.begin();
+	while (it != _channels.end()) {
+		if (capitalizeString((*it)->getName()) == upperName) {
+			break;
+		}
+		it++;
+	}
+	return it;
 }
 
-Channel* Server::findChannel(const std::string &name) {
-	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
-		if ((*it)->getName() == name) {
+Channel *Server::findChannel(const std::string &name) {
+	std::string upperName = capitalizeString(name);
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		if (capitalizeString((*it)->getName()) == upperName) {
 			return *it;
 		}
 	}
 	return NULL;
 }
 
-Client *Server::findClient(const std::string& nickname) {
-    for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it) {
-        if (it->second->getNickname() == nickname) {
-            return it->second;
-        }
-    }
-    return NULL;
+std::vector<Channel *> Server::findChannels(std::queue<std::string> names) {
+	std::vector<Channel *> channels;
+	while (!names.empty()) {
+		Channel *channel = findChannel(names.front());
+		if (channel) {
+			channels.push_back(channel);
+		}
+		names.pop();
+	}
+	return channels;
+}
+
+Client *Server::findClient(const std::string &nickname) {
+	std::string upperName = capitalizeString(nickname);
+	for (std::map<int, Client *>::iterator it = clients.begin(); it != clients.end(); ++it) {
+		if (capitalizeString(it->second->getNickname()) == upperName) {
+			return it->second;
+		}
+	}
+	return NULL;
 }
 
 Client &Server::getClient(int fd) {
@@ -283,4 +351,16 @@ Client &Server::getClient(int fd) {
 		throw std::runtime_error("Cannot find client with fd");
 	}
 	return (*this->clients[fd]);
+}
+
+const std::map<int, Client *> &Server::getClients() const {
+	return clients;
+}
+
+std::set<int> Server::getClientsFds() const {
+	std::set<int> fds;
+	for (std::map<int, Client *>::const_iterator it = clients.begin(); it != clients.end(); ++it) {
+		fds.insert(it->first);
+	}
+	return fds;
 }

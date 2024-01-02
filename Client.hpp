@@ -35,6 +35,7 @@ class Client {
         std::set<Mode> modes;
 		std::string		recvBuffer;
 		std::queue<std::string> _sendQueue;
+		std::string _awayMessage;
 
     public:
         Client(int socket);
@@ -43,7 +44,8 @@ class Client {
         const std::string &getUsername() const;
         const std::string &getPassword() const;
         int getSocket();
-        bool isRegistered();
+		const std::string &getAwayMessage() const;
+		bool isRegistered();
         bool isOperator();
         bool isLogged();
         void setNickname(const std::string &nickname);
