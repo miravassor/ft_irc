@@ -13,7 +13,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	}
 
 	for (; !channels.empty(); channels.pop()) {
-		std::string channelName = channels.front();
+		std::string channelName = capitalizeString(channels.front());
 		std::string password = passwords.empty() ? "" : passwords.front();
 		Channel *channel = findChannel(channelName);
 		if (channel) { // join existing channel

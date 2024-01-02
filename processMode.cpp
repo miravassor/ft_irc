@@ -14,7 +14,7 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
-	const std::string &channelName = tokens[1];
+	const std::string &channelName = capitalizeString(tokens[1]);
 	Channel *channel = findChannel(channelName);
 	std::string nickname = getNick(fd);
 	if (!channel) {
@@ -154,6 +154,10 @@ void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 		return;
 	}
 	std::vector<std::string>::const_iterator it = tokens.begin() + 2;
+    if (it == tokens.end()) {
+        serverSendReply(fd, "", RPL_UMODEIS, clients[fd]->returnModes());
+        return;
+    }
 	for (; it != tokens.end(); ++it) {
 		Mode mode = clients[fd]->getMode(*it);
 		if (mode == UNKNOWN) {
