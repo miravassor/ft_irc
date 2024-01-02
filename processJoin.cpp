@@ -13,6 +13,10 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 		channels.pop();
 		std::string password = !passwords.empty() ? passwords.front() : "";
 		if (!passwords.empty()) passwords.pop();
+		if (getClient(fd).getChannels().size() == MAXCHANNELS) {
+			serverSendError(fd, channelName, ERR_TOOMANYCHANNELS);
+			return;
+		}
 		Channel *channel = findChannel(channelName);
 		if (channel) {
 			joinExistingChannel(fd, channel, password);
@@ -35,6 +39,7 @@ void Server::joinExistingChannel(int fd, Channel *channel, std::string password)
 		return;
 	}
 	if (channel->authMember(fd, password)) { // checking password and removing from invited container
+		clients[fd]->addChannel(channel);
 		sendJoinNotificationsAndReplies(fd, channel);
 	} else {
 		serverSendError(fd, channel->getName(), ERR_BADCHANNELKEY);
@@ -46,6 +51,7 @@ void Server::createAndJoinNewChannel(int fd, std::string channelName, std::strin
 		Channel *newChannel = new Channel(channelName, password);
 		newChannel->addMember(fd);
 		newChannel->addOperator(fd);
+		clients[fd]->addChannel(newChannel);
 		addChannel(newChannel);
 		sendJoinNotificationsAndReplies(fd, newChannel);
 	} else {

@@ -21,6 +21,7 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 			std::string parameters = (*channelIt)->getName() + reason;
 			serverSendNotification((*channelIt)->getMemberFds(), prefix, "PART", parameters);
 			(*channelIt)->removeMember(fd);
+			clients[fd]->removeChannel(*channelIt);
 			if ((*channelIt)->getMemberFds().empty()) {
 				delete *channelIt;
 				_channels.erase(channelIt);
