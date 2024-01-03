@@ -98,18 +98,16 @@ const std::string &Client::getAwayMessage() const {
 	return _awayMessage;
 }
 
-const std::vector<Channel *> &Client::getChannels() const {
+const std::vector<std::string> &Client::getChannels() const {
 	return _channels;
 }
 
-void Client::addChannel(Channel *channel) {
-	if (channel) {
-		_channels.push_back(channel);
-	}
+void Client::addChannel(const std::string &channel) {
+	_channels.push_back(channel);
 }
 
-void Client::removeChannel(Channel *channel) {
-	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+void Client::removeChannel(const std::string &channel) {
+	for (std::vector<std::string>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
 		if (*it == channel) {
 			_channels.erase(it);
 			break;

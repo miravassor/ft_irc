@@ -10,8 +10,6 @@
 #include <set>
 #include <queue>
 
-class Channel;
-
 // TODO : Rework to make a binary field instead of a set
 enum Mode {
     AWAY = 0b000001, // a: user is flagged as away
@@ -33,7 +31,7 @@ class Client {
 		std::string	recvBuffer;
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
-		std::vector<Channel *> _channels;
+		std::vector<std::string> _channels;
 
     public:
         Client(int socket);
@@ -43,7 +41,7 @@ class Client {
         const std::string &getPassword() const;
         int getSocket();
 		const std::string &getAwayMessage() const;
-		const std::vector<Channel *> &getChannels() const;
+		const std::vector<std::string> &getChannels() const;
 
 	bool isRegistered();
         bool isOperator();
@@ -65,8 +63,8 @@ class Client {
 		void pushSendQueue(std::string send);
 		std::string popSendQueue();
 		bool sendQueueEmpty();
-		void addChannel(Channel *channel);
-		void removeChannel(Channel *channel);
+		void addChannel(const std::string &channel);
+		void removeChannel(const std::string &channel);
 };
 
 #endif
