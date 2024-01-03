@@ -73,8 +73,8 @@ void Server::initServerMessages() {
 	_serverMessages[RPL_LISTEND] = " :End of /LIST";
 	_serverMessages[RPL_NOTOPIC] = " :No topic is set";
 	_serverMessages[RPL_ENDOFNAMES] = " :End of /NAMES list";
-    _serverMessages[RPL_UNAWAY] = " :You are no longer marked as being away";
-    _serverMessages[RPL_NOWAWAY] = " :You have been marked as being away";
+	_serverMessages[RPL_UNAWAY] = " :You are no longer marked as being away";
+	_serverMessages[RPL_NOWAWAY] = " :You have been marked as being away";
 
 	_serverMessages[ERR_NOSUCHNICK] = " :No such nick/channel";
 	_serverMessages[ERR_NOSUCHSERVER] = " :No such server";
@@ -299,16 +299,14 @@ void Server::addChannel(Channel *channel) {
 	_channels.push_back(channel);
 }
 
-std::vector<Channel *>::iterator Server::findChannelIterator(const std::string &name) {
-	std::string upperName = capitalizeString(name);
-	std::vector<Channel *>::iterator it = _channels.begin();
-	while (it != _channels.end()) {
-		if (capitalizeString((*it)->getName()) == upperName) {
+void Server::removeChannel(const std::string &channelName) {
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		if ((*it)->getName() == channelName) {
+			delete *it;
+			_channels.erase(it);
 			break;
 		}
-		it++;
 	}
-	return it;
 }
 
 Channel *Server::findChannel(const std::string &name) {
@@ -319,6 +317,14 @@ Channel *Server::findChannel(const std::string &name) {
 		}
 	}
 	return NULL;
+}
+
+void Server::removeClientFromChannel(int fd, Channel *channel) {
+	channel->removeMember(fd);
+	clients[fd]->removeChannel(channel->getName());
+	if (channel->getMemberFds().empty()) {
+		removeChannel(channel->getName());
+	}
 }
 
 std::vector<Channel *> Server::findChannels(std::queue<std::string> names) {

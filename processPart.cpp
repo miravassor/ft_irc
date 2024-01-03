@@ -5,7 +5,6 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 		serverSendError(fd, "PART", ERR_NEEDMOREPARAMS);
 		return;
 	}
-
 	std::queue<std::string> channels = split(tokens[1], ',', true);
 	if (channels.size() > MAXTARGETS) {
 		serverSendError(fd, "PART", ERR_TOOMANYTARGETS);
@@ -19,20 +18,15 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 	}
 	while (!channels.empty()) {
 		std::string channelName = channels.front();
-		std::vector<Channel *>::iterator channelIt = findChannelIterator(channelName);
-		if (channelIt == _channels.end()) {
+		channels.pop();
+		Channel *channel = findChannel(channelName);
+		if (!channel) {
 			serverSendError(fd, channelName, ERR_NOSUCHCHANNEL);
-		} else if (!(*channelIt)->hasMember(fd)) {
+		} else if (!channel->hasMember(fd)) {
 			serverSendError(fd, channelName, ERR_NOTONCHANNEL);
 		} else {
-			serverSendNotification((*channelIt)->getMemberFds(), getNick(fd), "PART", channelName + " :" + reason);
-			(*channelIt)->removeMember(fd);
-			clients[fd]->removeChannel(channelName);
-			if ((*channelIt)->getMemberFds().empty()) {
-				delete *channelIt;
-				_channels.erase(channelIt);
-			}
+			serverSendNotification(channel->getMemberFds(), getNick(fd), "PART", channelName + " :" + reason);
+			removeClientFromChannel(fd, channel);
 		}
-		channels.pop();
 	}
 }
