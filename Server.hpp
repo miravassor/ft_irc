@@ -51,6 +51,7 @@ enum serverRep {
 	ERR_NOSUCHCHANNEL = 403,
 	ERR_CANNOTSENDTOCHAN = 404,
 	ERR_TOOMANYCHANNELS = 405,
+	ERR_TOOMANYTARGETS = 407,
 	ERR_NOORIGIN = 409,
 	ERR_NORECIPIENT = 411,
 	ERR_NOTEXTTOSEND = 412,
@@ -73,7 +74,8 @@ enum serverRep {
 
 };
 
-static const int MAXCHANNELS = 42;
+static const int MAXCHANNELS = 9; // max number of channels a client can join
+static const int MAXTARGETS = 10; // max number of unique targets for commands with targets
 
 class Server {
 public:

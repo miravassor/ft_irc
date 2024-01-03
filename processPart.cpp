@@ -8,7 +8,11 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 		return;
 	}
 
-	std::queue<std::string> channels = split(tokens[1], ',', false);
+	std::queue<std::string> channels = split(tokens[1], ',', true);
+	if (channels.size() > MAXTARGETS) {
+		serverSendError(fd, "PART", ERR_TOOMANYTARGETS);
+		return;
+	}
 	std::string reason = tokens.size() > 2 ? (" " + tokens[2]) : "";
 	std::string prefix = getNick(fd);
 

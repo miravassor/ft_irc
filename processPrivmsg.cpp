@@ -44,6 +44,10 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 		return;
 
 	std::queue<std::string> targets = split(tokens[1], ',', true);
+	if (targets.size() > MAXTARGETS) {
+		serverSendError(fd, tokens[0], ERR_TOOMANYTARGETS);
+		return;
+	}
 	std::string message = getParam(tokens);
 	std::string prefix = getNick(fd);
 	while (!targets.empty()) {
