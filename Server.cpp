@@ -250,14 +250,7 @@ int Server::acceptConnection() {
 		throw std::runtime_error(
 			"Accept error: [" + std::string(strerror(errno)) + "]");
 	}
-	// TODO : Not sur if that part is OK with subject restrictions ?
-	int flags = fcntl(socketFd, F_GETFL, 0);
-	if (flags == -1) {
-		// Handle error
-		throw std::runtime_error(
-			"Fcntl error: [" + std::string(strerror(errno)) + "]");
-	}
-	if (fcntl(socketFd, F_SETFL, flags | O_NONBLOCK) == -1) {
+	if (fcntl(socketFd, F_SETFL,  O_NONBLOCK) == -1) {
 		// Handle error
 		throw std::runtime_error(
 			"Fcntl error: [" + std::string(strerror(errno)) + "]");
