@@ -24,9 +24,9 @@ As there's no mention of user modes in subject probably those two will be enough
 - ajouter @ aux op 
 - gerer les invisibles 
 @ Maria 
-###  boucle poll 
+~~###  boucle poll 
 - corriger le send data pour correspondre au demande de l'eval 
-@ Julien 
+@ Julien~~ 
 
 ### CAP LS 
 - revoir le fonctionnement de CAP 
@@ -50,9 +50,9 @@ As there's no mention of user modes in subject probably those two will be enough
 ### Boucle du main
 - eviter de quitter la boucle principale en cas d exception 
 @ Julien
-### Fcntl 
+~~### Fcntl 
 - corriger fcntl
-- @ Julien 
+- @ Julien~~ 
 
 ### Kill du client
 - verifier comportement en cas de kill du client 
