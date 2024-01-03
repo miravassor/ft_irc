@@ -9,7 +9,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	std::queue<std::string> channels = split(tokens[1], ',', true);
 	std::queue<std::string> passwords = (tokens.size() > 2) ? split(tokens[2], ',', false) : std::queue<std::string>();
 	while (!channels.empty()) {
-		std::string channelName = capitalizeString(channels.front());
+		std::string channelName = channels.front();
 		channels.pop();
 		std::string password = !passwords.empty() ? passwords.front() : "";
 		if (!passwords.empty()) passwords.pop();
@@ -64,7 +64,7 @@ void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
 	if (!channel->getTopic().empty()) {
 		serverSendReply(fd, channel->getName(), RPL_TOPIC, channel->getTopic());
 	}
-	std::string nicknamesString = mergeTokensToString(getNicknames(channel->getMemberFds()), false);
+	std::string nicknamesString = mergeTokensToString(getAllChannelMembersNicks(channel), false);
 	serverSendReply(fd, channel->getName(), RPL_NAMREPLY, nicknamesString);
 	serverSendReply(fd, channel->getName(), RPL_ENDOFNAMES, "");
 }

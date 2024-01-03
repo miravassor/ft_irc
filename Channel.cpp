@@ -153,7 +153,7 @@ bool Channel::removeOperator(int clientFd) {
 	return _operatorFds.erase(clientFd);
 }
 
-bool Channel::hasOperator(int clientFd) {
+bool Channel::hasOperator(int clientFd) const {
 	return _operatorFds.find(clientFd) != _operatorFds.end();
 }
 

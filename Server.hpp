@@ -222,10 +222,6 @@ private:
 
 	void resetEvents(size_t index);
 
-	void fillChannelsFds(std::map<std::string, std::set<int> > &channelsFds,
-	                     std::pair<std::string, std::set<int> > *fdsWithoutChannels,
-	                     std::vector<Channel *> &channels) const;
-
 	std::string mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon);
 
 	void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
@@ -251,6 +247,14 @@ private:
 	bool isValidName(const std::string &name);
 
     std::string paddDigits(int i);
+
+	std::vector<std::string> getClientsWithoutChannels();
+
+	std::map<std::string, std::vector<std::string> > getClientsOfChannels(int fd, std::vector<Channel *> channels);
+
+	std::vector<std::string> getAllChannelMembersNicks(const Channel *channel);
+
+	std::vector<std::string> getVisibleChannelMembersNicks(const Channel *channel);
 };
 
 #endif
