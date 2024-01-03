@@ -27,7 +27,7 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 			std::string parameters = targetNick + " from " + channelName + reason;
 			serverSendNotification(channel->getMemberFds(), getNick(fd), "KICK", parameters);
 			channel->removeMember(targetClient->getSocket());
-			clients[fd]->removeChannel(channel);
+			clients[fd]->removeChannel(channelName);
 		}
 	}
 }

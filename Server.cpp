@@ -172,7 +172,8 @@ void Server::run() {
 	}
 }
 
-size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
+size_t Server::receiveData(size_t index) {
+// if index == 0 -> first connection
 	if (index == 0) {
 		addClient(acceptConnection());
 	} else {
@@ -181,10 +182,7 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 							 0);
 		if (bytesRead > 0) {
 			_buffer[bytesRead] = 0;
-			if (parsBuffer(pollFds[index].fd)) {
-				// TODO : handle parsing errors
-				(void) 0;
-			}
+			parsBuffer(pollFds[index].fd);
 		} else if (bytesRead == 0) {
 			removeClient(pollFds[index].fd);
 			index--;
@@ -199,18 +197,20 @@ size_t Server::receiveData(size_t index) {// if index == 0 -> first connection
 void Server::sendData(size_t index) {
 	try {
 		Client &c = getClient(pollFds[index].fd);
-		while (!c.sendQueueEmpty()) {
+		if (!c.sendQueueEmpty()) {
 			std::string msg = c.popSendQueue();
 			const char *dataPtr = msg.c_str();
 			ssize_t dataRemaining = msg.length();
-			while (dataRemaining > 0) {
 				std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
 				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
-				if (n < 0) {
+				if (dataRemaining > n) {
+					c.pushSendQueue(msg.substr(n));
+					pollFds[index].events = POLLOUT;
+				}
+				else if (n < 0) {
 					if (errno == EWOULDBLOCK || errno == EAGAIN) {
 						c.pushSendQueue(msg);
 						pollFds[index].events = POLLOUT;
-						break;
 					} else {
 						throw std::runtime_error("Send error");
 					}
@@ -218,9 +218,6 @@ void Server::sendData(size_t index) {
 					removeClient(pollFds[index].fd);
 					throw std::runtime_error("Connection closed");
 				}
-				dataPtr += n;
-				dataRemaining -= n;
-			}
 		}
 		pollFds[index].events = POLLIN;
 	}

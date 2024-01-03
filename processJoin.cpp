@@ -39,7 +39,7 @@ void Server::joinExistingChannel(int fd, Channel *channel, std::string password)
 		return;
 	}
 	if (channel->authMember(fd, password)) { // checking password and removing from invited container
-		clients[fd]->addChannel(channel);
+		clients[fd]->addChannel(channel->getName());
 		sendJoinNotificationsAndReplies(fd, channel);
 	} else {
 		serverSendError(fd, channel->getName(), ERR_BADCHANNELKEY);
@@ -51,7 +51,7 @@ void Server::createAndJoinNewChannel(int fd, std::string channelName, std::strin
 		Channel *newChannel = new Channel(channelName, password);
 		newChannel->addMember(fd);
 		newChannel->addOperator(fd);
-		clients[fd]->addChannel(newChannel);
+		clients[fd]->addChannel(channelName);
 		addChannel(newChannel);
 		sendJoinNotificationsAndReplies(fd, newChannel);
 	} else {

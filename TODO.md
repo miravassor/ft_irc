@@ -20,8 +20,9 @@ As there's no mention of user modes in subject probably those two will be enough
 - gerer les mode user / channel 
 - REWORK USER COMMAND
 @ alexandre
-### List des users d'un chan 
+### List des users d'un chan - in progress
 - ajouter @ aux op 
+- gerer les invisibles 
 @ Maria 
 ###  boucle poll 
 - corriger le send data pour correspondre au demande de l'eval 
