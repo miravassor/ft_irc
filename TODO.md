@@ -2,8 +2,8 @@
 
 ### 1. MAX_XXX variable
 ~~- MAXCHANNELS and ERR_TOOMANYCHANNELS to join for clients ? - optional in rfc1459~~ done
-- MAXTARGETS and ERR_TOOMANYTARGETS for PRIVMSG and other cmd ? - optional in rfc1459
-@ Maria
+- ~~MAXTARGETS and ERR_TOOMANYTARGETS for PRIVMSG and other cmd ?~~ done as limit of targets for cmd with targets
+- ~~@ Maria~~
  
 ### 3. Buffer Overflow
 - prevent buffer overflow in the `_buffer`

@@ -80,6 +80,7 @@ void Server::initServerMessages() {
 	_serverMessages[ERR_NOSUCHCHANNEL] = " :No such channel";
 	_serverMessages[ERR_CANNOTSENDTOCHAN] = " :Cannot send to channel";
 	_serverMessages[ERR_TOOMANYCHANNELS] = " :You have joined too many channels";
+	_serverMessages[ERR_TOOMANYTARGETS] = " :Too many targets";
 	_serverMessages[ERR_NOORIGIN] = " :No origin specified";
 	_serverMessages[ERR_NORECIPIENT] = " :No recipient given";
 	_serverMessages[ERR_NOTEXTTOSEND] = " :No text to send";

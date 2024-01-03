@@ -9,7 +9,7 @@ bool Server::checkPmTokens(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-                          const std::string &command) {
+						  const std::string &command) {
 
 	Client *receiver = findClient(targetName);
 	if (receiver) {
@@ -24,13 +24,15 @@ void Server::sendPmToUser(int fd, const std::string &message, const std::string 
 }
 
 void Server::sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-                          const std::string &command) {
+						  const std::string &command) {
 
 	Channel *channel = findChannel(targetName);
 	if (channel) {
 		if (channel->hasMember(fd)) {
 			std::string parameters = channel->getName() + " :" + message;
-			serverSendNotification(channel->getMemberFds(), prefix, command, parameters);
+			std::set<int> receiversFds(channel->getMemberFds());
+			receiversFds.erase(fd);
+			serverSendNotification(receiversFds, prefix, command, parameters);
 		} else if (command == "PRIVMSG") {
 			serverSendError(fd, targetName, ERR_CANNOTSENDTOCHAN);
 		}
@@ -44,7 +46,14 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 		return;
 
 	std::queue<std::string> targets = split(tokens[1], ',', true);
-	std::string message = getParam(tokens);
+	if (targets.size() > MAXTARGETS) {
+		serverSendError(fd, tokens[0], ERR_TOOMANYTARGETS);
+		return;
+	}
+
+	std::string message = tokens[2].at(0) == ':'
+						  ? mergeTokensToString(std::vector<std::string>(tokens.begin() + 2, tokens.end()), true)
+						  : tokens[2];
 	std::string prefix = getNick(fd);
 	while (!targets.empty()) {
 		const std::string targetName = targets.front();

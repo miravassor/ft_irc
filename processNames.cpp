@@ -8,6 +8,10 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 		nicks.insert(othersNicks);
 	} else {
 		std::queue<std::string> channelNames = split(tokens[1], ',', true);
+		if (channelNames.size() > MAXTARGETS) {
+			serverSendError(fd, "NAMES", ERR_TOOMANYTARGETS);
+			return;
+		}
 		std::vector<Channel *> channels = findChannels(channelNames);
 		nicks = getClientsOfChannels(fd, channels);
 	}

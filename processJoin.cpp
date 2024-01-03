@@ -7,6 +7,10 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 	}
 
 	std::queue<std::string> channels = split(tokens[1], ',', true);
+	if (channels.size() > MAXTARGETS) {
+		serverSendError(fd, "JOIN", ERR_TOOMANYTARGETS);
+		return;
+	}
 	std::queue<std::string> passwords = (tokens.size() > 2) ? split(tokens[2], ',', false) : std::queue<std::string>();
 	while (!channels.empty()) {
 		std::string channelName = channels.front();
