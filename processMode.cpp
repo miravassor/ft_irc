@@ -160,7 +160,7 @@ void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
     }
 	for (; it != tokens.end(); ++it) {
 		Mode mode = clients[fd]->getMode(*it);
-		if (mode == UNKNOWN) {
+		if (mode == UNKNOWN || mode == AWAY) {
 			serverSendError(fd, *it, ERR_UMODEUNKNOWNFLAG);
 			return;
 		} else if (it[0][0] == '+') {

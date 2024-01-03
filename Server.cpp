@@ -53,6 +53,7 @@ void Server::initCmd() {
 	cmd["LIST"] = &Server::processList;
 	cmd["PING"] = &Server::processPing;
     cmd["AWAY"] = &Server::processAway;
+    cmd["NICK"] = &Server::processNick;
 }
 
 void Server::initChannelMode() {
@@ -100,6 +101,7 @@ void Server::initServerMessages() {
 	_serverMessages[ERR_CHANOPRIVSNEEDED] = " :You're not channel operator";
 	_serverMessages[ERR_UMODEUNKNOWNFLAG] = " :Unknown MODE flag";
 	_serverMessages[ERR_USERSDONTMATCH] = " :Cant change mode for other users";
+    _serverMessages[ERR_NONICKNAMEGIVEN] = " :No nickname given";
 }
 
 Server::~Server() {

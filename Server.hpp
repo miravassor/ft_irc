@@ -58,6 +58,7 @@ enum serverRep {
 	ERR_NORECIPIENT = 411,
 	ERR_NOTEXTTOSEND = 412,
 	ERR_UNKNOWNCOMMAND = 421,
+    ERR_NONICKNAMEGIVEN = 431,
 	ERR_ERRONEUSNICKNAME = 432,
 	ERR_NICKNAMEINUSE = 433,
 	ERR_USERNOTINCHANNEL = 441,
@@ -200,6 +201,8 @@ private:
 
     void processAway(int fd, const std::vector<std::string> &tokens);
 
+    void processNick(int fd, const std::vector<std::string> &tokens);
+
 	bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
 
 	bool handleModeI(char set, const std::string &parameter, Channel *channel, int fd);
@@ -253,6 +256,10 @@ private:
 	bool isValidName(const std::string &name);
 
     std::string paddDigits(int i);
+
+    bool    isNum(const std::string& str);
+    bool    isBitMask(const std::string& str);
+    Mode    getBitMode(const std::string str);
 
 	std::vector<std::string> getClientsWithoutChannels();
 

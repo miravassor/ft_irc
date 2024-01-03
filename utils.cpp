@@ -60,3 +60,31 @@ std::string Server::mergeTokensToString(const std::vector<std::string> &tokens, 
 
 	return mergedString;
 }
+
+bool    Server::isNum(const std::string& str) {
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (!isdigit(str[i]))
+            return 0;
+    }
+    return 1;
+}
+
+bool    Server::isBitMask(const std::string& str) {
+    if (!isNum(str))
+        return 0;
+    int num;
+    std::stringstream(str) >> num;
+
+    // Check if only bits 2 or 3 are set
+    return (num & (~0b1100)) == 0 && (num & 0b1100) != 0;
+}
+
+Mode    Server::getBitMode(const std::string str) {
+    int num;
+    std::istringstream(str) >> num;
+
+    if (num & (1 << 3))
+        return INVISIBLE;
+    else
+        return UNKNOWN;
+}

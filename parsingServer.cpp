@@ -83,8 +83,16 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 		std::string realname = getParam(params);
 		if (verifyUsername(fd, realname))
 			return 1;
-		else
-			clients[fd]->setUsername(realname);
+		else {
+            clients[fd]->setUsername(realname);
+        }
+        if (isBitMask(params[1])) {
+            Mode mode = getBitMode(params[1]);
+            if (mode == UNKNOWN)
+                serverSendError(fd, params[1], ERR_UMODEUNKNOWNFLAG);
+            else
+                clients[fd]->addMode(mode);
+        }
 	}
 	return 0;
 }
@@ -126,9 +134,9 @@ bool Server::checkRegistration(int fd) {
 			// if first time user connect: add to database
 			users.insert(std::make_pair(clients[fd]->getNickname(), clients[fd]->getPassword()));
 		}
-		// resgitration complete, send welcome
+		// registration complete, send welcome
 		clients[fd]->setRegistration();
-		serverSendReply(fd, "", RPL_WELCOME, "");
+		serverSendReply(fd, "", RPL_WELCOME, clients[fd]->getNickname());
 		serverSendReply(fd, "", RPL_YOURHOST, "");
 		serverSendReply(fd, "", RPL_CREATED, "");
 		serverSendReply(fd, "", RPL_MYINFO, "");
