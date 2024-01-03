@@ -14,12 +14,12 @@
 
 ### 5. Limit user modes
 As there's no mention of user modes in subject probably those two will be enough:
-- i - marks a users as invisible;
-- s - marks a user for receipt of server notices;
-- gerer le mode passer en argument de la commande user
+~~- i - marks a users as invisible;~~
+- s - marks a user for receipt of server notices; -> pas obligatoire ?
+~~- gerer le mode passer en argument de la commande user~~
 - gerer les mode user / channel 
-- REWORK USER COMMAND
-@ alexandre
+~~- REWORK USER COMMAND~~
+~~@ alexandre~~
 ### ~~List des users d'un chan~~ done
 - ~~ajouter @ aux op~~ 
 - ~~gerer les invisibles~~ 
@@ -35,9 +35,9 @@ As there's no mention of user modes in subject probably those two will be enough
 ~~- debugger 
 @ Maria~~
 
-### Commande NICK 
-- a implementer 
-@ alexandre 
+### ~~Commande NICK~~
+~~- a implementer 
+@ alexandre~~ 
 ### PING
 - verifier comporterment (print du pong)
 ### WHOIS
