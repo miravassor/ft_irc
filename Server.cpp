@@ -52,7 +52,7 @@ void Server::initCmd() {
 	cmd["NAMES"] = &Server::processNames;
 	cmd["LIST"] = &Server::processList;
 	cmd["PING"] = &Server::processPing;
-    cmd["AWAY"] = &Server::processAway;
+	cmd["AWAY"] = &Server::processAway;
 }
 
 void Server::initChannelMode() {
@@ -72,8 +72,8 @@ void Server::initServerMessages() {
 	_serverMessages[RPL_LISTEND] = " :End of /LIST";
 	_serverMessages[RPL_NOTOPIC] = " :No topic is set";
 	_serverMessages[RPL_ENDOFNAMES] = " :End of /NAMES list";
-    _serverMessages[RPL_UNAWAY] = " :You are no longer marked as being away";
-    _serverMessages[RPL_NOWAWAY] = " :You have been marked as being away";
+	_serverMessages[RPL_UNAWAY] = " :You are no longer marked as being away";
+	_serverMessages[RPL_NOWAWAY] = " :You have been marked as being away";
 
 	_serverMessages[ERR_NOSUCHNICK] = " :No such nick/channel";
 	_serverMessages[ERR_NOSUCHSERVER] = " :No such server";
@@ -205,23 +205,22 @@ void Server::sendData(size_t index) {
 			std::string msg = c.popSendQueue();
 			const char *dataPtr = msg.c_str();
 			ssize_t dataRemaining = msg.length();
-				std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
-				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
-				if (dataRemaining > n) {
-					c.pushSendQueue(msg.substr(n));
+			std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
+			ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
+			if (dataRemaining > n) {
+				c.pushSendQueue(msg.substr(n));
+				pollFds[index].events = POLLOUT;
+			} else if (n < 0) {
+				if (errno == EWOULDBLOCK || errno == EAGAIN) {
+					c.pushSendQueue(msg);
 					pollFds[index].events = POLLOUT;
+				} else {
+					throw std::runtime_error("Send error");
 				}
-				else if (n < 0) {
-					if (errno == EWOULDBLOCK || errno == EAGAIN) {
-						c.pushSendQueue(msg);
-						pollFds[index].events = POLLOUT;
-					} else {
-						throw std::runtime_error("Send error");
-					}
-				} else if (n == 0) {
-					removeClient(pollFds[index].fd);
-					throw std::runtime_error("Connection closed");
-				}
+			} else if (n == 0) {
+				removeClient(pollFds[index].fd);
+				throw std::runtime_error("Connection closed");
+			}
 		}
 		pollFds[index].events = POLLIN;
 	}
@@ -254,7 +253,7 @@ int Server::acceptConnection() {
 		throw std::runtime_error(
 			"Accept error: [" + std::string(strerror(errno)) + "]");
 	}
-	if (fcntl(socketFd, F_SETFL,  O_NONBLOCK) == -1) {
+	if (fcntl(socketFd, F_SETFL, O_NONBLOCK) == -1) {
 		// Handle error
 		throw std::runtime_error(
 			"Fcntl error: [" + std::string(strerror(errno)) + "]");
@@ -297,16 +296,14 @@ void Server::addChannel(Channel *channel) {
 	_channels.push_back(channel);
 }
 
-std::vector<Channel *>::iterator Server::findChannelIterator(const std::string &name) {
-	std::string upperName = capitalizeString(name);
-	std::vector<Channel *>::iterator it = _channels.begin();
-	while (it != _channels.end()) {
-		if (capitalizeString((*it)->getName()) == upperName) {
+void Server::removeChannel(const std::string &channelName) {
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		if ((*it)->getName() == channelName) {
+			delete *it;
+			_channels.erase(it);
 			break;
 		}
-		it++;
 	}
-	return it;
 }
 
 Channel *Server::findChannel(const std::string &name) {
@@ -317,6 +314,14 @@ Channel *Server::findChannel(const std::string &name) {
 		}
 	}
 	return NULL;
+}
+
+void Server::removeClientFromChannel(int fd, Channel *channel) {
+	channel->removeMember(fd);
+	clients[fd]->removeChannel(channel->getName());
+	if (channel->getMemberFds().empty()) {
+		removeChannel(channel->getName());
+	}
 }
 
 std::vector<Channel *> Server::findChannels(std::queue<std::string> names) {

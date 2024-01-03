@@ -212,11 +212,13 @@ private:
 
 	void addChannel(Channel *channel);
 
+	void removeChannel(const std::string& channelName);
+
+	void removeClientFromChannel(int fd, Channel *channel);
+
 	Channel *findChannel(const std::string &name);
 
 	std::vector<Channel *> findChannels(std::queue<std::string> names);
-
-	std::vector<Channel *>::iterator findChannelIterator(const std::string &name);
 
 	bool isValidChannelName(const std::string &name);
 

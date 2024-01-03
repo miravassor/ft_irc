@@ -1,6 +1,5 @@
 #include "Server.hpp"
 
-// todo: remove channel if operator kicks himself and he was the last member?
 void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 3) {
 		serverSendError(fd, "KICK", ERR_NEEDMOREPARAMS);
@@ -29,8 +28,7 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 		} else {
 			std::string parameters = targetNick + " from " + channelName + " :" + reason;
 			serverSendNotification(channel->getMemberFds(), getNick(fd), "KICK", parameters);
-			channel->removeMember(targetClient->getSocket());
-			clients[fd]->removeChannel(channelName);
+			removeClientFromChannel(targetClient->getSocket(), channel);
 		}
 	}
 }
