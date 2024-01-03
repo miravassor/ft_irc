@@ -32,7 +32,7 @@ std::map<std::string, std::vector<std::string> > Server::getClientsOfChannels(in
 	}
 	return nicks;
 }
-std::vector<std::string> Server::getAllChannelMembersNicks(Channel *channel) {
+std::vector<std::string> Server::getAllChannelMembersNicks(const Channel *channel) {
 	std::vector<std::string> nicks;
 	std::set<int> members = channel->getMemberFds();
 	for (std::set<int>::iterator it = members.begin(); it != members.end(); ++it) {
@@ -45,7 +45,7 @@ std::vector<std::string> Server::getAllChannelMembersNicks(Channel *channel) {
 	return nicks;
 }
 
-std::vector<std::string> Server::getVisibleChannelMembersNicks(Channel *channel) {
+std::vector<std::string> Server::getVisibleChannelMembersNicks(const Channel *channel) {
 	std::vector<std::string> nicks;
 	std::set<int> members = channel->getMemberFds();
 	for (std::set<int>::iterator it = members.begin(); it != members.end(); ++it) {

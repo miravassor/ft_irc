@@ -252,9 +252,9 @@ private:
 
 	std::map<std::string, std::vector<std::string> > getClientsOfChannels(int fd, std::vector<Channel *> channels);
 
-	std::vector<std::string> getAllChannelMembersNicks(Channel *channel);
+	std::vector<std::string> getAllChannelMembersNicks(const Channel *channel);
 
-	std::vector<std::string> getVisibleChannelMembersNicks(Channel *channel);
+	std::vector<std::string> getVisibleChannelMembersNicks(const Channel *channel);
 };
 
 #endif

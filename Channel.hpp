@@ -83,7 +83,7 @@ public:
 
 	bool removeOperator(int clientFd);
 
-	bool hasOperator(int clientFd);
+	bool hasOperator(int clientFd) const;
 
 	void addInvited(int clientFd);
 
