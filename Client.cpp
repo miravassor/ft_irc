@@ -33,6 +33,10 @@ void Client::setPassword(const std::string& password) {
     Client::password = password;
 }
 
+void Client::setAwayMessage(const std::string &away) {
+    Client::_awayMessage = away;
+}
+
 
 // Getters
 

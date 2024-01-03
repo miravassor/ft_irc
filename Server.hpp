@@ -37,14 +37,16 @@ enum serverRep {
 
 	RPL_UMODEIS = 221,
 	RPL_AWAY = 301,
-	RPL_LIST = 322,
-	RPL_LISTEND = 323,
-	RPL_CHANNELMODEIS = 324,
-	RPL_NOTOPIC = 331,
-	RPL_TOPIC = 332,
-	RPL_INVITING = 341,
-	RPL_NAMREPLY = 353,
-	RPL_ENDOFNAMES = 366,
+    RPL_UNAWAY = 305,
+    RPL_NOWAWAY = 306,
+    RPL_LIST = 322,
+    RPL_LISTEND = 323,
+    RPL_CHANNELMODEIS = 324,
+    RPL_NOTOPIC = 331,
+    RPL_TOPIC = 332,
+    RPL_INVITING = 341,
+    RPL_NAMREPLY = 353,
+    RPL_ENDOFNAMES = 366,
 
 	ERR_NOSUCHNICK = 401,
 	ERR_NOSUCHSERVER = 402,
@@ -193,6 +195,8 @@ private:
 	void processList(int fd, const std::vector<std::string> &tokens);
 
 	void processPing(int fd, const std::vector<std::string> &tokens);
+
+    void processAway(int fd, const std::vector<std::string> &tokens);
 
 	bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
 

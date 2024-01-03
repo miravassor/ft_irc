@@ -51,6 +51,7 @@ class Client {
         void setPassword(const std::string &password);
         void setRegistration();
         void setLog();
+        void setAwayMessage(const std::string &away);
         void addMode(Mode mode);
         void removeMode(Mode mode);
         bool activeMode(Mode mode) const;

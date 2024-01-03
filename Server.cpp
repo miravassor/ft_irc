@@ -52,6 +52,7 @@ void Server::initCmd() {
 	cmd["NAMES"] = &Server::processNames;
 	cmd["LIST"] = &Server::processList;
 	cmd["PING"] = &Server::processPing;
+    cmd["AWAY"] = &Server::processAway;
 }
 
 void Server::initChannelMode() {
@@ -71,6 +72,8 @@ void Server::initServerMessages() {
 	_serverMessages[RPL_LISTEND] = " :End of /LIST";
 	_serverMessages[RPL_NOTOPIC] = " :No topic is set";
 	_serverMessages[RPL_ENDOFNAMES] = " :End of /NAMES list";
+    _serverMessages[RPL_UNAWAY] = " :You are no longer marked as being away";
+    _serverMessages[RPL_NOWAWAY] = " :You have been marked as being away";
 
 	_serverMessages[ERR_NOSUCHNICK] = " :No such nick/channel";
 	_serverMessages[ERR_NOSUCHSERVER] = " :No such server";
