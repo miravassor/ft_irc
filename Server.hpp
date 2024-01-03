@@ -37,16 +37,16 @@ enum serverRep {
 
 	RPL_UMODEIS = 221,
 	RPL_AWAY = 301,
-    RPL_UNAWAY = 305,
-    RPL_NOWAWAY = 306,
-    RPL_LIST = 322,
-    RPL_LISTEND = 323,
-    RPL_CHANNELMODEIS = 324,
-    RPL_NOTOPIC = 331,
-    RPL_TOPIC = 332,
-    RPL_INVITING = 341,
-    RPL_NAMREPLY = 353,
-    RPL_ENDOFNAMES = 366,
+	RPL_UNAWAY = 305,
+	RPL_NOWAWAY = 306,
+	RPL_LIST = 322,
+	RPL_LISTEND = 323,
+	RPL_CHANNELMODEIS = 324,
+	RPL_NOTOPIC = 331,
+	RPL_TOPIC = 332,
+	RPL_INVITING = 341,
+	RPL_NAMREPLY = 353,
+	RPL_ENDOFNAMES = 366,
 
 	ERR_NOSUCHNICK = 401,
 	ERR_NOSUCHSERVER = 402,
@@ -58,7 +58,7 @@ enum serverRep {
 	ERR_NORECIPIENT = 411,
 	ERR_NOTEXTTOSEND = 412,
 	ERR_UNKNOWNCOMMAND = 421,
-    ERR_NONICKNAMEGIVEN = 431,
+	ERR_NONICKNAMEGIVEN = 431,
 	ERR_ERRONEUSNICKNAME = 432,
 	ERR_NICKNAMEINUSE = 433,
 	ERR_USERNOTINCHANNEL = 441,
@@ -130,7 +130,6 @@ private:
 
 	void initServerMessages();
 
-
 	Client *findClient(const std::string &nickname);
 
 	void addClient(int clientSocket);
@@ -165,10 +164,10 @@ private:
 	void serverSendError(int fd, const std::string &token, serverRep id);
 
 	void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
-	                            const std::string &parameters);
+								const std::string &parameters);
 
 	void serverSendNotification(const std::set<int> &fds, const std::string &prefix, const std::string &command,
-	                            const std::string &parameters);
+								const std::string &parameters);
 
 	void serverSendMessage(int fd, const std::string &message);
 
@@ -199,9 +198,9 @@ private:
 
 	void processPing(int fd, const std::vector<std::string> &tokens);
 
-    void processAway(int fd, const std::vector<std::string> &tokens);
+	void processAway(int fd, const std::vector<std::string> &tokens);
 
-    void processNick(int fd, const std::vector<std::string> &tokens);
+	void processNick(int fd, const std::vector<std::string> &tokens);
 
 	bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
 
@@ -215,7 +214,7 @@ private:
 
 	void addChannel(Channel *channel);
 
-	void removeChannel(const std::string& channelName);
+	void removeChannel(const std::string &channelName);
 
 	void removeClientFromChannel(int fd, Channel *channel);
 
@@ -240,10 +239,10 @@ private:
 	bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
 
 	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-	                  const std::string &command);
+					  const std::string &command);
 
 	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-	                  const std::string &command);
+					  const std::string &command);
 
 	void joinExistingChannel(int fd, Channel *channel, std::string password);
 
@@ -257,11 +256,13 @@ private:
 
 	bool isValidName(const std::string &name);
 
-    std::string paddDigits(int i);
+	std::string paddDigits(int i);
 
-    bool    isNum(const std::string& str);
-    bool    isBitMask(const std::string& str);
-    Mode    getBitMode(const std::string str);
+	bool isNum(const std::string &str);
+
+	bool isBitMask(const std::string &str);
+
+	Mode getBitMode(const std::string str);
 
 	std::vector<std::string> getClientsWithoutChannels();
 

@@ -52,8 +52,8 @@ void Server::initCmd() {
 	cmd["NAMES"] = &Server::processNames;
 	cmd["LIST"] = &Server::processList;
 	cmd["PING"] = &Server::processPing;
-    cmd["AWAY"] = &Server::processAway;
-    cmd["NICK"] = &Server::processNick;
+	cmd["AWAY"] = &Server::processAway;
+	cmd["NICK"] = &Server::processNick;
 }
 
 void Server::initChannelMode() {
@@ -101,7 +101,7 @@ void Server::initServerMessages() {
 	_serverMessages[ERR_CHANOPRIVSNEEDED] = " :You're not channel operator";
 	_serverMessages[ERR_UMODEUNKNOWNFLAG] = " :Unknown MODE flag";
 	_serverMessages[ERR_USERSDONTMATCH] = " :Cant change mode for other users";
-    _serverMessages[ERR_NONICKNAMEGIVEN] = " :No nickname given";
+	_serverMessages[ERR_NONICKNAMEGIVEN] = " :No nickname given";
 }
 
 Server::~Server() {
@@ -207,23 +207,22 @@ void Server::sendData(size_t index) {
 			std::string msg = c.popSendQueue();
 			const char *dataPtr = msg.c_str();
 			ssize_t dataRemaining = msg.length();
-				std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
-				ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
-				if (dataRemaining > n) {
-					c.pushSendQueue(msg.substr(n));
+			std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
+			ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
+			if (dataRemaining > n) {
+				c.pushSendQueue(msg.substr(n));
+				pollFds[index].events = POLLOUT;
+			} else if (n < 0) {
+				if (errno == EWOULDBLOCK || errno == EAGAIN) {
+					c.pushSendQueue(msg);
 					pollFds[index].events = POLLOUT;
+				} else {
+					throw std::runtime_error("Send error");
 				}
-				else if (n < 0) {
-					if (errno == EWOULDBLOCK || errno == EAGAIN) {
-						c.pushSendQueue(msg);
-						pollFds[index].events = POLLOUT;
-					} else {
-						throw std::runtime_error("Send error");
-					}
-				} else if (n == 0) {
-					removeClient(pollFds[index].fd);
-					throw std::runtime_error("Connection closed");
-				}
+			} else if (n == 0) {
+				removeClient(pollFds[index].fd);
+				throw std::runtime_error("Connection closed");
+			}
 		}
 		pollFds[index].events = POLLIN;
 	}
@@ -256,7 +255,7 @@ int Server::acceptConnection() {
 		throw std::runtime_error(
 			"Accept error: [" + std::string(strerror(errno)) + "]");
 	}
-	if (fcntl(socketFd, F_SETFL,  O_NONBLOCK) == -1) {
+	if (fcntl(socketFd, F_SETFL, O_NONBLOCK) == -1) {
 		// Handle error
 		throw std::runtime_error(
 			"Fcntl error: [" + std::string(strerror(errno)) + "]");
