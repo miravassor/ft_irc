@@ -22,7 +22,6 @@ int main(int argc, char **argv) {
 				server.run();
 			} catch (std::exception &exception) {
 				std::cerr << "[ERROR]\t" << exception.what() << std::endl;
-				return 1;
 			}
 		}
 	} catch (std::exception &exception) {
