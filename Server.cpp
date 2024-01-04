@@ -54,7 +54,7 @@ void Server::initCmd() {
 	cmd["PING"] = &Server::processPing;
 	cmd["AWAY"] = &Server::processAway;
 	cmd["NICK"] = &Server::processNick;
-	cmd["QUIT"] = &Server::processKick;
+	cmd["QUIT"] = &Server::processQuit;
 }
 
 void Server::initChannelMode() {
@@ -180,7 +180,6 @@ void Server::run() {
 		if (pollFds[i].revents & POLLOUT) {
 			sendData(i);
 		}
-
 	}
 }
 
@@ -196,7 +195,7 @@ size_t Server::receiveData(size_t index) {
 			_buffer[bytesRead] = 0;
 			parsBuffer(pollFds[index].fd);
 		} else if (bytesRead == 0) {
-			removeClient(pollFds[index].fd);
+			processQuit(pollFds[index].fd, std::vector<std::string>());
 			index--;
 		} else {
 			throw std::runtime_error("Recv error: [" + std::string(strerror(errno)) + "]");
@@ -226,7 +225,7 @@ void Server::sendData(size_t index) {
 					throw std::runtime_error("Send error");
 				}
 			} else if (n == 0) {
-				removeClient(pollFds[index].fd);
+				processQuit(pollFds[index].fd, std::vector<std::string>());
 				throw std::runtime_error("Connection closed");
 			}
 		}
