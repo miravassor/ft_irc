@@ -129,13 +129,18 @@ void Server::addClient(int clientSocket) {
 
 void Server::removeClient(int clientSocket) {
 	// removing from _channels
-	for (std::vector<Channel *>::iterator it = _channels.begin();
-		 it != _channels.end(); ++it) {
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end();) {
 		(*it)->removeMember(clientSocket);
+		if ((*it)->getMemberFds().empty()) {
+			delete *it;
+			it = _channels.erase(it);
+		} else {
+			++it;
+		}
 	}
+
 	// removing from pollFds
-	for (std::vector<pollfd>::iterator it = pollFds.begin();
-		 it != pollFds.end(); ++it) {
+	for (std::vector<pollfd>::iterator it = pollFds.begin(); it != pollFds.end(); ++it) {
 		if (it->fd == clientSocket) {
 			pollFds.erase(it);
 			break;
