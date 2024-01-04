@@ -5,6 +5,10 @@ void Server::processList(int fd, const std::vector<std::string> &tokens) {
 		listChannels(fd, _channels);
 	} else {
 		std::queue<std::string> channelNames = split(tokens[1], ',', true);
+		if (channelNames.size() > MAXTARGETS) {
+			serverSendError(fd, "LIST", ERR_TOOMANYTARGETS);
+			return;
+		}
 		std::vector<Channel *> channels = findChannels(channelNames);
 		listChannels(fd, channels);
 	}

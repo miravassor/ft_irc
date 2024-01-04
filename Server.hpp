@@ -37,6 +37,8 @@ enum serverRep {
 
 	RPL_UMODEIS = 221,
 	RPL_AWAY = 301,
+	RPL_UNAWAY = 305,
+	RPL_NOWAWAY = 306,
 	RPL_LIST = 322,
 	RPL_LISTEND = 323,
 	RPL_CHANNELMODEIS = 324,
@@ -51,10 +53,12 @@ enum serverRep {
 	ERR_NOSUCHCHANNEL = 403,
 	ERR_CANNOTSENDTOCHAN = 404,
 	ERR_TOOMANYCHANNELS = 405,
+	ERR_TOOMANYTARGETS = 407,
 	ERR_NOORIGIN = 409,
 	ERR_NORECIPIENT = 411,
 	ERR_NOTEXTTOSEND = 412,
 	ERR_UNKNOWNCOMMAND = 421,
+	ERR_NONICKNAMEGIVEN = 431,
 	ERR_ERRONEUSNICKNAME = 432,
 	ERR_NICKNAMEINUSE = 433,
 	ERR_USERNOTINCHANNEL = 441,
@@ -73,7 +77,8 @@ enum serverRep {
 
 };
 
-static const int MAXCHANNELS = 42;
+static const int MAXCHANNELS = 9; // max number of channels a client can join
+static const int MAXTARGETS = 10; // max number of unique targets for commands with targets
 
 class Server {
 public:
@@ -125,7 +130,6 @@ private:
 
 	void initServerMessages();
 
-
 	Client *findClient(const std::string &nickname);
 
 	void addClient(int clientSocket);
@@ -160,10 +164,10 @@ private:
 	void serverSendError(int fd, const std::string &token, serverRep id);
 
 	void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
-	                            const std::string &parameters);
+								const std::string &parameters);
 
 	void serverSendNotification(const std::set<int> &fds, const std::string &prefix, const std::string &command,
-	                            const std::string &parameters);
+								const std::string &parameters);
 
 	void serverSendMessage(int fd, const std::string &message);
 
@@ -194,6 +198,10 @@ private:
 
 	void processPing(int fd, const std::vector<std::string> &tokens);
 
+	void processAway(int fd, const std::vector<std::string> &tokens);
+
+	void processNick(int fd, const std::vector<std::string> &tokens);
+
 	bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
 
 	bool handleModeI(char set, const std::string &parameter, Channel *channel, int fd);
@@ -206,11 +214,13 @@ private:
 
 	void addChannel(Channel *channel);
 
+	void removeChannel(const std::string &channelName);
+
+	void removeClientFromChannel(int fd, Channel *channel);
+
 	Channel *findChannel(const std::string &name);
 
 	std::vector<Channel *> findChannels(std::queue<std::string> names);
-
-	std::vector<Channel *>::iterator findChannelIterator(const std::string &name);
 
 	bool isValidChannelName(const std::string &name);
 
@@ -229,10 +239,10 @@ private:
 	bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
 
 	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-	                  const std::string &command);
+					  const std::string &command);
 
 	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-	                  const std::string &command);
+					  const std::string &command);
 
 	void joinExistingChannel(int fd, Channel *channel, std::string password);
 
@@ -246,7 +256,13 @@ private:
 
 	bool isValidName(const std::string &name);
 
-    std::string paddDigits(int i);
+	std::string paddDigits(int i);
+
+	bool isNum(const std::string &str);
+
+	bool isBitMask(const std::string &str);
+
+	Mode getBitMode(const std::string str);
 
 	std::vector<std::string> getClientsWithoutChannels();
 

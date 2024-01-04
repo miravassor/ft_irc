@@ -2,8 +2,8 @@
 
 ### 1. MAX_XXX variable
 ~~- MAXCHANNELS and ERR_TOOMANYCHANNELS to join for clients ? - optional in rfc1459~~ done
-- MAXTARGETS and ERR_TOOMANYTARGETS for PRIVMSG and other cmd ? - optional in rfc1459
-@ Maria
+- ~~MAXTARGETS and ERR_TOOMANYTARGETS for PRIVMSG and other cmd ?~~ done as limit of targets for cmd with targets
+- ~~@ Maria~~
  
 ### 3. Buffer Overflow
 - prevent buffer overflow in the `_buffer`
@@ -14,19 +14,19 @@
 
 ### 5. Limit user modes
 As there's no mention of user modes in subject probably those two will be enough:
-- i - marks a users as invisible;
-- s - marks a user for receipt of server notices;
-- gerer le mode passer en argument de la commande user
+~~- i - marks a users as invisible;~~
+- s - marks a user for receipt of server notices; -> pas obligatoire ?
+~~- gerer le mode passer en argument de la commande user~~
 - gerer les mode user / channel 
-- REWORK USER COMMAND
-@ alexandre
+~~- REWORK USER COMMAND~~
+~~@ alexandre~~
 ### ~~List des users d'un chan~~ done
 - ~~ajouter @ aux op~~ 
 - ~~gerer les invisibles~~ 
 - ~~@ Maria~~ 
 ###  boucle poll 
 - corriger le send data pour correspondre au demande de l'eval 
-@ Julien~~ 
+@ Julien 
 
 ### CAP LS 
 - revoir le fonctionnement de CAP 
@@ -35,9 +35,9 @@ As there's no mention of user modes in subject probably those two will be enough
 ~~- debugger 
 @ Maria~~
 
-### Commande NICK 
-- a implementer 
-@ alexandre 
+### ~~Commande NICK~~
+~~- a implementer 
+@ alexandre~~ 
 ### PING
 - verifier comporterment (print du pong)
 ### WHOIS
@@ -50,9 +50,9 @@ As there's no mention of user modes in subject probably those two will be enough
 ### Boucle du main
 - eviter de quitter la boucle principale en cas d exception 
 @ Julien
-~~### Fcntl 
+### Fcntl 
 - corriger fcntl
-- @ Julien~~ 
+- @ Julien 
 
 ### Kill du client
 - verifier comportement en cas de kill du client 

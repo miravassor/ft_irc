@@ -48,7 +48,7 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 									: ""; // check if the channelMode requires a parameter and take it
 			ModeHandlerIterator it = channelMode.find(mode);
 			if (it == channelMode.end()) { // check if mode is known
-				serverSendError(fd, std::string(&mode), ERR_UNKNOWNMODE); // todo: char to string
+				serverSendError(fd, std::string(1, mode), ERR_UNKNOWNMODE);
 				continue;
 			}
 			if ((this->*(it->second))(settingMode, parameter, channel, fd)) { // if channelMode applied successfully
@@ -160,7 +160,7 @@ void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
     }
 	for (; it != tokens.end(); ++it) {
 		Mode mode = clients[fd]->getMode(*it);
-		if (mode == UNKNOWN) {
+		if (mode == UNKNOWN || mode == AWAY) {
 			serverSendError(fd, *it, ERR_UMODEUNKNOWNFLAG);
 			return;
 		} else if (it[0][0] == '+') {

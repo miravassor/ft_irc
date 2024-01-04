@@ -30,3 +30,5 @@ void	Client::removeMode(Mode mode) {
 bool	Client::activeMode(Mode mode) const {
 	return (modes & mode) == mode;
 }
+
+
