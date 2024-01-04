@@ -54,6 +54,7 @@ void Server::initCmd() {
 	cmd["PING"] = &Server::processPing;
 	cmd["AWAY"] = &Server::processAway;
 	cmd["NICK"] = &Server::processNick;
+	cmd["QUIT"] = &Server::processKick;
 }
 
 void Server::initChannelMode() {

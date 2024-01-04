@@ -202,6 +202,8 @@ private:
 
 	void processNick(int fd, const std::vector<std::string> &tokens);
 
+	void processQuit(int fd, const std::vector<std::string> &tokens);
+
 	bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
 
 	bool handleModeI(char set, const std::string &parameter, Channel *channel, int fd);

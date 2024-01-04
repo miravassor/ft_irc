@@ -65,6 +65,10 @@ As there's no mention of user modes in subject probably those two will be enough
 ### ERR_UNKNOWNMODE
 - return garbage char into server response
 
+### QUIT
+close connection
+@ Maria
+
 ### 6. Packages organizing
 - Something like
   - includes/
