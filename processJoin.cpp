@@ -67,7 +67,9 @@ void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
 	serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channel->getName());
 	if (!channel->getTopic().empty()) {
 		serverSendReply(fd, channel->getName(), RPL_TOPIC, channel->getTopic());
-	}
+	} else {
+        serverSendReply(fd, channel->getName(), RPL_NOTOPIC, "");
+    }
 	std::string nicknamesString = mergeTokensToString(getAllChannelMembersNicks(channel), false);
 	serverSendReply(fd, channel->getName(), RPL_NAMREPLY, nicknamesString);
 	serverSendReply(fd, channel->getName(), RPL_ENDOFNAMES, "");

@@ -41,6 +41,7 @@ class Client {
         int getSocket();
 		const std::string &getAwayMessage() const;
 		const std::vector<std::string> &getChannels() const;
+        const std::string getRealName() const ;
 
 	bool isRegistered();
         bool isOperator();
