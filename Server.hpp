@@ -34,6 +34,7 @@ enum serverRep {
 	RPL_CREATED = 3,
 	RPL_MYINFO = 4,
 	PONG = 5,
+	ERROR = 6,
 
 	RPL_UMODEIS = 221,
 	RPL_AWAY = 301,
@@ -107,8 +108,6 @@ public:
 	Client &getClient(int fd);
 
 	const std::map<int, Client *> &getClients() const;
-
-	std::set<int> getClientsFds() const;
 
 private:
 	int socketFd;

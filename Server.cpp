@@ -229,6 +229,10 @@ void Server::sendData(size_t index) {
 				throw std::runtime_error("Connection closed");
 			}
 		}
+		if (c.isQuit()) {
+			close(pollFds[index].fd);
+			removeClient(pollFds[index].fd);
+		}
 		pollFds[index].events = POLLIN;
 	}
 	catch (std::exception &e) {
@@ -353,6 +357,8 @@ Client *Server::findClient(const std::string &nickname) {
 	return NULL;
 }
 
+//todo: overloaded findClient
+
 Client &Server::getClient(int fd) {
 	if (clients.find(fd) == clients.end()) {
 		throw std::runtime_error("Cannot find client with fd");
@@ -362,12 +368,4 @@ Client &Server::getClient(int fd) {
 
 const std::map<int, Client *> &Server::getClients() const {
 	return clients;
-}
-
-std::set<int> Server::getClientsFds() const {
-	std::set<int> fds;
-	for (std::map<int, Client *>::const_iterator it = clients.begin(); it != clients.end(); ++it) {
-		fds.insert(it->first);
-	}
-	return fds;
 }

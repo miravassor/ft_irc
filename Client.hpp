@@ -31,6 +31,7 @@ class Client {
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
 		std::vector<std::string> _channels;
+		bool 		_quit;
 
     public:
         Client(int socket);
@@ -41,6 +42,8 @@ class Client {
         int getSocket();
 		const std::string &getAwayMessage() const;
 		const std::vector<std::string> &getChannels() const;
+		bool isQuit() const;
+		void setQuit(bool quit);
 
 	bool isRegistered();
         bool isOperator();

@@ -84,15 +84,15 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 		if (verifyUsername(fd, realname))
 			return 1;
 		else {
-            clients[fd]->setUsername(realname);
-        }
-        if (isBitMask(params[1])) {
-            Mode mode = getBitMode(params[1]);
-            if (mode == UNKNOWN)
-                serverSendError(fd, params[1], ERR_UMODEUNKNOWNFLAG);
-            else
-                clients[fd]->addMode(mode);
-        }
+			clients[fd]->setUsername(realname);
+		}
+		if (isBitMask(params[1])) {
+			Mode mode = getBitMode(params[1]);
+			if (mode == UNKNOWN)
+				serverSendError(fd, params[1], ERR_UMODEUNKNOWNFLAG);
+			else
+				clients[fd]->addMode(mode);
+		}
 	}
 	return 0;
 }
@@ -194,9 +194,11 @@ bool Server::verifyPassword(int fd, const std::string &arg) {
 	return 0;
 }
 
-// Server reply
-
 void Server::serverSendError(int fd, const std::string &token, serverRep id) {
+	if (id == ERROR) {
+		serverSendMessage(fd, "ERROR :Closing connection :" + token + "\r\n");
+		return;
+	}
 	std::stringstream fullReply;
 	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
 	if (!token.empty()) {
@@ -254,8 +256,8 @@ void Server::serverSendMessage(int fd, const std::string &message) {
 }
 
 std::string Server::paddDigits(int i) {
-    std::ostringstream  stream;
-    stream << std::setw(3) << std::setfill('0') << i;
-    return stream.str();
+	std::ostringstream stream;
+	stream << std::setw(3) << std::setfill('0') << i;
+	return stream.str();
 }
 
