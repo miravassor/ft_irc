@@ -9,7 +9,7 @@
 ### ERROR Irssi
 - Irssi: critical nicklist_set_host: assertion 'host != NULL' failed
 
-### CAP LS 
+### CAP LS
 - revoir le fonctionnement de CAP @alexandre 
 
 ### Finish WHO
@@ -19,7 +19,7 @@
 - penser a virer tous les print des debug
 
 ### Server password 
-- Implementation password server
+- Implementation password server -> virer password users
 
 ### Packages organizing
 - Something like
