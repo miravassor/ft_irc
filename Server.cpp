@@ -196,6 +196,7 @@ size_t Server::receiveData(size_t index) {
 			parsBuffer(pollFds[index].fd);
 		} else if (bytesRead == 0) {
 			processQuit(pollFds[index].fd, std::vector<std::string>());
+			removeClient(pollFds[index].fd);
 			index--;
 		} else {
 			throw std::runtime_error("Recv error: [" + std::string(strerror(errno)) + "]");
@@ -226,6 +227,7 @@ void Server::sendData(size_t index) {
 				}
 			} else if (n == 0) {
 				processQuit(pollFds[index].fd, std::vector<std::string>());
+				removeClient(pollFds[index].fd);
 				throw std::runtime_error("Connection closed");
 			}
 		}
@@ -357,7 +359,13 @@ Client *Server::findClient(const std::string &nickname) {
 	return NULL;
 }
 
-//todo: overloaded findClient
+Client *Server::findClient(int fd) {
+	std::map<int, Client *>::iterator it = clients.find(fd);
+	if (it == clients.end()) {
+		return NULL;
+	}
+	return it->second;
+}
 
 Client &Server::getClient(int fd) {
 	if (clients.find(fd) == clients.end()) {

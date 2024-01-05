@@ -1,7 +1,8 @@
 #include "Server.hpp"
 
 void Server::processQuit(int fd, const std::vector<std::string> &tokens) {
-	std::vector<std::string> channels = getClient(fd).getChannels();
+	Client *client = findClient(fd);
+	std::vector<std::string> channels = client->getChannels();
 	std::set<int> sharingChannelsFds;
 	for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); ++it) {
 		Channel *channel = findChannel(*it);
@@ -24,5 +25,5 @@ void Server::processQuit(int fd, const std::vector<std::string> &tokens) {
 	}
 	serverSendNotification(sharingChannelsFds, getNick(fd), "QUIT", ":" + reason);
 	serverSendError(fd, reason, ERROR);
-	getClient(fd).setQuit(true);
+	client->setQuit(true);
 }

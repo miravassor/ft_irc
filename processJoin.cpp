@@ -17,7 +17,7 @@ void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
 		channels.pop();
 		std::string password = !passwords.empty() ? passwords.front() : "";
 		if (!passwords.empty()) passwords.pop();
-		if (getClient(fd).getChannels().size() == MAXCHANNELS) {
+		if (findClient(fd)->getChannels().size() == MAXCHANNELS) {
 			serverSendError(fd, channelName, ERR_TOOMANYCHANNELS);
 			return;
 		}

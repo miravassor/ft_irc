@@ -131,6 +131,8 @@ private:
 
 	Client *findClient(const std::string &nickname);
 
+	Client *findClient(int fd);
+
 	void addClient(int clientSocket);
 
 	void removeClient(int clientSocket);
