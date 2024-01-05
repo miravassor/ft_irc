@@ -27,7 +27,6 @@
 class Channel;
 
 enum serverRep {
-
 	CAPLS = 0,
 	RPL_WELCOME = 1,
 	RPL_YOURHOST = 2,
@@ -86,205 +85,125 @@ static const int MAXCHANNELS = 9; // max number of channels a client can join
 static const int MAXTARGETS = 10; // max number of unique targets for commands with targets
 
 class Server {
-public:
-	typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string> &)> Cmd;
-	typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string> &)>::iterator CmdIterator;
-	typedef std::map<char, bool (Server::*)(char, const std::string &, Channel *, int)> ModeHandler;
-	typedef std::map<char, bool (Server::*)(char, const std::string &, Channel *, int)>::iterator ModeHandlerIterator;
-
-	std::map<int, std::string> _serverMessages;
-
-	Server() {};
-
-	Server(int port, const std::string &password);
-
-	~Server();
-
-	void run();
-
-	// Channel getters
-	std::string getServerName();
-
-	std::string getNick(int fd);
-
-	std::vector<std::string> getNicknames(std::set<int> fds);
-
-	Client &getClient(int fd);
-
-	const std::map<int, Client *> &getClients() const;
-	static std::string uncapitalizeString(const std::string &input);
-
-
-private:
-	int socketFd;
-	time_t start;
-	sockaddr_in address;
-	std::string _password;
-	std::string serverName;
-	std::string serverVersion;
-	std::vector<pollfd> pollFds;
-	std::map<int, Client *> clients;
-	std::vector<Channel *> _channels;
-	Cmd cmd;
-	ModeHandler channelMode;
-	std::map<std::string, std::string> users;
-
-	void initCmd();
-
-	void initChannelMode();
-
-	void initServerMessages();
-
-	Client *findClient(const std::string &nickname);
-
-	Client *findClient(int fd);
-
-	void addClient(int clientSocket);
-
-	void removeClient(int clientSocket);
-
-	void listenPort() const;
-
-	int acceptConnection();
-
-	// Parsing
-	char _buffer[1024];
-
-	bool parsBuffer(int fd);
-
-	bool registrationProcess(int fd, std::vector<std::string> &tokens);
-
-	bool checkRegistration(int fd);
-
-	bool handleCommand(int fd, const std::string &command, const std::vector<std::string> &params);
-
-	bool verifyNickname(int fd, const std::string &arg);
-
-	bool verifyPassword(int fd, const std::string &arg);
-
-	bool verifyUsername(int fd, const std::string &arg);
-
-	void processCmd(int fd, std::vector<std::string> &tokens);
-
-	void serverSendReply(int fd, const std::string &token, serverRep id, const std::string &reply);
-
-	void serverSendError(int fd, const std::string &token, serverRep id);
-
-	void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
-								const std::string &parameters);
-
-	void serverSendNotification(const std::set<int> &fds, const std::string &prefix, const std::string &command,
-								const std::string &parameters);
-
-	void serverSendMessage(int fd, const std::string &message);
-
-	std::string getParam(const std::vector<std::string> &tokens);
-
-	// Commands
-	void processPrivmsg(int fd, const std::vector<std::string> &tokens);
-
-	void processJoin(int fd, const std::vector<std::string> &tokens);
-
-	void processInvite(int fd, const std::vector<std::string> &tokens);
-
-	void processKick(int fd, const std::vector<std::string> &tokens);
-
-	void processTopic(int fd, const std::vector<std::string> &tokens);
-
-	void processPart(int fd, const std::vector<std::string> &tokens);
-
-	void processMode(int fd, const std::vector<std::string> &tokens);
-
-	void processChannelMode(int fd, const std::vector<std::string> &tokens);
-
-	void processUserMode(int fd, const std::vector<std::string> &tokens);
-
-	void processNames(int fd, const std::vector<std::string> &tokens);
-
-	void processList(int fd, const std::vector<std::string> &tokens);
-
-	void processPing(int fd, const std::vector<std::string> &tokens);
-
-	void processAway(int fd, const std::vector<std::string> &tokens);
-
-	void processNick(int fd, const std::vector<std::string> &tokens);
-
-	void processQuit(int fd, const std::vector<std::string> &tokens);
-
-    void processWho(int fd, const std::vector<std::string> &tokens);
-
-    void processWhois(int fd, const std::vector<std::string> &tokens);
-
-	bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
-
-	bool handleModeI(char set, const std::string &parameter, Channel *channel, int fd);
-
-	bool handleModeK(char set, const std::string &parameter, Channel *channel, int fd);
-
-	bool handleModeL(char set, const std::string &parameter, Channel *channel, int fd);
-
-	bool handleModeO(char set, const std::string &parameter, Channel *channel, int fd);
-
-    bool handleModeB(char set, const std::string &parameter, Channel *channel, int fd);
-
-	void addChannel(Channel *channel);
-
-	void removeChannel(const std::string &channelName);
-
-	void removeClientFromChannel(int fd, Channel *channel);
-
-	Channel *findChannel(const std::string &name);
-
-	std::vector<Channel *> findChannels(std::queue<std::string> names);
-
-	bool isValidChannelName(const std::string &name);
-
-	std::queue<std::string> split(const std::string &src, char delimiter, bool unique) const;
-
-	void sendData(size_t index);
-
-	size_t receiveData(size_t index);
-
-	void resetEvents(size_t index);
-
-	std::string mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon);
-
-	void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
-
-	bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
-
-	void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-					  const std::string &command);
-
-	void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
-					  const std::string &command);
-
-	void joinExistingChannel(int fd, Channel *channel, std::string password);
-
-	void createAndJoinNewChannel(int fd, std::string channelName, std::string password);
-
-
-	void listChannels(int fd, std::vector<Channel *> &channels);
-
-	bool modeParameterNeeded(char set, char mode);
-
-	bool isValidName(const std::string &name);
-
-	std::string paddDigits(int i);
-
-	bool isNum(const std::string &str);
-
-	bool isBitMask(const std::string &str);
-
-	Mode getBitMode(const std::string str);
-
-	std::vector<std::string> getClientsWithoutChannels();
-
-	std::map<std::string, std::vector<std::string> > getClientsOfChannels(int fd, std::vector<Channel *> channels);
-
-	std::vector<std::string> getAllChannelMembersNicks(const Channel *channel);
-
-	std::vector<std::string> getVisibleChannelMembersNicks(const Channel *channel);
+    public:
+        typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string> &)> Cmd;
+        typedef std::map<std::string, void (Server::*)(int, const std::vector<std::string> &)>::iterator CmdIterator;
+        typedef std::map<char, bool (Server::*)(char, const std::string &, Channel *, int)> ModeHandler;
+        typedef std::map<char, bool (Server::*)(char, const std::string &, Channel *, int)>::iterator ModeHandlerIterator;
+        std::map<int, std::string> _serverMessages;
+        Server() {};
+        Server(int port, const std::string &password);
+        ~Server();
+        void run();
+        std::string getServerName();
+        std::string getNick(int fd);
+        std::vector<std::string> getNicknames(std::set<int> fds);
+        Client &getClient(int fd);
+        const std::map<int, Client *> &getClients() const;
+        static std::string uncapitalizeString(const std::string &input);
+
+    private:
+        int socketFd;
+        time_t start;
+        sockaddr_in address;
+        std::string _password;
+        std::string serverName;
+        std::string serverVersion;
+        std::vector<pollfd> pollFds;
+        std::map<int, Client *> clients;
+        std::vector<Channel *> _channels;
+        char _buffer[1024];
+        Cmd cmd;
+        ModeHandler channelMode;
+        std::map<std::string, std::string> users;
+        void initCmd();
+        void initChannelMode();
+        void initServerMessages();
+        Client *findClient(const std::string &nickname);
+        Client *findClient(int fd);
+        void addClient(int clientSocket);
+        void removeClient(int clientSocket);
+        void listenPort() const;
+        int acceptConnection();
+
+        bool parsBuffer(int fd);
+        std::string getParam(const std::vector<std::string> &tokens);
+        bool registrationProcess(int fd, std::vector<std::string> &tokens);
+        bool checkRegistration(int fd);
+        bool handleCommand(int fd, const std::string &command, const std::vector<std::string> &params);
+        void processCmd(int fd, std::vector<std::string> &tokens);
+
+        bool verifyNickname(int fd, const std::string &arg);
+        bool verifyPassword(int fd, const std::string &arg);
+        bool verifyUsername(int fd, const std::string &arg);
+
+        void serverSendReply(int fd, const std::string &token, serverRep id, const std::string &reply);
+        void serverSendError(int fd, const std::string &token, serverRep id);
+        void serverSendNotification(int fd, const std::string &prefix, const std::string &command,
+                                    const std::string &parameters);
+        void serverSendNotification(const std::set<int> &fds, const std::string &prefix, const std::string &command,
+                                    const std::string &parameters);
+        void serverSendMessage(int fd, const std::string &message);
+
+        // Commands
+        void processPrivmsg(int fd, const std::vector<std::string> &tokens);
+        void processJoin(int fd, const std::vector<std::string> &tokens);
+        void processInvite(int fd, const std::vector<std::string> &tokens);
+        void processKick(int fd, const std::vector<std::string> &tokens);
+        void processTopic(int fd, const std::vector<std::string> &tokens);
+        void processPart(int fd, const std::vector<std::string> &tokens);
+        void processMode(int fd, const std::vector<std::string> &tokens);
+        void processChannelMode(int fd, const std::vector<std::string> &tokens);
+        void processUserMode(int fd, const std::vector<std::string> &tokens);
+        void processNames(int fd, const std::vector<std::string> &tokens);
+        void processList(int fd, const std::vector<std::string> &tokens);
+        void processPing(int fd, const std::vector<std::string> &tokens);
+        void processAway(int fd, const std::vector<std::string> &tokens);
+        void processNick(int fd, const std::vector<std::string> &tokens);
+        void processQuit(int fd, const std::vector<std::string> &tokens);
+        void processWho(int fd, const std::vector<std::string> &tokens);
+        void processWhois(int fd, const std::vector<std::string> &tokens);
+
+        bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
+        bool handleModeI(char set, const std::string &parameter, Channel *channel, int fd);
+        bool handleModeK(char set, const std::string &parameter, Channel *channel, int fd);
+        bool handleModeL(char set, const std::string &parameter, Channel *channel, int fd);
+        bool handleModeO(char set, const std::string &parameter, Channel *channel, int fd);
+        bool handleModeB(char set, const std::string &parameter, Channel *channel, int fd);
+
+        void addChannel(Channel *channel);
+        void removeChannel(const std::string &channelName);
+        void removeClientFromChannel(int fd, Channel *channel);
+        Channel *findChannel(const std::string &name);
+        std::vector<Channel *> findChannels(std::queue<std::string> names);
+        bool isValidChannelName(const std::string &name);
+        void joinExistingChannel(int fd, Channel *channel, std::string password);
+        void createAndJoinNewChannel(int fd, std::string channelName, std::string password);
+        void listChannels(int fd, std::vector<Channel *> &channels);
+        std::vector<std::string> getClientsWithoutChannels();
+        std::map<std::string, std::vector<std::string> > getClientsOfChannels(int fd, std::vector<Channel *> channels);
+        std::vector<std::string> getAllChannelMembersNicks(const Channel *channel);
+        std::vector<std::string> getVisibleChannelMembersNicks(const Channel *channel);
+
+        void sendData(size_t index);
+        size_t receiveData(size_t index);
+        void resetEvents(size_t index);
+        std::string mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon);
+
+        void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
+        bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
+        void sendPmToChan(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
+                          const std::string &command);
+        void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
+                          const std::string &command);
+
+        std::queue<std::string> split(const std::string &src, char delimiter, bool unique) const;
+        bool modeParameterNeeded(char set, char mode);
+        bool isValidName(const std::string &name);
+        std::string paddDigits(int i);
+        bool isNum(const std::string &str);
+        bool isBitMask(const std::string &str);
+        Mode getBitMode(const std::string str);
 };
 
 #endif

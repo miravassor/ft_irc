@@ -81,32 +81,3 @@ bool Server::isValidChannelName(const std::string &name) {
 	}
 	return isValidName(name.substr(1));
 }
-
-// that method will be refactored later
-//void Server::processJoin(int fd, const std::vector<std::string> &tokens) {
-//	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
-//
-//	if (tokens.size() < 2)
-//		serverReply(fd, "", ERR_NEEDMOREPARAMS);
-//	// search if channel already exist
-//	// check if user already in channel ??
-//	std::vector<Channel *>::iterator it = _channels.begin();
-//	for (; it != _channels.end(); ++it) {
-//		if ((*it)->getName() == uncapitalizeString(tokens[1])) {
-//			(*it)->addMember(fd);
-//			(*it)->newMember(fd);
-//			return;
-//		}
-//	}
-//	// or build one
-//	if (tokens[1].find(' ') != std::string::npos) {
-//		// no space allowed in channel name
-//		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
-//		return;
-//	} else {
-//		_channels.push_back(new Channel(uncapitalizeString(tokens[1]), this));
-//		_channels.back()->addMember(fd);
-//		_channels.back()->addOperator(fd);
-//		_channels.back()->newMember(fd);
-//	}
-//}
