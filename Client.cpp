@@ -45,7 +45,6 @@ void Client::setAwayMessage(const std::string &away) {
 	Client::_awayMessage = away;
 }
 
-
 // Getters
 
 const std::string &Client::getNickname() const {

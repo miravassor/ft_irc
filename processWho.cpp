@@ -6,28 +6,33 @@ void    Server  ::processWho(int fd, const std::vector<std::string> &tokens) {
         if (channel) {
             std::set<int>::iterator members = channel->getMemberFds().begin();
             for (; members != channel->getMemberFds().end(); ++members) {
-                std::string result = channel->getName()  + " " + serverName + " " +  clients[fd]->getNickname() + " ";
                 if (clients[*members] != clients[fd] && !clients[*members]->activeMode(INVISIBLE)) {
-                    if (clients[*members]->activeMode(AWAY))
-                        result.append("G");
-                    else
-                        result.append("H");
-                    if (channel->isOperator(*members))
-                        result.append("@");
-                    result.append(" :");
+                    std::string token = channel->getName()  + " " + clients[*members]->getNickname() + " ";
+                    token.append(clients[fd]->getNickname() + + " 127.0.0.1 " + serverName + " ");
+                    token.append(clients[*members]->getNickname() + " ");
+                    if (clients[*members]->activeMode(AWAY)) {
+                        token.append("G");
+                    }
+                    else {
+                        token.append("H");
+                    }
+                    if (channel->isOperator(*members)) {
+                        token.append("@");
+                    }
+                    std::string result = "0 ";
                     result.append(clients[*members]->getRealName());
-                    serverSendReply(fd, clients[fd]->getNickname(), RPL_WHOREPLY, result);
+                    serverSendReply(fd, token, RPL_WHOREPLY, result);
                 }
             }
         }
+        serverSendReply(fd, channel->getName(), RPL_ENDOFWHO, "");
     }
-//    else if (tokens.size() == 1) {
-//        std::map<int, Client *>::iterator  it = clients.begin();
-//        for (; it != clients.end(); ++it) {
-//            if (clients[fd]->isInChannel(*cIt->))
-//        }
-//    }
-    serverSendReply(fd, "", RPL_ENDOFWHO, "");
+    //    else if (tokens.size() == 1) {
+    //        std::map<int, Client *>::iterator  it = clients.begin();
+    //        for (; it != clients.end(); ++it) {
+    //            if (clients[fd]->isInChannel(*cIt->))
+    //        }
+    //    }
 }
 
 void    Server::processWhois(int fd, const std::vector<std::string> &tokens) {
