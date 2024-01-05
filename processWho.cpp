@@ -27,12 +27,12 @@ void    Server  ::processWho(int fd, const std::vector<std::string> &tokens) {
         }
         serverSendReply(fd, channel->getName(), RPL_ENDOFWHO, "");
     }
-    //    else if (tokens.size() == 1) {
-    //        std::map<int, Client *>::iterator  it = clients.begin();
-    //        for (; it != clients.end(); ++it) {
-    //            if (clients[fd]->isInChannel(*cIt->))
-    //        }
-    //    }
+//    else if (tokens.size() == 1) {
+//        std::map<int, Client *>::iterator  it = clients.begin();
+//        for (; it != clients.end(); ++it) {
+//            if (clients[fd]->isInChannel())
+//        }
+//    }
 }
 
 void    Server::processWhois(int fd, const std::vector<std::string> &tokens) {

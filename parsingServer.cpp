@@ -200,7 +200,7 @@ void Server::serverSendError(int fd, const std::string &token, serverRep id) {
 		return;
 	}
 	std::stringstream fullReply;
-	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
+	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd) + "!" + clients[fd]->getRealName() + "@localhost ";
 	if (!token.empty()) {
 		fullReply << " " << token;
 	}
