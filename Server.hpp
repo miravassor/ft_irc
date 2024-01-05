@@ -40,12 +40,15 @@ enum serverRep {
 	RPL_AWAY = 301,
 	RPL_UNAWAY = 305,
 	RPL_NOWAWAY = 306,
+    RPL_ENDOFWHOIS = 318,
+    RPL_ENDOFWHO = 352,
 	RPL_LIST = 322,
 	RPL_LISTEND = 323,
 	RPL_CHANNELMODEIS = 324,
 	RPL_NOTOPIC = 331,
 	RPL_TOPIC = 332,
 	RPL_INVITING = 341,
+    RPL_WHOREPLY = 352,
 	RPL_NAMREPLY = 353,
 	RPL_ENDOFNAMES = 366,
 
@@ -204,6 +207,10 @@ private:
 	void processNick(int fd, const std::vector<std::string> &tokens);
 
 	void processQuit(int fd, const std::vector<std::string> &tokens);
+
+    void processWho(int fd, const std::vector<std::string> &tokens);
+
+    void processWhois(int fd, const std::vector<std::string> &tokens);
 
 	bool handleModeT(char set, const std::string &parameter, Channel *channel, int fd);
 

@@ -44,6 +44,7 @@ class Client {
 		const std::vector<std::string> &getChannels() const;
 		bool isQuit() const;
 		void setQuit(bool quit);
+        const std::string getRealName() const ;
 
 	bool isRegistered();
         bool isOperator();
@@ -68,6 +69,7 @@ class Client {
 		bool sendQueueEmpty();
 		void addChannel(const std::string &channel);
 		void removeChannel(const std::string &channel);
+        bool isInChannel(const std::string &channel);
 };
 
 #endif

@@ -91,11 +91,7 @@ public:
 
 	bool hasInvited(int clientFd);
 
-//	void newMember(int fd);
-
-//	void chanReply(int fd, chanRep id);
-//
-//	void chanSendReply(int fd, std::string id, const std::string &token, const std::string &reply);
+    bool isOperator(int fd);
 
 	bool authMember(int clientFd, std::string &password);
 

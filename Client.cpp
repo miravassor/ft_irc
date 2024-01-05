@@ -76,6 +76,10 @@ const std::string &Client::getPassword() const {
 	return password;
 }
 
+const std::string Client::getRealName() const {
+    return realName;
+}
+
 void Client::pushSendQueue(std::string send) {
 	this->_sendQueue.push(send);
 }
@@ -125,6 +129,15 @@ void Client::removeChannel(const std::string &channel) {
 			break;
 		}
 	}
+}
+
+bool    Client::isInChannel(const std::string &channel) {
+    std::vector<std::string>::iterator it = _channels.begin();
+    for (; it != _channels.end(); ++it) {
+        if (channel == *it)
+            return true;
+    }
+    return false;
 }
 
 std::string Client::returnModes() {
