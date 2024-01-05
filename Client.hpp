@@ -28,6 +28,7 @@ class Client {
         std::string username;
         std::string realName;
         std::string password;
+		std::string hostname;
 		std::string	recvBuffer;
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
@@ -46,6 +47,8 @@ class Client {
 		bool isQuit() const;
 		void setQuit(bool quit);
         const std::string getRealName() const ;
+
+	const std::string &getHostname() const;
 
 	bool isRegistered();
         bool isOperator();

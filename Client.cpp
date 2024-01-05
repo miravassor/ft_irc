@@ -10,9 +10,15 @@ Client::Client(int socket)
 	  modes(0),
 	  recvBuffer(""),
 	  _awayMessage(""),
-	  _quit(
-		  false) {
+	  _quit(false) {
 	std::cout << "Client created" << std::endl;
+	struct sockaddr_in _addr;
+	socklen_t _addrLen = sizeof(_addr);
+	getsockname(socketFd, (struct sockaddr *)&_addr, &_addrLen);
+	char _ip[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &_addr.sin_addr, _ip, INET_ADDRSTRLEN);
+	hostname = std::string(_ip);
+	std::cout << "Client hostname: " << hostname << std::endl;
 }
 
 Client::~Client() {
@@ -161,5 +167,9 @@ bool Client::isQuit() const {
 }
 void Client::setQuit(bool quit) {
 	Client::_quit = quit;
+}
+
+const std::string &Client::getHostname() const {
+	return hostname;
 }
 
