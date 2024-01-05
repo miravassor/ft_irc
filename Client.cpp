@@ -123,6 +123,15 @@ void Client::removeChannel(const std::string &channel) {
 	}
 }
 
+bool    Client::isInChannel(const std::string &channel) {
+    std::vector<std::string>::iterator it = _channels.begin();
+    for (; it != _channels.end(); ++it) {
+        if (channel == *it)
+            return true;
+    }
+    return false;
+}
+
 std::string Client::returnModes() {
     std::string fullModes;
 

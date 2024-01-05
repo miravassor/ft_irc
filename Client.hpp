@@ -66,6 +66,7 @@ class Client {
 		bool sendQueueEmpty();
 		void addChannel(const std::string &channel);
 		void removeChannel(const std::string &channel);
+        bool isInChannel(const std::string &channel);
 };
 
 #endif

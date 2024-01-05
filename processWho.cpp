@@ -6,7 +6,7 @@ void    Server  ::processWho(int fd, const std::vector<std::string> &tokens) {
         if (channel) {
             std::set<int>::iterator members = channel->getMemberFds().begin();
             for (; members != channel->getMemberFds().end(); ++members) {
-                std::string result = channel->getName()  + " " + serverName + " " +  clients[fd]->getNickname();
+                std::string result = channel->getName()  + " " + serverName + " " +  clients[fd]->getNickname() + " ";
                 if (clients[*members] != clients[fd] && !clients[*members]->activeMode(INVISIBLE)) {
                     if (clients[*members]->activeMode(AWAY))
                         result.append("G");
@@ -21,6 +21,12 @@ void    Server  ::processWho(int fd, const std::vector<std::string> &tokens) {
             }
         }
     }
+//    else if (tokens.size() == 1) {
+//        std::map<int, Client *>::iterator  it = clients.begin();
+//        for (; it != clients.end(); ++it) {
+//            if (clients[fd]->isInChannel(*cIt->))
+//        }
+//    }
     serverSendReply(fd, "", RPL_ENDOFWHO, "");
 }
 
