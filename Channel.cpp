@@ -169,6 +169,14 @@ bool Channel::hasInvited(int clientFd) {
 	return _invitedFds.find(clientFd) != _invitedFds.end();
 }
 
+bool Channel::isOperator(int fd) {
+    std::set<int>::iterator it = _operatorFds.find(fd);
+    if (it != _operatorFds.end())
+        return true;
+    else
+        return false;
+}
+
 
 //void    Channel::newMember(int fd) {
 //    if (!getTopic().empty()) {

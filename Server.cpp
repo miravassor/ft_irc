@@ -55,6 +55,8 @@ void Server::initCmd() {
 	cmd["AWAY"] = &Server::processAway;
 	cmd["NICK"] = &Server::processNick;
 	cmd["QUIT"] = &Server::processQuit;
+    cmd["WHO"] = &Server::processWho;
+    cmd["WHOIS"] = &Server::processWhois;
 }
 
 void Server::initChannelMode() {
@@ -76,6 +78,8 @@ void Server::initServerMessages() {
 	_serverMessages[RPL_ENDOFNAMES] = " :End of /NAMES list";
 	_serverMessages[RPL_UNAWAY] = " :You are no longer marked as being away";
 	_serverMessages[RPL_NOWAWAY] = " :You have been marked as being away";
+    _serverMessages[RPL_ENDOFWHO] = " :End of WHO list";
+    _serverMessages[RPL_ENDOFWHOIS] = " :End of WHOIS list";
 
 	_serverMessages[ERR_NOSUCHNICK] = " :No such nick/channel";
 	_serverMessages[ERR_NOSUCHSERVER] = " :No such server";

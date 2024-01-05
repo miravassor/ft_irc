@@ -6,7 +6,7 @@ void Server::processPing(int fd, const std::vector<std::string> &tokens) {
 	} else if (tokens[1] != serverName) {
 		serverSendError(fd, "", ERR_NOSUCHSERVER);
 	} else {
-		std::string pong = ":42.IRC PONG " + tokens[1];
-		serverSendReply(fd, pong, PONG, "");
+		std::string pong = "PONG :42.IRC";
+        serverSendMessage(fd, pong);
 	}
 }
