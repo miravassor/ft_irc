@@ -7,7 +7,7 @@ void    Server::processNick(int fd, const std::vector<std::string> &tokens) {
     }
     std::map<int, Client *>::iterator it = clients.begin();
     for (; it != clients.end(); ++it) {
-        if (it->second != clients[fd] && it->second->getNickname() == tokens[1]) {
+        if (it->second != clients[fd] && it->second->getNickname() == Server::uncapitalizeString(tokens[1])) {
             serverSendError(fd, clients[fd]->getNickname(), ERR_NICKNAMEINUSE);
             return;
         }

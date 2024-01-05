@@ -149,7 +149,7 @@ bool Server::handleModeO(char set, const std::string &parameter, Channel *channe
 // process MODE command (user) !!-> doc has more
 void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
-	if (params[0] != clients[fd]->getNickname()) {
+	if (Server::uncapitalizeString(params[0]) != clients[fd]->getNickname()) {
 		serverSendError(fd, params[0], ERR_USERSDONTMATCH);
 		return;
 	}
