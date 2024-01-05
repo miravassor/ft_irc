@@ -1,5 +1,5 @@
 #include "Client.hpp"
-
+#include "Server.hpp"
 // Build
 
 Client::Client(int socket)
@@ -22,7 +22,7 @@ Client::~Client() {
 // Setters
 
 void Client::setNickname(const std::string &nickname) {
-	Client::nickname = nickname;
+	this->nickname =  Server::uncapitalizeString(nickname);
 }
 
 void Client::setUsername(const std::string &username) {

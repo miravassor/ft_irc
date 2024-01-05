@@ -1,5 +1,5 @@
 #include "Channel.hpp"
-
+#include "Server.hpp"
 //Channel::Channel(const std::string &name, Server *server) {
 //    this->_name = name;
 //	this->_password = "";
@@ -10,7 +10,7 @@
 //}
 
 Channel::Channel(const std::string &name, std::string &password) {
-	_name = name;
+	_name = Server::uncapitalizeString(name);
 	_password = password;
 	_topic = "";
 	_mode = 0;

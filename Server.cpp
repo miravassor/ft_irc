@@ -223,12 +223,7 @@ void Server::sendData(size_t index) {
 				c.pushSendQueue(msg.substr(n));
 				pollFds[index].events = POLLOUT;
 			} else if (n < 0) {
-				if (errno == EWOULDBLOCK || errno == EAGAIN) {
-					c.pushSendQueue(msg);
-					pollFds[index].events = POLLOUT;
-				} else {
-					throw std::runtime_error("Send error");
-				}
+				throw std::runtime_error("Send error");
 			} else if (n == 0) {
 				processQuit(pollFds[index].fd, std::vector<std::string>());
 				removeClient(pollFds[index].fd);
@@ -315,7 +310,7 @@ void Server::addChannel(Channel *channel) {
 
 void Server::removeChannel(const std::string &channelName) {
 	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
-		if ((*it)->getName() == channelName) {
+		if ((*it)->getName() == Server::uncapitalizeString(channelName)) {
 			delete *it;
 			_channels.erase(it);
 			break;
@@ -324,9 +319,9 @@ void Server::removeChannel(const std::string &channelName) {
 }
 
 Channel *Server::findChannel(const std::string &name) {
-	std::string upperName = capitalizeString(name);
+	std::string lowerName = uncapitalizeString(name);
 	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
-		if (capitalizeString((*it)->getName()) == upperName) {
+		if ((*it)->getName() == lowerName) {
 			return *it;
 		}
 	}
@@ -354,9 +349,9 @@ std::vector<Channel *> Server::findChannels(std::queue<std::string> names) {
 }
 
 Client *Server::findClient(const std::string &nickname) {
-	std::string upperName = capitalizeString(nickname);
+	std::string lowerNickname = uncapitalizeString(nickname);
 	for (std::map<int, Client *>::iterator it = clients.begin(); it != clients.end(); ++it) {
-		if (capitalizeString(it->second->getNickname()) == upperName) {
+		if ( it->second->getNickname() == lowerNickname) {
 			return it->second;
 		}
 	}

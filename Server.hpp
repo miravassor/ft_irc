@@ -111,6 +111,8 @@ public:
 	Client &getClient(int fd);
 
 	const std::map<int, Client *> &getClients() const;
+	static std::string uncapitalizeString(const std::string &input);
+
 
 private:
 	int socketFd;
@@ -258,7 +260,6 @@ private:
 
 	void createAndJoinNewChannel(int fd, std::string channelName, std::string password);
 
-	std::string capitalizeString(const std::string &input);
 
 	void listChannels(int fd, std::vector<Channel *> &channels);
 

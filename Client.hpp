@@ -10,6 +10,7 @@
 #include <set>
 #include <queue>
 
+
 enum Mode {
     AWAY = 0b000001, // a: user is flagged as away
     INVISIBLE = 0b001000, // i: marks a users as invisible

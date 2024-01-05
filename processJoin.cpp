@@ -92,7 +92,7 @@ bool Server::isValidChannelName(const std::string &name) {
 //	// check if user already in channel ??
 //	std::vector<Channel *>::iterator it = _channels.begin();
 //	for (; it != _channels.end(); ++it) {
-//		if ((*it)->getName() == capitalizeString(tokens[1])) {
+//		if ((*it)->getName() == uncapitalizeString(tokens[1])) {
 //			(*it)->addMember(fd);
 //			(*it)->newMember(fd);
 //			return;
@@ -104,7 +104,7 @@ bool Server::isValidChannelName(const std::string &name) {
 //		serverReply(fd, tokens[1], ERR_NOSUCHCHANNEL);
 //		return;
 //	} else {
-//		_channels.push_back(new Channel(capitalizeString(tokens[1]), this));
+//		_channels.push_back(new Channel(uncapitalizeString(tokens[1]), this));
 //		_channels.back()->addMember(fd);
 //		_channels.back()->addOperator(fd);
 //		_channels.back()->newMember(fd);

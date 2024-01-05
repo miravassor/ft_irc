@@ -4,10 +4,10 @@
 
 
 // probably better to have capitalized names/nicknames in channels/clients than capitalize each time when looking
-std::string Server::capitalizeString(const std::string &input) {
+ std::string Server::uncapitalizeString(const std::string &input) {
 	std::string output(input);
 	for (size_t i = 0; i < input.size(); i++) {
-		output[i] = toupper(input[i]);
+		output[i] = tolower(input[i]);
 	}
 	return output;
 }
