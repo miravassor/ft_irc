@@ -8,7 +8,7 @@ void    Server  ::processWho(int fd, const std::vector<std::string> &tokens) {
             for (; members != channel->getMemberFds().end(); ++members) {
                 if (clients[*members] != clients[fd] && !clients[*members]->activeMode(INVISIBLE)) {
                     std::string token = channel->getName()  + " " + clients[*members]->getNickname() + " ";
-                    token.append(clients[fd]->getNickname() + + " 127.0.0.1 " + serverName + " ");
+                    token.append(clients[fd]->getNickname() + + " localhost " + serverName + " ");
                     token.append(clients[*members]->getNickname() + " ");
                     if (clients[*members]->activeMode(AWAY)) {
                         token.append("G");
