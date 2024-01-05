@@ -5,6 +5,7 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() == 1) {
 		nicks = getClientsOfChannels(fd, _channels);
 		std::pair<std::string, std::vector<std::string> > otherNicks = std::make_pair("*", getClientsWithoutChannels());
+		nicks.insert(otherNicks);
 	} else {
 		std::queue<std::string> channelNames = split(tokens[1], ',', true);
 		if (channelNames.size() > MAXTARGETS) {
