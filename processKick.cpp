@@ -8,7 +8,7 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 
 	const std::string &channelName = tokens[1];
 	const std::string &targetNick = tokens[2];
-	std::string reason;
+	std::string reason = targetNick;
 	if (tokens.size() > 3) {
 		reason = tokens[3].at(0) == ':'
 				 ? mergeTokensToString(std::vector<std::string>(tokens.begin() + 3, tokens.end()), true)
@@ -26,7 +26,7 @@ void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 		if (!targetClient || !channel->hasMember(targetClient->getSocket())) {
 			serverSendError(fd, targetNick + " " + channelName, ERR_USERNOTINCHANNEL);
 		} else {
-			std::string parameters = targetNick + " from " + channelName + " :" + reason;
+			std::string parameters = channelName + " " + targetNick + " :" + reason;
 			serverSendNotification(channel->getMemberFds(), getNick(fd), "KICK", parameters);
 			removeClientFromChannel(targetClient->getSocket(), channel);
 		}

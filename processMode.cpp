@@ -14,7 +14,7 @@ void Server::processMode(int fd, const std::vector<std::string> &tokens) {
 }
 
 void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) {
-	const std::string &channelName = capitalizeString(tokens[1]);
+	const std::string &channelName = tokens[1];
 	Channel *channel = findChannel(channelName);
 	std::string nickname = getNick(fd);
 	if (!channel) {
