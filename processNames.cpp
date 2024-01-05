@@ -5,7 +5,9 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() == 1) {
 		nicks = getClientsOfChannels(fd, _channels);
 		std::pair<std::string, std::vector<std::string> > othersNicks = std::make_pair("", getClientsWithoutChannels());
-		nicks.insert(othersNicks);
+		if (!othersNicks.second.empty()) {
+			nicks.insert(othersNicks);
+		}
 	} else {
 		std::queue<std::string> channelNames = split(tokens[1], ',', true);
 		if (channelNames.size() > MAXTARGETS) {
@@ -36,6 +38,7 @@ std::map<std::string, std::vector<std::string> > Server::getClientsOfChannels(in
 	}
 	return nicks;
 }
+
 std::vector<std::string> Server::getAllChannelMembersNicks(const Channel *channel) {
 	std::vector<std::string> nicks;
 	std::set<int> members = channel->getMemberFds();
