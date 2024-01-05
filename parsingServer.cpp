@@ -16,7 +16,7 @@ bool Server::parsBuffer(int fd) {
 			client.resetRecvBuffer();
 		}
 		// check if buffer contains a full line
-		size_t cRet = ss.str().find("\r\n");
+		size_t cRet = ss.str().find("\n");
 		if (cRet == std::string::npos) {
 			// if not, add buffer to recvBuffer and return
 			client.appendRecvBuffer(ss.str());
