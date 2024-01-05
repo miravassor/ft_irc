@@ -200,7 +200,8 @@ void Server::serverSendError(int fd, const std::string &token, serverRep id) {
 		return;
 	}
 	std::stringstream fullReply;
-	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd) + "!" + getNick(fd) + "@localhost ";
+//	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd) + "!" + getNick(fd) + "@localhost ";
+    fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
 	if (!token.empty()) {
 		fullReply << " " << token;
 	}
@@ -215,7 +216,8 @@ void Server::serverSendReply(int fd, const std::string &token, serverRep id, con
 		serverSendMessage(fd, fullReply.str());
 		return;
 	}
-	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd) + "!" + getNick(fd) + "@localhost ";
+//	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd) + "!" + getNick(fd) + "@localhost ";
+    fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
 	if (!token.empty()) {
 		fullReply << " " << token;
 	}

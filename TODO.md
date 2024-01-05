@@ -9,8 +9,8 @@
 ### ERROR Irssi
 - Irssi: critical nicklist_set_host: assertion 'host != NULL' failed
 
-### Away command
-- ne prend pas tous les espaces @alexandre
+~~### Away command~~
+~~- ne prend pas tous les espaces @alexandre~~
 
 ### CAP LS
 - revoir le fonctionnement de CAP @alexandre 
