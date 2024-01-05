@@ -51,6 +51,7 @@ enum serverRep {
     RPL_WHOREPLY = 352,
 	RPL_NAMREPLY = 353,
 	RPL_ENDOFNAMES = 366,
+    RPL_ENDOFBANLIST = 368,
 
 	ERR_NOSUCHNICK = 401,
 	ERR_NOSUCHSERVER = 402,
@@ -223,6 +224,8 @@ private:
 	bool handleModeL(char set, const std::string &parameter, Channel *channel, int fd);
 
 	bool handleModeO(char set, const std::string &parameter, Channel *channel, int fd);
+
+    bool handleModeB(char set, const std::string &parameter, Channel *channel, int fd);
 
 	void addChannel(Channel *channel);
 

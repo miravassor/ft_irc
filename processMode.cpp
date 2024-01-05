@@ -146,6 +146,14 @@ bool Server::handleModeO(char set, const std::string &parameter, Channel *channe
 	}
 }
 
+bool Server::handleModeB(char set, const std::string &parameter, Channel *channel, int fd) {
+    (void) set;
+    (void) parameter;
+    (void) channel;
+    serverSendReply(fd, "", RPL_ENDOFBANLIST, "");
+    return false;
+}
+
 // process MODE command (user) !!-> doc has more
 void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());

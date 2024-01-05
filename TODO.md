@@ -3,8 +3,8 @@
 ### User modes in Irssi
 - characteres aleatoires
 
-### #MODE #channel b
-- repondre a cette commande envoye par Irssi
+~~### #MODE #channel b
+- repondre a cette commande envoye par Irssi~~
 
 ### ERROR Irssi
 - Irssi: critical nicklist_set_host: assertion 'host != NULL' failed

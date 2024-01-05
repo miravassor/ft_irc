@@ -65,6 +65,7 @@ void Server::initChannelMode() {
 	channelMode['k'] = &Server::handleModeK;
 	channelMode['l'] = &Server::handleModeL;
 	channelMode['o'] = &Server::handleModeO;
+    channelMode['b'] = &Server::handleModeB;
 }
 
 void Server::initServerMessages() {
@@ -107,6 +108,7 @@ void Server::initServerMessages() {
 	_serverMessages[ERR_UMODEUNKNOWNFLAG] = " :Unknown MODE flag";
 	_serverMessages[ERR_USERSDONTMATCH] = " :Cant change mode for other users";
 	_serverMessages[ERR_NONICKNAMEGIVEN] = " :No nickname given";
+    _serverMessages[RPL_ENDOFBANLIST] = " : End of channel ban list";
 }
 
 Server::~Server() {
