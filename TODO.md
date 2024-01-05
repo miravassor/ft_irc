@@ -12,8 +12,8 @@
 ~~### Away command~~
 ~~- ne prend pas tous les espaces @alexandre~~
 
-### CAP LS
-- revoir le fonctionnement de CAP @alexandre 
+~~### CAP LS~~
+~~- revoir le fonctionnement de CAP @alexandre~~ 
 
 ### Finish WHO
 - finish who command @alexandre

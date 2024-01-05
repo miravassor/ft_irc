@@ -211,8 +211,8 @@ void Server::serverSendError(int fd, const std::string &token, serverRep id) {
 
 void Server::serverSendReply(int fd, const std::string &token, serverRep id, const std::string &reply) {
 	std::stringstream fullReply;
-	if (id == CAPLS) { // todo: ??
-		fullReply << ":" << serverName << " " << "CAP_LS" << " " << "[...]" << "\r\n";
+	if (id == CAPLS) {
+		fullReply << ":" << serverName << " " << "CAP * LS :" << "multi-prefix away-notify" << "\r\n";
 		serverSendMessage(fd, fullReply.str());
 		return;
 	}
