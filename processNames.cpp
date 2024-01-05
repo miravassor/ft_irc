@@ -4,10 +4,7 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 	std::map<std::string, std::vector<std::string> > nicks;
 	if (tokens.size() == 1) {
 		nicks = getClientsOfChannels(fd, _channels);
-		std::pair<std::string, std::vector<std::string> > othersNicks = std::make_pair("", getClientsWithoutChannels());
-		if (!othersNicks.second.empty()) {
-			nicks.insert(othersNicks);
-		}
+		std::pair<std::string, std::vector<std::string> > otherNicks = std::make_pair("*", getClientsWithoutChannels());
 	} else {
 		std::queue<std::string> channelNames = split(tokens[1], ',', true);
 		if (channelNames.size() > MAXTARGETS) {
@@ -19,7 +16,9 @@ void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 	}
 	for (std::map<std::string, std::vector<std::string> >::iterator it = nicks.begin(); it != nicks.end(); ++it) {
 		std::string nicknamesString = mergeTokensToString(it->second, false);
-		serverSendReply(fd, (*it).first, RPL_NAMREPLY, nicknamesString);
+		if (!nicknamesString.empty()) {
+			serverSendReply(fd, (*it).first, RPL_NAMREPLY, nicknamesString);
+		}
 	}
 	serverSendReply(fd, "", RPL_ENDOFNAMES, "");
 }
