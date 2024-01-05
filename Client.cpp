@@ -76,7 +76,7 @@ const std::string &Client::getPassword() const {
 }
 
 const std::string Client::getRealName() const {
-    return realName;
+    return username;
 }
 
 void Client::pushSendQueue(std::string send) {
