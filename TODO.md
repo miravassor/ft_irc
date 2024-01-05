@@ -21,6 +21,9 @@
 #### Print de dbug
 - penser a virer tous les print des debug
 
+### Cleaning
+- Clean unused methods and variables
+
 ### Server password 
 - Implementation password server -> virer password users
 
