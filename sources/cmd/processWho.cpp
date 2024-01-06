@@ -19,32 +19,12 @@ void    Server  ::processWho(int fd, const std::vector<std::string> &tokens) {
                         token.append("@");
                     }
                     std::string result = "0 ";
-                    result.append(clients[*members]->getRealName());
+                    result.append(clients[*members]->getUsername());
                     serverSendReply(fd, token, RPL_WHOREPLY, result);
                 }
             }
         }
         serverSendReply(fd, channel->getName(), RPL_ENDOFWHO, "");
-    }
-}
-
-void    Server::listServerClients(int fd) {
-    std::map<int, Client *>::const_iterator it = clients.begin();
-    for (; it != clients.end(); ++it) {
-            if (clients[fd] != it->second && !clients[it->second->getSocket()]->activeMode(INVISIBLE)) {
-                std::string token = clients[it->second->getSocket()]->getNickname() + " ";
-                token.append(clients[fd]->getNickname() + + " localhost " + serverName + " ");
-                token.append(clients[it->second->getSocket()]->getNickname() + " ");
-                if (clients[it->second->getSocket()]->activeMode(AWAY)) {
-                    token.append("G");
-                }
-                else {
-                    token.append("H");
-                }
-                std::string result = "0 ";
-                result.append(clients[it->second->getSocket()]->getRealName());
-                serverSendReply(fd, token, RPL_WHOREPLY, result);
-            }
     }
 }
 

@@ -59,10 +59,6 @@ bool Client::isRegistered() {
 	return registered;
 }
 
-bool Client::isOperator() {
-	return isOpe;
-}
-
 bool Client::isLogged() {
 	return logged;
 }
@@ -73,10 +69,6 @@ int Client::getSocket() {
 
 const std::string &Client::getPassword() const {
 	return password;
-}
-
-const std::string Client::getRealName() const {
-    return username;
 }
 
 void Client::pushSendQueue(std::string send) {

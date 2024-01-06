@@ -22,11 +22,9 @@ class Client {
         int         socketFd;
         bool        logged;
         bool        registered;
-        bool        isOpe;
         unsigned int modes;
         std::string nickname;
         std::string username;
-        std::string realName;
         std::string password;
 		std::string	recvBuffer;
 		std::queue<std::string> _sendQueue;
@@ -45,10 +43,8 @@ class Client {
 		const std::vector<std::string> &getChannels() const;
 		bool isQuit() const;
 		void setQuit(bool quit);
-        const std::string getRealName() const ;
 
-	bool isRegistered();
-        bool isOperator();
+	    bool isRegistered();
         bool isLogged();
         void setNickname(const std::string &nickname);
         void setUsername(const std::string &username);
