@@ -98,7 +98,7 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 }
 
 void Server::processCmd(int fd, std::vector<std::string> &tokens) {
-	if (tokens.empty())
+	if (tokens.empty() || tokens[0] == "CAP")
 		return;
 
 	std::string command = tokens[0];
@@ -212,7 +212,7 @@ void Server::serverSendError(int fd, const std::string &token, serverRep id) {
 void Server::serverSendReply(int fd, const std::string &token, serverRep id, const std::string &reply) {
 	std::stringstream fullReply;
 	if (id == CAPLS) {
-		fullReply << ":" << serverName << " " << "CAP * LS :" << "multi-prefix away-notify" << "\r\n";
+        fullReply << "CAP * LS :" << "\r\n";
 		serverSendMessage(fd, fullReply.str());
 		return;
 	}
