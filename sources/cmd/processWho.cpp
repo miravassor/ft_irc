@@ -1,31 +1,51 @@
 #include "../../headers/Server.hpp"
 
-void    Server  ::processWho(int fd, const std::vector<std::string> &tokens) {
-    if (tokens.size() > 1 && tokens[1][0] == '#') {
-        Channel *channel = findChannel(tokens[1]);
-        if (channel) {
-            std::set<int>::iterator members = channel->getMemberFds().begin();
-            for (; members != channel->getMemberFds().end(); ++members) {
-                if (clients[*members] != clients[fd] && !clients[*members]->activeMode(INVISIBLE)) {
-                    std::string token = channel->getName() + " " + clients[*members]->getNickname() + " ";
-                    token.append(clients[fd]->getNickname() + +" localhost " + serverName + " ");
-                    token.append(clients[*members]->getNickname() + " ");
-                    if (clients[*members]->activeMode(AWAY)) {
-                        token.append("G");
-                    } else {
-                        token.append("H");
-                    }
-                    if (channel->isOperator(*members)) {
-                        token.append("@");
-                    }
-                    std::string result = "0 ";
-                    result.append(clients[*members]->getUsername());
-                    serverSendReply(fd, token, RPL_WHOREPLY, result);
-                }
-            }
-        }
-        serverSendReply(fd, channel->getName(), RPL_ENDOFWHO, "");
-    }
+void Server::processWho(int fd, const std::vector<std::string> &tokens) {
+	if (tokens.size() < 2) {
+		serverSendError(fd, "WHO", ERR_NEEDMOREPARAMS);
+		return;
+	}
+	std::string targetName = tokens[1];
+	// "<channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
+	std::vector<std::pair<std::string, std::string> > info;
+	if (targetName.at(0) == '#' || targetName.at(0) == '&') {
+		Channel *channel = findChannel(targetName);
+		if (channel) {
+			std::set<int> members = channel->getMemberFds();
+			for (std::set<int>::iterator it = members.begin(); it != members.end(); ++it) {
+				Client *client = clients[*it];
+				if (!client->activeMode(INVISIBLE) || channel->hasMember(fd)) {
+					info.push_back(takeFullClientInfo(client, channel));
+				}
+			}
+		}
+	} else {
+		Client *client = findClient(targetName);
+		if (client) {
+			info.push_back(takeFullClientInfo(client, NULL));
+		}
+	}
+	for (std::vector<std::pair<std::string, std::string> >::iterator it = info.begin(); it != info.end(); ++it) {
+		serverSendReply(fd, it->first, RPL_WHOREPLY, it->second);
+	}
+	serverSendReply(fd, targetName, RPL_ENDOFWHO, "");
+}
+
+std::pair<std::string, std::string> Server::takeFullClientInfo(Client *client, Channel *channel) {
+	std::string channelName = channel ? channel->getName() : "*";
+	std::string clientInfo;
+	clientInfo
+		.append(channelName)
+		.append(" ~").append(client->getUsername())
+		.append(" ").append(client->getHostname())
+		.append(" ").append(serverName)
+		.append(" ").append(client->getNickname())
+		.append(" ").append(client->activeMode(AWAY) ? "G" : "H");
+	if (channel && channel->hasOperator(client->getSocket())) {
+		clientInfo.append("@");
+	}
+	std::string hopcountAndRealName = "0 " + client->getRealName();
+	return std::make_pair(clientInfo, hopcountAndRealName);
 }
 
 void    Server::processWhois(int fd, const std::vector<std::string> &tokens) {

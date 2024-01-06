@@ -80,11 +80,18 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 		else
 			clients[fd]->setNickname(params[0]);
 	} else if (command == "USER") {
-		std::string realname = getParam(params);
+		if (params.size() < 4) {
+			serverSendError(fd, "USER", ERR_NEEDMOREPARAMS);
+			return 1;
+		}
+		clients[fd]->setUsername(params[0]);
+		std::string realname = params[3].at(0) == ':'
+							   ? mergeTokensToString(std::vector<std::string>(params.begin() + 3, params.end()), true)
+							   : params[3];
 		if (verifyUsername(fd, realname))
 			return 0;
 		else {
-			clients[fd]->setUsername(realname);
+			clients[fd]->setRealName(realname);
 		}
 		if (isBitMask(params[1])) {
 			Mode mode = getBitMode(params[1]);

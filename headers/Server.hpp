@@ -204,6 +204,8 @@ class Server {
         bool isNum(const std::string &str);
         bool isBitMask(const std::string &str);
         Mode getBitMode(const std::string str);
+
+		std::pair<std::string, std::string> takeFullClientInfo(Client *client, Channel *channel);
 };
 
 #endif

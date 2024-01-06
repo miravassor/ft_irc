@@ -25,7 +25,9 @@ class Client {
         unsigned int modes;
         std::string nickname;
         std::string username;
+		std::string realName;
         std::string password;
+		std::string hostname;
 		std::string	recvBuffer;
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
@@ -41,6 +43,7 @@ class Client {
         int getSocket();
 		const std::string &getAwayMessage() const;
 		const std::vector<std::string> &getChannels() const;
+
 		bool isQuit() const;
 		void setQuit(bool quit);
 
@@ -50,7 +53,8 @@ class Client {
         void setUsername(const std::string &username);
         void setPassword(const std::string &password);
         void setRegistration();
-        void setLog();
+		void setRealName(const std::string &real_name);
+		void setLog();
         void setAwayMessage(const std::string &away);
         void addMode(Mode mode);
         void removeMode(Mode mode);
@@ -61,12 +65,14 @@ class Client {
 		void appendRecvBuffer(std::string recv);
 		void resetRecvBuffer();
 		bool isRecvBufferEmpty();
+		std::string getRealName() const;
 		void pushSendQueue(std::string send);
 		std::string popSendQueue();
 		bool sendQueueEmpty();
 		void addChannel(const std::string &channel);
 		void removeChannel(const std::string &channel);
         bool isInChannel(const std::string &channel);
+	const std::string &getHostname() const;
 };
 
 #endif

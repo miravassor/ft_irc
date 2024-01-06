@@ -7,6 +7,7 @@ Client::Client(int socket)
 	  logged(false),
 	  registered(false),
 	  modes(0),
+	  hostname("lalal"),
 	  recvBuffer(""),
 	  _awayMessage(""),
 	  _quit(
@@ -21,7 +22,7 @@ Client::~Client() {
 // Setters
 
 void Client::setNickname(const std::string &nickname) {
-	this->nickname =  Server::uncapitalizeString(nickname);
+	this->nickname = Server::uncapitalizeString(nickname);
 }
 
 void Client::setUsername(const std::string &username) {
@@ -68,6 +69,10 @@ int Client::getSocket() {
 
 const std::string &Client::getPassword() const {
 	return password;
+}
+
+std::string Client::getRealName() const {
+	return realName;
 }
 
 void Client::pushSendQueue(std::string send) {
@@ -121,13 +126,13 @@ void Client::removeChannel(const std::string &channel) {
 	}
 }
 
-bool    Client::isInChannel(const std::string &channel) {
-    std::vector<std::string>::iterator it = _channels.begin();
-    for (; it != _channels.end(); ++it) {
-        if (channel == *it)
-            return true;
-    }
-    return false;
+bool Client::isInChannel(const std::string &channel) {
+	std::vector<std::string>::iterator it = _channels.begin();
+	for (; it != _channels.end(); ++it) {
+		if (channel == *it)
+			return true;
+	}
+	return false;
 }
 
 std::string Client::returnModes() {
@@ -143,11 +148,16 @@ std::string Client::returnModes() {
 	} else
 		return "";
 }
-
 bool Client::isQuit() const {
 	return _quit;
 }
 void Client::setQuit(bool quit) {
 	Client::_quit = quit;
+}
+const std::string &Client::getHostname() const {
+	return hostname;
+}
+void Client::setRealName(const std::string &real_name) {
+	realName = real_name;
 }
 
