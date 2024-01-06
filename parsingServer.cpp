@@ -54,7 +54,7 @@ bool Server::registrationProcess(int fd, std::vector<std::string> &tokens) {
 		return 0; // or 1?
 	if (tokens.size() < 2) {
 		serverSendError(fd, "", ERR_NEEDMOREPARAMS);
-		return 1;
+		return 0;
 	}
 	std::string command = tokens[0];
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
@@ -76,13 +76,13 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 			clients[fd]->setPassword(params[0]);
 	} else if (command == "NICK") {
 		if (verifyNickname(fd, params[0]))
-			return 1;
+			return 0;
 		else
 			clients[fd]->setNickname(params[0]);
 	} else if (command == "USER") {
 		std::string realname = getParam(params);
 		if (verifyUsername(fd, realname))
-			return 1;
+			return 0;
 		else {
 			clients[fd]->setUsername(realname);
 		}
@@ -117,19 +117,14 @@ bool Server::checkRegistration(int fd) {
 	if (clients[fd]->isLogged() && (!clients[fd]->getNickname().empty() && !clients[fd]->getUsername().empty())) {
 		// check if user (nickname) is in database
 		if (users.find(clients[fd]->getNickname()) != users.end()) {
-			// check if user is already connected
-			std::map<int, Client *>::iterator it = clients.begin();
-			for (; it != clients.end(); ++it) {
-				if (it->second != clients[fd] && it->second->getNickname() == clients[fd]->getNickname()) {
-					serverSendError(fd, clients[fd]->getNickname(), ERR_NICKNAMEINUSE);
-					return 1;
-				}
-			}
-			// check if _password match previous login
-			if (clients[fd]->getPassword() != users[clients[fd]->getNickname()]) {
-				serverSendError(fd, clients[fd]->getNickname(), ERR_PASSWDMISMATCH);
-				return 1;
-			}
+            // check if user is already connected
+            std::map<int, Client *>::iterator it = clients.begin();
+            for (; it != clients.end(); ++it) {
+                if (it->second != clients[fd] && it->second->getNickname() == clients[fd]->getNickname()) {
+                    serverSendError(fd, clients[fd]->getNickname(), ERR_NICKNAMEINUSE);
+                    return 1;
+                }
+            }
 		} else {
 			// if first time user connect: add to database
 			users.insert(std::make_pair(clients[fd]->getNickname(), clients[fd]->getPassword()));
@@ -188,9 +183,14 @@ bool Server::verifyNickname(int fd, const std::string &arg) {
 bool Server::verifyPassword(int fd, const std::string &arg) {
 	if (arg.empty()) {
 		serverSendError(fd, "", ERR_NEEDMOREPARAMS);
-		return 1;
+		return 0;
 	}
-	clients[fd]->setLog();
+    if (arg != _password) {
+        serverSendError(fd, "", ERR_PASSWDMISMATCH);
+        return 1;
+    } else {
+        clients[fd]->setLog();
+    }
 	return 0;
 }
 
