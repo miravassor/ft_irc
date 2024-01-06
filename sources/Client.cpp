@@ -6,7 +6,6 @@ Client::Client(int socket)
 	: socketFd(socket),
 	  logged(false),
 	  registered(false),
-	  isOpe(false),
 	  modes(0),
 	  recvBuffer(""),
 	  _awayMessage(""),
@@ -144,6 +143,7 @@ std::string Client::returnModes() {
 	} else
 		return "";
 }
+
 bool Client::isQuit() const {
 	return _quit;
 }
