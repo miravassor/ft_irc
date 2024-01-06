@@ -15,8 +15,8 @@
 ~~### CAP LS~~
 ~~- revoir le fonctionnement de CAP @alexandre~~ 
 
-### Finish WHO
-- finish who command @alexandre
+~~### Finish WHO~~
+~~- finish who command @alexandre~~
 
 #### Print de dbug
 - penser a virer tous les print des debug
@@ -24,7 +24,7 @@
 ### Cleaning
 - Clean unused methods and variables
 
-### Server password 
+### Server password -> 90% done
 - Implementation password server -> virer password users
 
 ### Packages organizing
