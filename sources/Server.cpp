@@ -146,7 +146,6 @@ void Server::removeClient(int clientSocket) {
 			++it;
 		}
 	}
-
 	// removing from pollFds
 	for (std::vector<pollfd>::iterator it = pollFds.begin(); it != pollFds.end(); ++it) {
 		if (it->fd == clientSocket) {
@@ -154,9 +153,10 @@ void Server::removeClient(int clientSocket) {
 			break;
 		}
 	}
-	// deleting and removing from clients
+	// removing from users, deleting and removing from clients
 	std::map<int, Client *>::iterator it = clients.find(clientSocket);
 	if (it != clients.end()) {
+		users.erase(it->second->getNickname());
 		delete it->second;
 		clients.erase(it);
 	}
