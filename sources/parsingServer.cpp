@@ -82,7 +82,7 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 	} else if (command == "USER") {
 		if (params.size() < 4) {
 			serverSendError(fd, "USER", ERR_NEEDMOREPARAMS);
-			return 1;
+			return 0;
 		}
 		clients[fd]->setUsername(params[0]);
 		std::string realname = params[3].at(0) == ':'
