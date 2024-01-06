@@ -202,7 +202,7 @@ size_t Server::receiveData(size_t index) {
 		if (bytesRead > 0) {
 			_buffer[bytesRead] = 0;
 			if (parsBuffer(pollFds[index].fd)) {
-                clients[index]->setQuit(true); // QUIT TOO SOON
+                clients[pollFds[index].fd]->setQuit(true);
             }
 		} else if (bytesRead == 0) {
 			processQuit(pollFds[index].fd, std::vector<std::string>());
