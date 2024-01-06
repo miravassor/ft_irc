@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../../headers/Server.hpp"
 
 void Server::processNames(int fd, const std::vector<std::string> &tokens) {
 	std::map<std::string, std::vector<std::string> > nicks;

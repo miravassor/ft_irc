@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../../headers/Server.hpp"
 
 // User should not be able to use MODE +a command but use away command
 

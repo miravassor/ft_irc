@@ -1,5 +1,5 @@
-#include "Server.hpp"
-#include "Channel.hpp"
+#include "../headers/Server.hpp"
+#include "../headers/Channel.hpp"
 
 static bool running = true;
 

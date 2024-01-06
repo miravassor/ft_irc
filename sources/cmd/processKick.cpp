@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../../headers/Server.hpp"
 
 void Server::processKick(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() < 3) {

@@ -1,5 +1,5 @@
-#include "Channel.hpp"
-#include "Server.hpp"
+#include "../headers/Channel.hpp"
+#include "../headers/Server.hpp"
 
 Channel::Channel(const std::string &name, std::string &password) {
 	_name = Server::uncapitalizeString(name);

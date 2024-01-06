@@ -1,6 +1,6 @@
-#include "Server.hpp"
-#include "Client.hpp"
-#include "Channel.hpp"
+#include "../headers/Server.hpp"
+#include "../headers/Client.hpp"
+#include "../headers/Channel.hpp"
 
 
 // probably better to have capitalized names/nicknames in channels/clients than capitalize each time when looking

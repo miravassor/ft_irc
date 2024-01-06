@@ -1,4 +1,4 @@
-#include "Client.hpp"
+#include "../headers/Client.hpp"
 
 Mode	Client::getMode(const std::string &mode) {
 	if (mode.size() != 2)

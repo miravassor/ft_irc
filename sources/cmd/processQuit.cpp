@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../../headers/Server.hpp"
 
 void Server::processQuit(int fd, const std::vector<std::string> &tokens) {
 	Client *client = findClient(fd);

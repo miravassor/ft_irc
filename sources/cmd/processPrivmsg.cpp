@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../../headers/Server.hpp"
 
 bool Server::checkPmTokens(int fd, const std::vector<std::string> &tokens) {
 	if (tokens.size() == 1 || tokens.size() == 2) {

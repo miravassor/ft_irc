@@ -1,5 +1,5 @@
-#include "Server.hpp"
-#include "Channel.hpp"
+#include "../headers/Server.hpp"
+#include "../headers/Channel.hpp"
 
 Server::Server(int port, const std::string &password) {
 	// setting the address family - AF_INET for IPv4

@@ -1,5 +1,5 @@
-#include "Client.hpp"
-#include "Server.hpp"
+#include "../headers/Client.hpp"
+#include "../headers/Server.hpp"
 // Build
 
 Client::Client(int socket)
