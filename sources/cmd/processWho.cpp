@@ -32,18 +32,15 @@ void Server::processWho(int fd, const std::vector<std::string> &tokens) {
 }
 
 std::pair<std::string, std::string> Server::takeFullClientInfo(Client *client, Channel *channel) {
-	std::string channelName = channel ? channel->getName() : "*";
 	std::string clientInfo;
 	clientInfo
-		.append(channelName)
+		.append(channel ? channel->getName() : "*")
 		.append(" ~").append(client->getUsername())
 		.append(" ").append(client->getHostname())
 		.append(" ").append(serverName)
 		.append(" ").append(client->getNickname())
-		.append(" ").append(client->activeMode(AWAY) ? "G" : "H");
-	if (channel && channel->hasOperator(client->getSocket())) {
-		clientInfo.append("@");
-	}
+		.append(" ").append(client->activeMode(AWAY) ? "G" : "H")
+		.append(channel && channel->hasOperator(client->getSocket()) ? "@" : "");
 	std::string hopcountAndRealName = "0 " + client->getRealName();
 	return std::make_pair(clientInfo, hopcountAndRealName);
 }

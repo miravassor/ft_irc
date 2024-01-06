@@ -7,8 +7,6 @@
 #include <cstring>
 #include <sys/socket.h>
 
-//#include "Server.hpp"
-
 #define TOPICSET     0b000001 // if set topic is settable by channel operator only
 #define INVITEONLY      0b000010 // if set clients can join only if invited
 #define KEYSET            0b000100 // if set clients can join only with password
@@ -30,11 +28,9 @@ class Channel {
         ~Channel();
         const std::string &getName() const;
         const std::string &getTopic() const;
-        unsigned int getMode() const;
         std::string getModeString() const;
         std::string getModeStringWithParameters() const;
         const std::set<int> &getMemberFds() const;
-        const std::set<int> &getOperatorFds() const;
         int getLimitMembers() const;
         void setTopic(const std::string &topic);
         void setPassword(const std::string &password);

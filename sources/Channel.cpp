@@ -15,17 +15,12 @@ Channel::Channel(const std::string &name, std::string &password) {
 Channel::~Channel() {
 }
 
-
 const std::string &Channel::getName() const {
 	return _name;
 }
 
 const std::string &Channel::getTopic() const {
 	return _topic;
-}
-
-unsigned int Channel::getMode() const {
-	return _mode;
 }
 
 std::string Channel::getModeString() const {
@@ -61,10 +56,6 @@ std::string Channel::getModeStringWithParameters() const {
 
 const std::set<int> &Channel::getMemberFds() const {
 	return _memberFds;
-}
-
-const std::set<int> &Channel::getOperatorFds() const {
-	return _operatorFds;
 }
 
 int Channel::getLimitMembers() const {
@@ -130,7 +121,6 @@ bool Channel::authMember(int clientFd, std::string &password) {
 bool Channel::addOperator(int clientFd) {
 	return _operatorFds.insert(clientFd).second;
 }
-
 
 bool Channel::removeOperator(int clientFd) {
 	return _operatorFds.erase(clientFd);
