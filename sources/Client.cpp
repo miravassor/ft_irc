@@ -1,107 +1,116 @@
 #include "../headers/Client.hpp"
 #include "../headers/Server.hpp"
-// Build
 
 Client::Client(int socket, std::string hostname)
-	: socketFd(socket),
-	  logged(false),
-	  registered(false),
-	  modes(0),
-	  hostname(hostname),
-	  recvBuffer(""),
+	: _socketFd(socket),
+	  _logged(false),
+	  _registered(false),
+	  _modes(0),
+	  _hostname(hostname),
+	  _recvBuffer(""),
 	  _awayMessage(""),
 	  _quit(false) {
-	std::cout << "Client created" << std::endl;
 }
 
 Client::~Client() {
-	std::cout << "Client destroyed." << std::endl;
 }
 
-// Setters
-
 void Client::setNickname(const std::string &nickname) {
-	this->nickname = Server::uncapitalizeString(nickname);
+	_nickname = Server::uncapitalizeString(nickname);
 }
 
 void Client::setUsername(const std::string &username) {
-	Client::username = username;
+	Client::_username = username;
 }
 
 void Client::setLog() {
-	Client::logged = true;
+	Client::_logged = true;
 }
 
 void Client::setRegistration() {
-	Client::registered = true;
+	Client::_registered = true;
 }
 
 void Client::setPassword(const std::string &password) {
-	Client::password = password;
+	Client::_password = password;
+}
+
+void Client::setRealName(const std::string &real_name) {
+	_realName = real_name;
 }
 
 void Client::setAwayMessage(const std::string &away) {
 	Client::_awayMessage = away;
 }
 
-// Getters
+void Client::setQuit(bool quit) {
+	Client::_quit = quit;
+}
 
 const std::string &Client::getNickname() const {
-	return nickname;
+	return _nickname;
 }
 
 const std::string &Client::getUsername() const {
-	return username;
+	return _username;
 }
 
-bool Client::isRegistered() {
-	return registered;
+bool Client::isRegistered() const {
+	return _registered;
 }
 
-bool Client::isLogged() {
-	return logged;
+bool Client::isLogged() const {
+	return _logged;
 }
 
-int Client::getSocket() {
-	return socketFd;
+int Client::getSocket() const {
+	return _socketFd;
 }
 
 const std::string &Client::getPassword() const {
-	return password;
+	return _password;
 }
 
 std::string Client::getRealName() const {
-	return realName;
+	return _realName;
+}
+
+const std::string &Client::getHostname() const {
+	return _hostname;
+}
+
+bool Client::isQuit() const {
+	return _quit;
 }
 
 void Client::pushSendQueue(std::string send) {
-	this->_sendQueue.push(send);
+	_sendQueue.push(send);
 }
 
 std::string Client::popSendQueue() {
-	std::string ret(this->_sendQueue.front());
-	this->_sendQueue.pop();
+	std::string ret(_sendQueue.front());
+	_sendQueue.pop();
 	return ret;
 }
 
 bool Client::sendQueueEmpty() {
-	return this->_sendQueue.empty();
+	return _sendQueue.empty();
 }
 
 void Client::appendRecvBuffer(std::string recv) {
-	this->recvBuffer.append(recv);
+	_recvBuffer.append(recv);
 }
 
 std::string Client::getRecvBuffer() {
-	return this->recvBuffer;
+	return _recvBuffer;
 }
 
 void Client::resetRecvBuffer() {
-	this->recvBuffer.clear();
+	_recvBuffer.clear();
 }
 
 bool Client::isRecvBufferEmpty() {
-	return this->recvBuffer.empty();
+	return _recvBuffer.empty();
 }
 
 const std::string &Client::getAwayMessage() const {
@@ -125,15 +134,6 @@ void Client::removeChannel(const std::string &channel) {
 	}
 }
 
-bool Client::isInChannel(const std::string &channel) {
-	std::vector<std::string>::iterator it = _channels.begin();
-	for (; it != _channels.end(); ++it) {
-		if (channel == *it)
-			return true;
-	}
-	return false;
-}
-
 std::string Client::returnModes() {
 	std::string fullModes;
 
@@ -147,16 +147,34 @@ std::string Client::returnModes() {
 	} else
 		return "";
 }
-bool Client::isQuit() const {
-	return _quit;
-}
-void Client::setQuit(bool quit) {
-	Client::_quit = quit;
-}
-const std::string &Client::getHostname() const {
-	return hostname;
-}
-void Client::setRealName(const std::string &real_name) {
-	realName = real_name;
+
+Mode	Client::getMode(const std::string &mode) {
+	if (mode.size() != 2)
+		return UNKNOWN;
+	if (mode[0] != '+' && mode[0] != '-')
+		return UNKNOWN;
+	switch (mode[1]) {
+		case 'a' :
+			return AWAY;
+		case 'i':
+			return INVISIBLE;
+		default:
+			return UNKNOWN;
+	}
 }
 
+void	Client::addMode(Mode mode) {
+	if (activeMode(mode))
+		return;
+	_modes |= mode;
+}
+
+void	Client::removeMode(Mode mode) {
+	if (!activeMode(mode))
+		return;
+	_modes &= ~mode;
+}
+
+bool	Client::activeMode(Mode mode) const {
+	return (_modes & mode) == mode;
+}

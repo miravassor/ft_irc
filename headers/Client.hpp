@@ -19,16 +19,16 @@ enum Mode {
 
 class Client {
     private:
-        int         socketFd;
-        bool        logged;
-        bool        registered;
-        unsigned int modes;
-        std::string nickname;
-        std::string username;
-		std::string realName;
-        std::string password;
-		std::string hostname;
-		std::string	recvBuffer;
+        int         _socketFd;
+        bool        _logged;
+        bool        _registered;
+        unsigned int _modes;
+        std::string _nickname;
+        std::string _username;
+		std::string _realName;
+        std::string _password;
+		std::string _hostname;
+		std::string	_recvBuffer;
 		std::queue<std::string> _sendQueue;
 		std::string _awayMessage;
 		std::vector<std::string> _channels;
@@ -37,18 +37,18 @@ class Client {
     public:
         Client(int socket, std::string hostname);
         ~Client();
+
         const std::string &getNickname() const;
         const std::string &getUsername() const;
         const std::string &getPassword() const;
-        int getSocket();
+		const std::string &getHostname() const;
+        int getSocket() const;
 		const std::string &getAwayMessage() const;
 		const std::vector<std::string> &getChannels() const;
-
 		bool isQuit() const;
 		void setQuit(bool quit);
-
-	    bool isRegistered();
-        bool isLogged();
+	    bool isRegistered() const;
+        bool isLogged() const;
         void setNickname(const std::string &nickname);
         void setUsername(const std::string &username);
         void setPassword(const std::string &password);
@@ -71,8 +71,6 @@ class Client {
 		bool sendQueueEmpty();
 		void addChannel(const std::string &channel);
 		void removeChannel(const std::string &channel);
-        bool isInChannel(const std::string &channel);
-	const std::string &getHostname() const;
 };
 
 #endif

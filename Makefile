@@ -6,7 +6,7 @@ SRCDIR = sources
 CMDDIR = $(SRCDIR)/cmd
 HEADERDIR = headers
 
-SRCS = main.cpp Server.cpp Client.cpp Channel.cpp parsingServer.cpp utils.cpp modes.cpp
+SRCS = main.cpp Server.cpp Client.cpp Channel.cpp parsingServer.cpp utils.cpp
 CMDSRCS = processInvite.cpp processJoin.cpp processKick.cpp processList.cpp processMode.cpp \
 processNames.cpp processPart.cpp processPing.cpp processPrivmsg.cpp processTopic.cpp \
 processAway.cpp processNick.cpp processQuit.cpp processWho.cpp
