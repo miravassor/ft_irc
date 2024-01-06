@@ -130,9 +130,9 @@ Server::~Server() {
 	}
 }
 
-void Server::addClient(int clientSocket) {
+void Server::addClient(int clientSocket, std::string clientHostname) {
 	// Create a new Client object and insert it into the clients map
-	clients.insert(std::make_pair(clientSocket, new Client(clientSocket)));
+	clients.insert(std::make_pair(clientSocket, new Client(clientSocket, clientHostname)));
 }
 
 void Server::removeClient(int clientSocket) {
@@ -193,7 +193,8 @@ void Server::run() {
 size_t Server::receiveData(size_t index) {
 // if index == 0 -> first connection
 	if (index == 0) {
-		addClient(acceptConnection());
+		std::pair<int, std::string> connectionInfo = acceptConnection();
+		addClient(connectionInfo.first, connectionInfo.second);
 	} else {
 		memset(_buffer, 0, 1024);
 		int bytesRead = recv(pollFds[index].fd, _buffer, sizeof(_buffer) - 1,
@@ -258,7 +259,7 @@ void Server::listenPort() const {
 	std::cout << "Server is listening for incoming connections" << std::endl;
 }
 
-int Server::acceptConnection() {
+std::pair<int, std::string> Server::acceptConnection() {
 	sockaddr_in clientAddress;
 	socklen_t clientAddressLength = sizeof(clientAddress);
 	pollfd clientPollFd;
@@ -284,7 +285,7 @@ int Server::acceptConnection() {
 			  << inet_ntoa(clientAddress.sin_addr) << ":"
 			  << ntohs(clientAddress.sin_port)
 			  << " at fd=" << clientSocket << std::endl;
-	return clientSocket;
+	return std::make_pair(clientSocket, inet_ntoa(clientAddress.sin_addr));
 }
 
 // Channel getters

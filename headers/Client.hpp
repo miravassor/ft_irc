@@ -35,7 +35,7 @@ class Client {
 		bool 		_quit;
 
     public:
-        Client(int socket);
+        Client(int socket, std::string hostname);
         ~Client();
         const std::string &getNickname() const;
         const std::string &getUsername() const;

@@ -2,16 +2,15 @@
 #include "../headers/Server.hpp"
 // Build
 
-Client::Client(int socket)
+Client::Client(int socket, std::string hostname)
 	: socketFd(socket),
 	  logged(false),
 	  registered(false),
 	  modes(0),
-	  hostname("lalal"),
+	  hostname(hostname),
 	  recvBuffer(""),
 	  _awayMessage(""),
-	  _quit(
-		  false) {
+	  _quit(false) {
 	std::cout << "Client created" << std::endl;
 }
 

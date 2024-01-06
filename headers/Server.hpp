@@ -121,10 +121,10 @@ class Server {
         void initServerMessages();
         Client *findClient(const std::string &nickname);
         Client *findClient(int fd);
-        void addClient(int clientSocket);
+		void addClient(int clientSocket, std::string clientHostname);
         void removeClient(int clientSocket);
         void listenPort() const;
-        int acceptConnection();
+		std::pair<int, std::string> acceptConnection();
 
         bool parsBuffer(int fd);
         std::string getParam(const std::vector<std::string> &tokens);
