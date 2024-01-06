@@ -1,9 +1,5 @@
 #include "../headers/Server.hpp"
-#include "../headers/Client.hpp"
-#include "../headers/Channel.hpp"
 
-
-// probably better to have capitalized names/nicknames in channels/clients than capitalize each time when looking
  std::string Server::uncapitalizeString(const std::string &input) {
 	std::string output(input);
 	for (size_t i = 0; i < input.size(); i++) {
@@ -56,8 +52,6 @@ std::string Server::mergeTokensToString(const std::vector<std::string> &tokens, 
 	if (removeColon && !mergedString.empty() && mergedString[0] == ':') {
 		mergedString.erase(0, 1);
 	}
-
-
 	return mergedString;
 }
 
