@@ -52,10 +52,6 @@ bool Server::parsBuffer(int fd) {
 bool Server::registrationProcess(int fd, std::vector<std::string> &tokens) {
 	if (tokens.empty())
 		return 0; // or 1?
-	if (tokens.size() < 2) {
-		serverSendError(fd, "", ERR_NEEDMOREPARAMS);
-		return 0;
-	}
 	std::string command = tokens[0];
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 	if (command == "CAP") {
@@ -70,11 +66,17 @@ bool Server::registrationProcess(int fd, std::vector<std::string> &tokens) {
 
 bool Server::handleCommand(int fd, const std::string &command, const std::vector<std::string> &params) {
 	if (command == "PASS") {
+		if (params.empty()) {
+			return (serverSendError(fd, "PASS", ERR_NEEDMOREPARAMS), 1);
+		}
 		if (verifyPassword(fd, params[0]))
 			return 1;
 		else
 			clients[fd]->setPassword(params[0]);
 	} else if (command == "NICK") {
+		if (params.empty()) {
+			return (serverSendError(fd, "NICK", ERR_NEEDMOREPARAMS), 0);
+		}
 		if (verifyNickname(fd, params[0]))
 			return 0;
 		else
@@ -176,7 +178,6 @@ bool Server::verifyUsername(int fd, const std::string &arg) {
 }
 
 bool Server::verifyNickname(int fd, const std::string &arg) {
-	// look for illegal characters
 	if (arg[0] == ':' || arg[0] == '$')
 		return (serverSendError(fd, arg, ERR_ERRONEUSNICKNAME), 1);
 	std::string ill = " ,*?!@.";
