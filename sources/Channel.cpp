@@ -46,9 +46,9 @@ std::string Channel::getModeStringWithParameters() const {
 	if (isModeSet(KEYSET) && !_password.empty()) {
 		modeString += " " + _password;
 	}
-	if (isModeSet(LIMITSET) && limitMembers > 0) {
+	if (isModeSet(LIMITSET) && _limitMembers > 0) {
 		std::ostringstream oss;
-		oss << limitMembers;
+		oss << _limitMembers;
 		modeString += " " + oss.str();
 	}
 	return modeString;
@@ -59,7 +59,7 @@ const std::set<int> &Channel::getMemberFds() const {
 }
 
 int Channel::getLimitMembers() const {
-	return limitMembers;
+	return _limitMembers;
 }
 
 void Channel::setTopic(const std::string &topic) {
@@ -71,7 +71,7 @@ void Channel::setPassword(const std::string &password) {
 }
 
 void Channel::setLimitMembers(int limitMembers) {
-	Channel::limitMembers = limitMembers;
+	Channel::_limitMembers = limitMembers;
 }
 
 bool Channel::setMode(unsigned int mode) {
@@ -140,12 +140,4 @@ void Channel::removeInvited(int clientFd) {
 
 bool Channel::hasInvited(int clientFd) {
 	return _invitedFds.find(clientFd) != _invitedFds.end();
-}
-
-bool Channel::isOperator(int fd) {
-    std::set<int>::iterator it = _operatorFds.find(fd);
-    if (it != _operatorFds.end())
-        return true;
-    else
-        return false;
 }

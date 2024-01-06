@@ -3,9 +3,6 @@
 
 #include <iostream>
 #include <set>
-#include <sstream>
-#include <cstring>
-#include <sys/socket.h>
 
 #define TOPICSET     0b000001 // if set topic is settable by channel operator only
 #define INVITEONLY      0b000010 // if set clients can join only if invited
@@ -21,7 +18,7 @@ class Channel {
         std::set<int> _memberFds;
         std::set<int> _operatorFds;
         std::set<int> _invitedFds;
-        int limitMembers;
+        int _limitMembers;
 
     public:
         Channel(const std::string &name, std::string &password);
@@ -47,7 +44,6 @@ class Channel {
         void addInvited(int clientFd);
         void removeInvited(int clientFd);
         bool hasInvited(int clientFd);
-        bool isOperator(int fd);
         bool authMember(int clientFd, std::string &password);
 };
 
