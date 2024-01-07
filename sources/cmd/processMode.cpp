@@ -154,7 +154,6 @@ bool Server::handleModeB(char set, const std::string &parameter, Channel *channe
     return false;
 }
 
-// process MODE command (user) !!-> doc has more
 void Server::processUserMode(int fd, const std::vector<std::string> &tokens) {
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 	if (Server::uncapitalizeString(params[0]) != clients[fd]->getNickname()) {

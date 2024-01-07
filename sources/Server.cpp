@@ -108,7 +108,7 @@ void Server::initServerMessages() {
 	_serverMessages[ERR_UMODEUNKNOWNFLAG] = " :Unknown MODE flag";
 	_serverMessages[ERR_USERSDONTMATCH] = " :Cant change mode for other users";
 	_serverMessages[ERR_NONICKNAMEGIVEN] = " :No nickname given";
-    _serverMessages[RPL_ENDOFBANLIST] = " : End of channel ban list";
+    _serverMessages[RPL_ENDOFBANLIST] = " :End of channel ban list";
 
 }
 
