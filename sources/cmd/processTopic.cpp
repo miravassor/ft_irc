@@ -27,7 +27,7 @@ void Server::processTopic(int fd, const std::vector<std::string> &tokens) {
 								? mergeTokensToString(std::vector<std::string>(tokens.begin() + 2, tokens.end()), true)
 								: tokens[2];
 			channel->setTopic(topic);
-			serverSendNotification(channel->getMemberFds(), getNick(fd), "TOPIC", channelName + " :" + topic);
+			serverSendNotification(channel->getMemberFds(), getNickAndHostname(fd), "TOPIC", channelName + " :" + topic);
 		}
 	}
 }

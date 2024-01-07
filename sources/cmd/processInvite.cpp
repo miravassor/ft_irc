@@ -27,7 +27,7 @@ void Server::processInvite(int fd, const std::vector<std::string> &tokens) {
 			}
 			channel->addInvited(invitedClient->getSocket());
 		}
-		serverSendNotification(invitedClient->getSocket(), getNick(fd), "INVITE", parameters);
+		serverSendNotification(invitedClient->getSocket(), getNickAndHostname(fd), "INVITE", parameters);
 		serverSendReply(fd, parameters, RPL_INVITING, "");
 		if (invitedClient->activeMode(AWAY)) {
 			serverSendReply(fd, invitedNick, RPL_AWAY, invitedClient->getAwayMessage());

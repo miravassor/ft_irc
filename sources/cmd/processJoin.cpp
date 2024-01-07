@@ -64,7 +64,7 @@ void Server::createAndJoinNewChannel(int fd, std::string channelName, std::strin
 }
 
 void Server::sendJoinNotificationsAndReplies(int fd, const Channel *channel) {
-	serverSendNotification(channel->getMemberFds(), getNick(fd), "JOIN", channel->getName());
+	serverSendNotification(channel->getMemberFds(), getNickAndHostname(fd), "JOIN", channel->getName());
 	if (!channel->getTopic().empty()) {
 		serverSendReply(fd, channel->getName(), RPL_TOPIC, channel->getTopic());
 	} else {

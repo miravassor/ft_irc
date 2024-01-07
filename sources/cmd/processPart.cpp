@@ -25,7 +25,7 @@ void Server::processPart(int fd, const std::vector<std::string> &tokens) {
 		} else if (!channel->hasMember(fd)) {
 			serverSendError(fd, channelName, ERR_NOTONCHANNEL);
 		} else {
-			serverSendNotification(channel->getMemberFds(), getNick(fd), "PART", channelName + " :" + reason);
+			serverSendNotification(channel->getMemberFds(), getNickAndHostname(fd), "PART", channelName + " :" + reason);
 			removeClientFromChannel(fd, channel);
 		}
 	}

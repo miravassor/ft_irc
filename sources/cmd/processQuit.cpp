@@ -23,7 +23,7 @@ void Server::processQuit(int fd, const std::vector<std::string> &tokens) {
 			         : tokens[1];
 		}
 	}
-	serverSendNotification(sharingChannelsFds, getNick(fd), "QUIT", ":" + reason);
+	serverSendNotification(sharingChannelsFds, getNickAndHostname(fd), "QUIT", ":" + reason);
 	if (!tokens.empty()) {
 		serverSendError(fd, reason, ERROR);
 	}

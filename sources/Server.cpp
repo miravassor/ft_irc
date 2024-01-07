@@ -294,6 +294,11 @@ std::string Server::getServerName() {
 	return serverName;
 }
 
+std::string Server::getNickAndHostname(int fd) {
+	std::string  res = clients[fd]->getNickname() + "@" + clients[fd]->getHostname();
+	return res;
+}
+
 std::string Server::getNick(int fd) {
 	if (clients.find(fd) != clients.end()) {
 		std::string nick = clients[fd]->getNickname();

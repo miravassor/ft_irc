@@ -97,6 +97,7 @@ class Server {
         void run();
         std::string getServerName();
         std::string getNick(int fd);
+		std::string getNickAndHostname(int fd);
         std::vector<std::string> getNicknames(std::set<int> fds);
         Client &getClient(int fd);
         const std::map<int, Client *> &getClients() const;

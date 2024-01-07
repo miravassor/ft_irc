@@ -54,7 +54,7 @@ void Server::processPrivmsg(int fd, const std::vector<std::string> &tokens) {
 	std::string message = tokens[2].at(0) == ':'
 						  ? mergeTokensToString(std::vector<std::string>(tokens.begin() + 2, tokens.end()), true)
 						  : tokens[2];
-	std::string prefix = getNick(fd);
+	std::string prefix = getNickAndHostname(fd);
 	while (!targets.empty()) {
 		const std::string targetName = targets.front();
 		targets.pop();
