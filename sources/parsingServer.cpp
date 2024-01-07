@@ -16,11 +16,11 @@ bool Server::parsBuffer(int fd) {
 			client.resetRecvBuffer();
 		}
 		// check if buffer contains a full line
-		size_t cRet = ss.str().find("\n");
+		size_t cRet = ss.str().find('\n');
 		if (cRet == std::string::npos) {
 			// if not, add buffer to recvBuffer and return
 			client.appendRecvBuffer(ss.str());
-			return 0;
+			return false;
 		}
 	}
 	catch (std::exception &e) {
@@ -40,16 +40,16 @@ bool Server::parsBuffer(int fd) {
 		}
 		if (!clients[fd]->isRegistered()) {
 			if (registrationProcess(fd, tokens))
-				return 1;
+				return true;
 		} else
 			processCmd(fd, tokens);
 	}
-	return 0;
+	return false;
 }
 
 bool Server::registrationProcess(int fd, std::vector<std::string> &tokens) {
 	if (tokens.empty())
-		return 0; // or 1?
+		return false; // or 1?
 	std::string command = tokens[0];
 	std::vector<std::string> params(tokens.begin() + 1, tokens.end());
 	if (command == "CAP") {
@@ -57,7 +57,7 @@ bool Server::registrationProcess(int fd, std::vector<std::string> &tokens) {
 			serverSendReply(fd, "", CAPLS, "");
 		}
 	} else if (handleCommand(fd, command, params)) {
-		return 1;
+		return true;
 	}
 	return checkRegistration(fd);
 }
@@ -68,7 +68,7 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 			return (serverSendError(fd, "PASS", ERR_NEEDMOREPARAMS), 1);
 		}
 		if (verifyPassword(fd, params[0]))
-			return 1;
+			return true;
 		else
 			clients[fd]->setPassword(params[0]);
 	} else if (command == "NICK") {
@@ -76,20 +76,20 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 			return (serverSendError(fd, "NICK", ERR_NEEDMOREPARAMS), 0);
 		}
 		if (verifyNickname(fd, params[0]))
-			return 0;
+			return false;
 		else
 			clients[fd]->setNickname(params[0]);
 	} else if (command == "USER") {
 		if (params.size() < 3) {
 			serverSendError(fd, "USER", ERR_NEEDMOREPARAMS);
-			return 0;
+			return false;
 		}
 		clients[fd]->setUsername(params[0]);
 		std::string realname = params[2].at(0) == ':'
 							   ? mergeTokensToString(std::vector<std::string>(params.begin() + 2, params.end()), true)
 							   : params[2];
 		if (verifyUsername(fd, realname))
-			return 0;
+			return false;
 		else {
 			clients[fd]->setRealName(realname);
 		}
@@ -101,7 +101,7 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 				clients[fd]->addMode(mode);
 		}
 	}
-	return 0;
+	return false;
 }
 
 void Server::processCmd(int fd, std::vector<std::string> &tokens) {
@@ -129,7 +129,7 @@ bool Server::checkRegistration(int fd) {
             for (; it != clients.end(); ++it) {
                 if (it->second != clients[fd] && it->second->getNickname() == clients[fd]->getNickname()) {
                     serverSendError(fd, clients[fd]->getNickname(), ERR_NICKNAMEINUSE);
-                    return 1;
+                    return true;
                 }
             }
 		} else {
@@ -143,15 +143,15 @@ bool Server::checkRegistration(int fd) {
 		serverSendReply(fd, "", RPL_CREATED, "");
 		serverSendReply(fd, "", RPL_MYINFO, "");
 	}
-	return 0;
+	return false;
 }
 
 bool Server::verifyUsername(int fd, const std::string &arg) {
 	if (arg.empty()) {
 		serverSendError(fd, "", ERR_NEEDMOREPARAMS);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 bool Server::verifyNickname(int fd, const std::string &arg) {
@@ -162,21 +162,21 @@ bool Server::verifyNickname(int fd, const std::string &arg) {
 		if (arg.find(ill[i]) != std::string::npos)
 			return (serverSendError(fd, arg, ERR_ERRONEUSNICKNAME), 1);
 	}
-	return 0;
+	return false;
 }
 
 bool Server::verifyPassword(int fd, const std::string &arg) {
 	if (arg.empty()) {
 		serverSendError(fd, "", ERR_NEEDMOREPARAMS);
-		return 0;
+		return false;
 	}
     if (arg != _password) {
         serverSendError(fd, "", ERR_PASSWDMISMATCH);
-        return 1;
+        return true;
     } else {
         clients[fd]->setLog();
     }
-	return 0;
+	return false;
 }
 
 void Server::serverSendError(int fd, const std::string &token, serverRep id) {

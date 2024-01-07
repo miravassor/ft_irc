@@ -58,14 +58,14 @@ std::string Server::mergeTokensToString(const std::vector<std::string> &tokens, 
 bool    Server::isNum(const std::string& str) {
     for (size_t i = 0; i < str.size(); ++i) {
         if (!isdigit(str[i]))
-            return 0;
+            return false;
     }
-    return 1;
+    return true;
 }
 
 bool    Server::isBitMask(const std::string& str) {
     if (!isNum(str))
-        return 0;
+        return false;
     int num;
     std::stringstream(str) >> num;
 
