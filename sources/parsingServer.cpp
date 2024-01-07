@@ -82,7 +82,7 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 		else
 			clients[fd]->setNickname(params[0]);
 	} else if (command == "USER") {
-		if (params.size() < 4) {
+		if (params.size() <= 4) {
 			serverSendError(fd, "USER", ERR_NEEDMOREPARAMS);
 			return 0;
 		}
@@ -146,27 +146,6 @@ bool Server::checkRegistration(int fd) {
 		serverSendReply(fd, "", RPL_MYINFO, "");
 	}
 	return 0;
-}
-
-// Find the parameters in command (after ':')
-std::string Server::getParam(const std::vector<std::string> &tokens) {
-	std::vector<std::string>::const_iterator it = tokens.begin();
-	for (; it != tokens.end(); ++it) {
-		if (it[0][0] == ':')
-			break;
-	}
-	std::string param;
-	for (; it != tokens.end(); ++it) {
-		param.append(*it);
-		if (it + 1 != tokens.end())
-			param.append(" ");
-	}
-	size_t cRet = param.find(':');
-	if (cRet != std::string::npos)
-		param.erase(cRet, 1);
-	if (!param.empty())
-		return param;
-	return "";
 }
 
 bool Server::verifyUsername(int fd, const std::string &arg) {

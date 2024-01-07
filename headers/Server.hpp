@@ -128,7 +128,6 @@ class Server {
 		std::pair<int, std::string> acceptConnection();
 
         bool parsBuffer(int fd);
-        std::string getParam(const std::vector<std::string> &tokens);
         bool registrationProcess(int fd, std::vector<std::string> &tokens);
         bool checkRegistration(int fd);
         bool handleCommand(int fd, const std::string &command, const std::vector<std::string> &params);
