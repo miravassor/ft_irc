@@ -27,7 +27,7 @@ Server::Server(int port, const std::string &password) {
 	this->start = time(0);
 	this->_password = password;
 	this->serverName = "42.IRC";
-	this->serverVersion = "0.1";
+	this->serverVersion = "1.0";
 	initCmd();
 	initChannelMode();
 	initServerMessages();
