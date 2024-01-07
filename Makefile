@@ -1,6 +1,6 @@
 NAME = ircserv
 
-COMPILE = g++ -std=c++98 -Wall -Wextra -Werror -g
+COMPILE = c++ -std=c++98 -Wall -Wextra -Werror
 
 SRCDIR = sources
 CMDDIR = $(SRCDIR)/cmd

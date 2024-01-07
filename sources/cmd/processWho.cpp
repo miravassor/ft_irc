@@ -6,7 +6,6 @@ void Server::processWho(int fd, const std::vector<std::string> &tokens) {
 		return;
 	}
 	std::string targetName = tokens[1];
-	// "<channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
 	std::vector<std::pair<std::string, std::string> > info;
 	if (targetName.at(0) == '#' || targetName.at(0) == '&') {
 		Channel *channel = findChannel(targetName);

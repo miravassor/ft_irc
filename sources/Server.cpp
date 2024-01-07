@@ -114,7 +114,6 @@ void Server::initServerMessages() {
 
 Server::~Server() {
 	// Memory Cleanup
-	std::cout << "[Cleaning before exit]" << std::endl;
 	for (std::map<int, Client *>::iterator it = clients.begin();
 		 it != clients.end(); ++it) {
 		delete it->second;
@@ -223,7 +222,6 @@ void Server::sendData(size_t index) {
 			std::string msg = c.popSendQueue();
 			const char *dataPtr = msg.c_str();
 			ssize_t dataRemaining = msg.length();
-			std::cout << "[->" << pollFds[index].fd << "]\t|" << dataPtr;
 			ssize_t n = send(pollFds[index].fd, dataPtr, dataRemaining, 0);
 			if (dataRemaining > n) {
 				c.pushSendQueue(msg.substr(n));
@@ -290,10 +288,6 @@ std::pair<int, std::string> Server::acceptConnection() {
 
 // Channel getters
 
-std::string Server::getServerName() {
-	return serverName;
-}
-
 std::string Server::getNickAndHostname(int fd) {
 	std::string  res = clients[fd]->getNickname() + "@" + clients[fd]->getHostname();
 	return res;
@@ -305,14 +299,6 @@ std::string Server::getNick(int fd) {
 		return nick;
 	}
 	return "";
-}
-
-std::vector<std::string> Server::getNicknames(std::set<int> fds) {
-	std::vector<std::string> nicknames;
-	for (std::set<int>::iterator it = fds.begin(); it != fds.end(); ++it) {
-		nicknames.push_back(getNick(*it));
-	}
-	return nicknames;
 }
 
 void Server::addChannel(Channel *channel) {
@@ -382,8 +368,4 @@ Client &Server::getClient(int fd) {
 		throw std::runtime_error("Cannot find client with fd");
 	}
 	return (*this->clients[fd]);
-}
-
-const std::map<int, Client *> &Server::getClients() const {
-	return clients;
 }

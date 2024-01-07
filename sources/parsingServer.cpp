@@ -36,10 +36,8 @@ bool Server::parsBuffer(int fd) {
 		std::vector<std::string> tokens;
 		std::string token;
 		while (lineStream >> token) {
-			std::cout << token << " "; // debug
 			tokens.push_back(token);
 		}
-		std::cout << "[TOKEN END]" << std::endl; // debug
 		if (!clients[fd]->isRegistered()) {
 			if (registrationProcess(fd, tokens))
 				return 1;
@@ -187,7 +185,6 @@ void Server::serverSendError(int fd, const std::string &token, serverRep id) {
 		return;
 	}
 	std::stringstream fullReply;
-//	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd) + "!" + getNick(fd) + "@localhost ";
     fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
 	if (!token.empty()) {
 		fullReply << " " << token;
@@ -203,7 +200,6 @@ void Server::serverSendReply(int fd, const std::string &token, serverRep id, con
 		serverSendMessage(fd, fullReply.str());
 		return;
 	}
-//	fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd) + "!" + getNick(fd) + "@localhost ";
     fullReply << ":" << serverName << " " << paddDigits(id) << " " << getNick(fd);
 	if (!token.empty()) {
 		fullReply << " " << token;

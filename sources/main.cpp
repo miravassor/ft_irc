@@ -4,7 +4,7 @@
 static bool running = true;
 
 void signalHandler(int signum) {
-	std::cout << "[SIG:" << signum << "] received.\n";
+	std::cout << "[QUITTING]" << std::endl;
 	running = false;
 }
 
