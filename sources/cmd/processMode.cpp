@@ -61,8 +61,8 @@ void Server::processChannelMode(int fd, const std::vector<std::string> &tokens) 
 			}
 		}
 		if (!changedModes.empty()) {
-			std::string parameters = changedModes + " " + mergeTokensToString(parametersSet, false);
-			serverSendNotification(channel->getMemberFds(), nickname, "MODE", parameters);
+			std::string parameters = channelName + " " + changedModes + " " + mergeTokensToString(parametersSet, false);
+			serverSendNotification(channel->getMemberFds(), getNickAndHostname(fd), "MODE", parameters);
 		}
 	}
 }
