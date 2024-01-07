@@ -82,14 +82,14 @@ bool Server::handleCommand(int fd, const std::string &command, const std::vector
 		else
 			clients[fd]->setNickname(params[0]);
 	} else if (command == "USER") {
-		if (params.size() <= 4) {
+		if (params.size() < 3) {
 			serverSendError(fd, "USER", ERR_NEEDMOREPARAMS);
 			return 0;
 		}
 		clients[fd]->setUsername(params[0]);
-		std::string realname = params[3].at(0) == ':'
-							   ? mergeTokensToString(std::vector<std::string>(params.begin() + 3, params.end()), true)
-							   : params[3];
+		std::string realname = params[2].at(0) == ':'
+							   ? mergeTokensToString(std::vector<std::string>(params.begin() + 2, params.end()), true)
+							   : params[2];
 		if (verifyUsername(fd, realname))
 			return 0;
 		else {
