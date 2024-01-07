@@ -185,7 +185,7 @@ class Server {
         void sendData(size_t index);
         size_t receiveData(size_t index);
         void resetEvents(size_t index);
-        std::string mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon);
+        static std::string mergeTokensToString(const std::vector<std::string> &tokens, bool removeColon);
 
         void sendJoinNotificationsAndReplies(int fd, const Channel *channel);
         bool checkPmTokens(int fd, const std::vector<std::string> &tokens);
@@ -194,13 +194,13 @@ class Server {
         void sendPmToUser(int fd, const std::string &message, const std::string &prefix, const std::string &targetName,
                           const std::string &command);
 
-        std::queue<std::string> split(const std::string &src, char delimiter, bool unique) const;
+        static std::queue<std::string> split(const std::string &src, char delimiter, bool unique) ;
         bool modeParameterNeeded(char set, char mode);
-        bool isValidName(const std::string &name);
+        static bool isValidName(const std::string &name);
         std::string paddDigits(int i);
-        bool isNum(const std::string &str);
-        bool isBitMask(const std::string &str);
-        Mode getBitMode(const std::string str);
+        static bool isNum(const std::string &str);
+        static bool isBitMask(const std::string &str);
+        static Mode getBitMode(const std::string str);
 
 		std::pair<std::string, std::string> takeFullClientInfo(Client *client, Channel *channel);
 };

@@ -8,7 +8,7 @@
 	return output;
 }
 
-std::queue<std::string> Server::split(const std::string &src, char delimiter, bool unique) const {
+std::queue<std::string> Server::split(const std::string &src, char delimiter, bool unique) {
 	std::set<std::string> uniqueTokens;
 	std::queue<std::string> tokensQueue;
 	std::istringstream srcStream(src);
