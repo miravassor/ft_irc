@@ -19,4 +19,4 @@ The goal is to develop a non-blocking server (no forking), using only one poll, 
 
 ## Run
 
-- /ircserv <port> <password>
+- /ircserv '<port>' '<password>'
